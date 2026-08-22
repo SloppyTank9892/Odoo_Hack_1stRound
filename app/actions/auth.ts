@@ -80,6 +80,7 @@ export async function getAuthUser(): Promise<
             country: 'Earth',
             bio: 'Demo Guest Explorer exploring the world with GlobeTrotter.',
             avatar_url: null,
+            is_admin: false,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -502,6 +503,7 @@ export async function updateProfile(
         country: parsed.country || null,
         bio: parsed.bio || null,
         avatar_url: parsed.avatar_url || null,
+        is_admin: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }
