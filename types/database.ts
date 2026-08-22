@@ -20,6 +20,7 @@ export type Database = {
           country: string | null
           bio: string | null
           avatar_url: string | null
+          is_admin: boolean
           created_at: string
           updated_at: string
         }
@@ -32,6 +33,7 @@ export type Database = {
           country?: string | null
           bio?: string | null
           avatar_url?: string | null
+          is_admin?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -44,6 +46,7 @@ export type Database = {
           country?: string | null
           bio?: string | null
           avatar_url?: string | null
+          is_admin?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -180,6 +183,60 @@ export type Database = {
           title?: string
           content?: string
           rating?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      curated_destinations: {
+        Row: {
+          id: string
+          name: string
+          trip_count: number
+          growth: string
+          rank: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          trip_count?: number
+          growth: string
+          rank: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          trip_count?: number
+          growth?: string
+          rank?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      curated_activities: {
+        Row: {
+          id: string
+          name: string
+          city: string
+          views: number
+          category: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          city: string
+          views?: number
+          category: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          city?: string
+          views?: number
+          category?: string
           created_at?: string
         }
         Relationships: []
