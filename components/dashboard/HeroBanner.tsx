@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Sparkles, Compass, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -39,13 +40,13 @@ export function HeroBanner({ onPlanTrip }: HeroBannerProps) {
           >
             Plan a New Trip
           </Button>
-          <a
-            href="#featured-destinations"
+          <Link
+            href="/explore"
             className="inline-flex items-center gap-1.5 px-4 py-3 text-sm font-semibold text-white/80 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
           >
             <span>Explore Destinations</span>
             <ArrowUpRight className="w-4 h-4" />
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -1,15 +1,26 @@
 "use client";
 
 import React, { useState } from "react";
+import { ActivityCategory, ActivityDiscovery } from "@/types/trip";
+import { curatedActivities } from "@/data/curatedActivities";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { curatedActivities } from "@/data/curatedActivities";
-import { ActivityCategory, Activity } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
 import { formatCurrency } from "@/lib/tripCalculations";
-import { Search, Plus, Sparkles, Clock, MapPin, Check } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Clock,
+  MapPin,
+  Sparkles,
+  Compass,
+  Utensils,
+  Camera,
+  ShoppingBag,
+  Trees,
+} from "lucide-react";
 
 interface AddActivityDrawerProps {
   isOpen: boolean;
@@ -28,15 +39,16 @@ export function AddActivityDrawer({
   cityName,
   stopId,
 }: AddActivityDrawerProps) {
-  const { addActivityToDay, currency } = useTrips();
+  const { addActivityToDay, currency, activities } = useTrips();
+  const displayActivities = activities?.length > 0 ? activities : curatedActivities;
   const { toast } = useToast();
 
   const [mode, setMode] = useState<"browse" | "custom">("browse");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
 
-  // Custom Form State
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  // Custom Activity Form State
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [category, setCategory] = useState<ActivityCategory>("culture");
   const [cost, setCost] = useState<number>(500);
   const [durationMinutes, setDurationMinutes] = useState<number>(120);
@@ -44,7 +56,7 @@ export function AddActivityDrawer({
   const [location, setLocation] = useState<string>("");
 
   // Filter activities matching city or global
-  const availableActivities = curatedActivities.filter((act) => {
+  const availableActivities = (activities || curatedActivities).filter((act) => {
     const matchesCity = act.cityName.toLowerCase() === cityName.toLowerCase();
     const matchesSearch =
       act.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,7 +65,7 @@ export function AddActivityDrawer({
     return (matchesCity || !cityName) && matchesSearch;
   });
 
-  const handleAddFromCatalog = (act: (typeof curatedActivities)[0]) => {
+  const handleAddFromCatalog = (act: ActivityDiscovery) => {
     addActivityToDay(
       tripId,
       dayNumber,
@@ -153,80 +165,85 @@ export function AddActivityDrawer({
 
       {mode === "browse" ? (
         <div className="space-y-4">
-          {/* Search bar */}
+          {/* Search Box */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9E978E] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Search ${cityName} experiences...`}
-              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder={`Search experiences in ${cityName}...`}
+              className="w-full pl-9 pr-4 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           {/* Activity Cards List */}
           <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
-            {availableActivities.length > 0 ? (
-              availableActivities.map((act) => (
-                <div
-                  key={act.id}
-                  className="p-3.5 bg-white dark:bg-[#201F1B] rounded-xl border border-[#E7E2D8] dark:border-[#33302B] hover:border-[#D5CEBF] dark:hover:border-[#48443D] transition-all hover:shadow-2xs flex flex-col justify-between gap-3 group"
-                >
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={act.image}
-                      alt={act.name}
-                      className="w-16 h-16 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B] shrink-0"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Badge variant="amber" size="sm">
-                          {act.category}
-                        </Badge>
-                        <span className="text-[10px] text-[#6B655E] dark:text-[#A8A196] flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> {act.durationMinutes}m
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] leading-tight group-hover:text-[#F4A62A] transition-colors">
+            {availableActivities.map((act) => (
+              <div
+                key={act.id}
+                className="p-3 bg-white dark:bg-[#1C1B18] rounded-2xl border border-[#E7E2D8] dark:border-[#33302B] hover:border-[#F4A62A] dark:hover:border-[#F4A62A] transition-all flex gap-3 group"
+              >
+                {act.image && (
+                  <img
+                    src={act.image}
+                    alt={act.name}
+                    className="w-20 h-20 rounded-xl object-cover shrink-0"
+                  />
+                )}
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-bold text-xs text-[#181818] dark:text-[#F5F3EF] line-clamp-1">
                         {act.name}
                       </h4>
-                      <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mt-0.5">
-                        {act.description}
-                      </p>
+                      <Badge variant="amber" size="sm">
+                        {formatCurrency(act.cost, currency)}
+                      </Badge>
                     </div>
+                    <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mt-0.5">
+                      {act.description}
+                    </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D8] dark:border-[#33302B]">
-                    <div>
-                      <span className="text-[10px] text-[#9E978E] dark:text-[#7A746B] block">Price</span>
-                      <span className="font-bold text-xs text-[#181818] dark:text-[#F5F3EF]">
-                        {act.cost === 0 ? "Free" : formatCurrency(act.cost, currency)}
-                      </span>
-                    </div>
-
+                  <div className="flex items-center justify-between mt-2 pt-1 border-t border-[#E7E2D8]/50 dark:border-[#33302B]/50">
+                    <span className="text-[10px] text-[#9E978E] dark:text-[#7A746B] flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {act.durationMinutes} min · {act.bestTimeOfDay}
+                    </span>
                     <Button
                       size="sm"
                       onClick={() => handleAddFromCatalog(act)}
-                      leftIcon={<Plus className="w-3.5 h-3.5" />}
+                      className="py-1 px-2.5 text-[11px]"
                     >
-                      Add to Day {dayNumber}
+                      <Plus className="w-3 h-3 mr-1" /> Add
                     </Button>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-[#9E978E] dark:text-[#7A746B] text-xs">
-                No matching curated experiences found. Try creating a custom one!
+              </div>
+            ))}
+
+            {availableActivities.length === 0 && (
+              <div className="text-center py-10">
+                <Sparkles className="w-8 h-8 text-[#9E978E] dark:text-[#7A746B] mx-auto mb-2" />
+                <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">
+                  No curated experiences match this search in {cityName}.
+                </p>
+                <button
+                  onClick={() => setMode("custom")}
+                  className="mt-2 text-xs font-bold text-[#76546F] dark:text-[#B88BAF] hover:underline"
+                >
+                  Create custom activity instead →
+                </button>
               </div>
             )}
           </div>
         </div>
       ) : (
-        /* Custom Activity Creation Form */
-        <form onSubmit={handleCreateCustom} className="space-y-3.5">
+        /* Custom Activity Form */
+        <form onSubmit={handleCreateCustom} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
               Activity Name *
             </label>
             <input
@@ -234,106 +251,103 @@ export function AddActivityDrawer({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Royal Thali Tasting at Heritage Haveli"
-              className="w-full px-3.5 py-2 text-xs sm:text-sm bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder="e.g. Sunrise Yoga at Nahargarh"
+              className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ActivityCategory)}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               >
-                <option value="culture" className="dark:bg-[#1C1B18]">Culture / Heritage</option>
-                <option value="food" className="dark:bg-[#1C1B18]">Food & Dining</option>
-                <option value="sightseeing" className="dark:bg-[#1C1B18]">Sightseeing</option>
-                <option value="adventure" className="dark:bg-[#1C1B18]">Adventure</option>
-                <option value="nature" className="dark:bg-[#1C1B18]">Nature / Outdoors</option>
-                <option value="shopping" className="dark:bg-[#1C1B18]">Shopping</option>
-                <option value="transport" className="dark:bg-[#1C1B18]">Transport</option>
+                <option value="culture">Culture &amp; Heritage</option>
+                <option value="food">Food &amp; Dining</option>
+                <option value="sightseeing">Sightseeing</option>
+                <option value="adventure">Adventure &amp; Sports</option>
+                <option value="nature">Nature &amp; Outdoors</option>
+                <option value="shopping">Shopping &amp; Markets</option>
+                <option value="transport">Transit &amp; Travel</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
-                Time Slot
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
+                Estimated Cost ({currency})
               </label>
               <input
-                type="time"
-                value={timeSlot}
-                onChange={(e) => setTimeSlot(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                type="number"
+                min="0"
+                value={cost}
+                onChange={(e) => setCost(Number(e.target.value))}
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
-                Estimated Cost ({currency})
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
+                Start Time
               </label>
               <input
-                type="number"
-                min="0"
-                step="50"
-                value={cost}
-                onChange={(e) => setCost(Number(e.target.value))}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                type="time"
+                value={timeSlot}
+                onChange={(e) => setTimeSlot(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
-                Duration (Minutes)
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
+                Duration (minutes)
               </label>
               <input
                 type="number"
-                min="15"
                 step="15"
+                min="15"
+                max="720"
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
-              Location / Area (Optional)
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
+              Location / Venue
             </label>
             <input
               type="text"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Old City Courtyard"
-              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder={`e.g. City Palace Complex, ${cityName}`}
+              className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-1">
               Notes or Description
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add key reservation details, dress code, or tips..."
-              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder="What makes this activity special? Booking codes, tips..."
+              className="w-full px-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
-          <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex justify-end gap-2">
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" size="sm" leftIcon={<Sparkles className="w-3.5 h-3.5" />}>
-              Add Activity
+          <div className="pt-2">
+            <Button type="submit" size="md" className="w-full">
+              Add Activity to Itinerary
             </Button>
           </div>
         </form>

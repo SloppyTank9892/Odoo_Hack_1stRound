@@ -1,9 +1,20 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { Trip, Activity, DestinationStop, CityDiscovery, DayPlan } from "@/types/trip";
+import { Trip, Activity, DestinationStop, CityDiscovery, DayPlan, ActivityDiscovery } from "@/types/trip";
 import { curatedDestinations } from "@/data/curatedDestinations";
+import { curatedActivities } from "@/data/curatedActivities";
 import { recalculateTrip } from "@/lib/tripCalculations";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import {
+  fetchDestinationsDB,
+  upsertDestinationDB,
+  deleteDestinationDB,
+  fetchActivitiesDB,
+  upsertActivityDB,
+  deleteActivityDB,
+  seedAllToSupabase,
+} from "@/lib/supabaseService";
 import {
   getUserTrips,
   getTripById as fetchTripDetailsFromDb,
@@ -30,6 +41,7 @@ export interface CreateTripOptions {
 }
 
 interface TripContextType {
+  // Trips
   trips: Trip[];
   activeTrip: Trip | null;
   activeTripId: string | null;
@@ -40,15 +52,34 @@ interface TripContextType {
   isLoading: boolean;
   error: string | null;
 
+  // Destinations (Cities Catalog)
+  destinations: CityDiscovery[];
+  addDestination: (city: CityDiscovery) => Promise<void>;
+  updateDestination: (id: string, updated: Partial<CityDiscovery>) => Promise<void>;
+  deleteDestination: (id: string) => Promise<void>;
+
+  // Activities Catalog
+  activities: ActivityDiscovery[];
+  addActivityCatalogItem: (activity: ActivityDiscovery) => Promise<void>;
+  updateActivityCatalogItem: (id: string, updated: Partial<ActivityDiscovery>) => Promise<void>;
+  deleteActivityCatalogItem: (id: string) => Promise<void>;
+
+  // Database Sync & Reset
+  isDbConnected: boolean;
+  isSyncing: boolean;
+  syncAllFromDatabase: () => Promise<void>;
+  seedDatabaseToSupabase: () => Promise<{ success: boolean; message: string }>;
+  resetCatalogToDefault: () => void;
+
   // The WOW Moment Engine
   updateStopDuration: (tripId: string, stopId: string, newDaysCount: number) => Promise<void>;
 
-  // Stops Management
+  // Stops Management inside Trips
   addStopToTrip: (tripId: string, city: CityDiscovery) => Promise<void>;
   removeStopFromTrip: (tripId: string, stopId: string) => Promise<void>;
   reorderStops: (tripId: string, newStops: DestinationStop[]) => void;
 
-  // Activities Management
+  // Activities Management inside Trips
   addActivityToDay: (
     tripId: string,
     dayNumber: number,
@@ -71,7 +102,7 @@ interface TripContextType {
   updateTargetBudget: (tripId: string, targetAmount: number) => Promise<void>;
   toggleTripPublic: (tripId: string) => Promise<void>;
 
-  // Visual pulse signal for UI feedback
+  // UI Signals & Filters
   lastRecalculatedField: string | null;
   currency: string;
   setCurrency: (c: string) => void;
@@ -80,6 +111,9 @@ interface TripContextType {
 }
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
+
+const LOCAL_STORAGE_DESTS_KEY = "globetrotter_destinations_catalog_v2";
+const LOCAL_STORAGE_ACTS_KEY = "globetrotter_activities_catalog_v2";
 
 /**
  * Converts a database TripWithDetails row tree into the rich UI Trip object.
@@ -100,29 +134,76 @@ export function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
     return {
       id: stop.id,
       cityName: stop.city_name,
-      stateOrCountry: stop.country,
+      stateOrCountry: stop.country || "India",
       daysCount,
       lat: matchedCity?.lat || 26.9124,
       lng: matchedCity?.lng || 75.7873,
       image:
         matchedCity?.image ||
-        dbTrip.cover_image_url ||
-        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
       costIndex: matchedCity?.costIndex || "$$",
       popularRank: matchedCity?.popularity || 90,
-      highlights: matchedCity?.tags || ["Heritage", "Explore"],
-      description: matchedCity?.description || `Explore ${stop.city_name}`,
-      accommodationPerNight: matchedCity ? Math.round(matchedCity.avgDailyCost * 0.6) : 2500,
-      dailyMealsEstimate: matchedCity ? Math.round(matchedCity.avgDailyCost * 0.3) : 1000,
-      startDate: stop.start_date || undefined,
-      endDate: stop.end_date || undefined,
+      highlights: matchedCity?.tags || ["Heritage", "Culture"],
+      description: matchedCity?.description || `Explore the heritage and cultural beauty of ${stop.city_name}.`,
+      accommodationPerNight: Math.round((stop.allocated_budget || 8000) / Math.max(1, daysCount) * 0.6),
+      dailyMealsEstimate: Math.round((stop.allocated_budget || 8000) / Math.max(1, daysCount) * 0.3),
     };
+  });
+
+  const allActivitiesByStopAndDay: Record<string, Activity[]> = {};
+  (dbTrip.trip_stops || []).forEach((stop) => {
+    ((stop.activities || (stop as any).trip_activities) || []).forEach((act: any) => {
+      const key = `${stop.id}-${act.day_number}`;
+      if (!allActivitiesByStopAndDay[key]) {
+        allActivitiesByStopAndDay[key] = [];
+      }
+      allActivitiesByStopAndDay[key].push({
+        id: act.id,
+        name: act.title,
+        description: `Experience ${act.title} in ${stop.city_name}.`,
+        category: (act.category as Activity["category"]) || "culture",
+        cost: Number(act.cost) || 0,
+        durationMinutes: 120,
+        timeSlot: "10:00",
+        location: `${stop.city_name}, Exploration Zone`,
+        completed: act.status === "completed",
+        isCustom: true,
+      });
+    });
+  });
+
+  let currentGlobalDay = 1;
+  const startMoment = dbTrip.start_date ? new Date(dbTrip.start_date) : new Date();
+  const days: DayPlan[] = [];
+
+  stops.forEach((stop) => {
+    for (let cityDay = 1; cityDay <= stop.daysCount; cityDay++) {
+      const dayDate = new Date(startMoment);
+      dayDate.setDate(dayDate.getDate() + (currentGlobalDay - 1));
+      const dateStr = dayDate.toISOString().split("T")[0];
+
+      const key = `${stop.id}-${cityDay}`;
+      const dbActivities = allActivitiesByStopAndDay[key] || [];
+
+      days.push({
+        dayNumber: currentGlobalDay,
+        cityId: stop.id,
+        cityName: stop.cityName,
+        cityDayNumber: cityDay,
+        date: dateStr,
+        estimatedDailyBudget: (stop.accommodationPerNight || 3000) + (stop.dailyMealsEstimate || 1500),
+        activities: dbActivities,
+        notes: `Day ${cityDay} in ${stop.cityName}`,
+      });
+
+      currentGlobalDay++;
+    }
   });
 
   const rawTrip: Trip = {
     id: dbTrip.id,
     name: dbTrip.title,
-    tagline: dbTrip.description || "A personalized travel journey",
+    tagline: dbTrip.description || "A personalized journey",
     description: dbTrip.description || "",
     coverImage:
       dbTrip.cover_image_url ||
@@ -130,76 +211,133 @@ export function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
       "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
     startDate: dbTrip.start_date || new Date().toISOString().split("T")[0],
     endDate: dbTrip.end_date || new Date().toISOString().split("T")[0],
-    isPublic: dbTrip.is_public,
-    shareCode: `GT-${dbTrip.id.substring(0, 5).toUpperCase()}`,
-    status:
-      dbTrip.status === "completed" ? "completed" : dbTrip.status === "ongoing" ? "active" : "planning",
-    createdAt: dbTrip.created_at || new Date().toISOString().split("T")[0],
-    stops: stops,
-    days: [],
+    isPublic: dbTrip.is_public || false,
+    shareCode: (dbTrip as any).share_code || `GT-${dbTrip.id.substring(0, 5).toUpperCase()}`,
+    status: dbTrip.status as "planning" | "active" | "completed",
+    createdAt: dbTrip.created_at ? dbTrip.created_at.split("T")[0] : new Date().toISOString().split("T")[0],
+    stops,
+    days,
     budget: {
       targetBudget: Number(dbTrip.total_budget) || 50000,
       currency: "₹",
       categories: {
         transport: 5000,
-        accommodation: 20000,
-        activities: 15000,
-        meals: 10000,
-        misc: 5000,
+        accommodation: Math.round((Number(dbTrip.total_budget) || 50000) * 0.4),
+        activities: Math.round((Number(dbTrip.total_budget) || 50000) * 0.3),
+        meals: Math.round((Number(dbTrip.total_budget) || 50000) * 0.2),
+        misc: Math.round((Number(dbTrip.total_budget) || 50000) * 0.1),
       },
     },
   };
 
-  const calculated = recalculateTrip(rawTrip);
-
-  // Populate activities from database rows
-  if (dbTrip.trip_stops && dbTrip.trip_stops.length > 0) {
-    const actMap = new Map<string, Activity[]>();
-    dbTrip.trip_stops.forEach((stop) => {
-      (stop.activities || []).forEach((act) => {
-        const key = `${stop.id}-${act.day_number}`;
-        const existing = actMap.get(key) || [];
-        existing.push({
-          id: act.id,
-          name: act.title,
-          description: "",
-          category: (act.category as any) || "culture",
-          cost: Number(act.cost) || 0,
-          durationMinutes: 90,
-          timeSlot: "14:00",
-          location: stop.city_name,
-        });
-        actMap.set(key, existing);
-      });
-    });
-
-    if (actMap.size > 0) {
-      calculated.days = calculated.days.map((day) => {
-        const key = `${day.cityId}-${day.cityDayNumber}`;
-        const dbActivities = actMap.get(key);
-        if (dbActivities && dbActivities.length > 0) {
-          return {
-            ...day,
-            activities: [...day.activities, ...dbActivities],
-          };
-        }
-        return day;
-      });
-      return recalculateTrip(calculated);
-    }
-  }
-
-  return calculated;
+  return recalculateTrip(rawTrip);
 }
 
 export function TripProvider({ children }: { children: React.ReactNode }) {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
-  const [lastRecalculatedField, setLastRecalculatedField] = useState<string | null>(null);
-  const [currency, setCurrency] = useState<string>("₹");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Destinations & Activities Catalog
+  const [destinations, setDestinations] = useState<CityDiscovery[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_DESTS_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.error("Local storage dests read failed", e);
+      }
+    }
+    return curatedDestinations;
+  });
+
+  const [activities, setActivities] = useState<ActivityDiscovery[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_ACTS_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {
+        console.error("Local storage acts read failed", e);
+      }
+    }
+    return curatedActivities;
+  });
+
+  const [isDbConnected, setIsDbConnected] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Currency & Search state
+  const [currency, setCurrencyState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("globetrotter_currency") || "₹";
+    }
+    return "₹";
+  });
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [lastRecalculatedField, setLastRecalculatedField] = useState<string | null>(null);
+
+  const setCurrency = (c: string) => {
+    setCurrencyState(c);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("globetrotter_currency", c);
+    }
+  };
+
+  // Sync Destinations & Activities to LocalStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_DESTS_KEY, JSON.stringify(destinations));
+        localStorage.setItem(LOCAL_STORAGE_ACTS_KEY, JSON.stringify(activities));
+      } catch (e) {
+        console.error("LocalStorage write failed", e);
+      }
+    }
+  }, [destinations, activities]);
+
+  // Check DB connection & sync remote catalog
+  const syncAllFromDatabase = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setIsDbConnected(false);
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const dbDests = await fetchDestinationsDB();
+      if (dbDests && dbDests.length > 0) {
+        setDestinations(dbDests);
+        setIsDbConnected(true);
+      }
+
+      const dbActs = await fetchActivitiesDB();
+      if (dbActs && dbActs.length > 0) {
+        setActivities(dbActs);
+        setIsDbConnected(true);
+      }
+    } catch (e) {
+      console.warn("Supabase initial sync error:", e);
+      setIsDbConnected(false);
+    } finally {
+      setIsSyncing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    syncAllFromDatabase();
+  }, [syncAllFromDatabase]);
+
+  const seedDatabaseToSupabase = async () => {
+    setIsSyncing(true);
+    const res = await seedAllToSupabase();
+    if (res.success) {
+      await syncAllFromDatabase();
+    }
+    setIsSyncing(false);
+    return res;
+  };
 
   // Helper to trigger pulse badge
   const triggerRecalcPulse = (fieldTag: string) => {
@@ -277,6 +415,108 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     return trips.find((t) => t.id === id);
   };
 
+  // ============================================================================
+  // DESTINATIONS (CITIES) CRUD
+  // ============================================================================
+
+  const addDestination = async (city: CityDiscovery) => {
+    setDestinations((prev) => {
+      const exists = prev.some((d) => d.id === city.id || d.name.toLowerCase() === city.name.toLowerCase());
+      if (exists) {
+        return prev.map((d) => (d.id === city.id || d.name.toLowerCase() === city.name.toLowerCase() ? city : d));
+      }
+      return [city, ...prev];
+    });
+
+    if (isSupabaseConfigured()) {
+      await upsertDestinationDB(city);
+    }
+  };
+
+  const updateDestination = async (id: string, updated: Partial<CityDiscovery>) => {
+    let finalItem: CityDiscovery | undefined;
+
+    setDestinations((prev) =>
+      prev.map((d) => {
+        if (d.id === id) {
+          finalItem = { ...d, ...updated };
+          return finalItem;
+        }
+        return d;
+      })
+    );
+
+    if (finalItem && isSupabaseConfigured()) {
+      await upsertDestinationDB(finalItem);
+    }
+  };
+
+  const deleteDestination = async (id: string) => {
+    setDestinations((prev) => prev.filter((d) => d.id !== id));
+
+    if (isSupabaseConfigured()) {
+      await deleteDestinationDB(id);
+    }
+  };
+
+  // ============================================================================
+  // ACTIVITIES CATALOG CRUD
+  // ============================================================================
+
+  const addActivityCatalogItem = async (activity: ActivityDiscovery) => {
+    setActivities((prev) => {
+      const exists = prev.some((a) => a.id === activity.id);
+      if (exists) {
+        return prev.map((a) => (a.id === activity.id ? activity : a));
+      }
+      return [activity, ...prev];
+    });
+
+    if (isSupabaseConfigured()) {
+      await upsertActivityDB(activity);
+    }
+  };
+
+  const updateActivityCatalogItem = async (id: string, updated: Partial<ActivityDiscovery>) => {
+    let finalItem: ActivityDiscovery | undefined;
+
+    setActivities((prev) =>
+      prev.map((a) => {
+        if (a.id === id) {
+          finalItem = { ...a, ...updated };
+          return finalItem;
+        }
+        return a;
+      })
+    );
+
+    if (finalItem && isSupabaseConfigured()) {
+      await upsertActivityDB(finalItem);
+    }
+  };
+
+  const deleteActivityCatalogItem = async (id: string) => {
+    setActivities((prev) => prev.filter((a) => a.id !== id));
+
+    if (isSupabaseConfigured()) {
+      await deleteActivityDB(id);
+    }
+  };
+
+  const resetCatalogToDefault = () => {
+    setDestinations(curatedDestinations);
+    setActivities(curatedActivities);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_DESTS_KEY);
+        localStorage.removeItem(LOCAL_STORAGE_ACTS_KEY);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
   // WOW MOMENT: Dynamic Stop Duration Adjustment
   const updateStopDuration = async (tripId: string, stopId: string, newDaysCount: number) => {
     if (newDaysCount < 1 || newDaysCount > 14) return;
@@ -313,7 +553,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
   const addStopToTrip = async (tripId: string, city: CityDiscovery) => {
     const targetTrip = trips.find((t) => t.id === tripId);
-    if (targetTrip?.stops.some((s) => s.cityName.toLowerCase() === city.name.toLowerCase())) {
+    if (targetTrip?.stops.some((s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase())) {
       return;
     }
 
@@ -653,7 +893,6 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         setActiveTripId(dbTripId);
         return dbTripId;
       } else if (!serverRes.success) {
-        // Rollback optimistic state
         setTrips((prev) => prev.filter((t) => t.id !== newId));
         throw new Error(serverRes.error || "Failed to save trip to Supabase database.");
       }
@@ -744,13 +983,14 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     setTrips((prev) =>
       prev.map((t) => {
         if (t.id !== tripId) return t;
-        return {
+        const updated = {
           ...t,
           budget: {
             ...t.budget,
             targetBudget: targetAmount,
           },
         };
+        return updated;
       })
     );
     triggerRecalcPulse("budget-target");
@@ -794,6 +1034,19 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         refreshTrip,
         isLoading,
         error,
+        destinations,
+        addDestination,
+        updateDestination,
+        deleteDestination,
+        activities,
+        addActivityCatalogItem,
+        updateActivityCatalogItem,
+        deleteActivityCatalogItem,
+        isDbConnected,
+        isSyncing,
+        syncAllFromDatabase,
+        seedDatabaseToSupabase,
+        resetCatalogToDefault,
         updateStopDuration,
         addStopToTrip,
         removeStopFromTrip,

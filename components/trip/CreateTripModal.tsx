@@ -4,19 +4,26 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { curatedDestinations } from "@/data/curatedDestinations";
-import { CityDiscovery } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
-import { Sparkles, Calendar, MapPin, Check, Image as ImageIcon, Loader2 } from "lucide-react";
+import { CityDiscovery } from "@/types/trip";
+import { curatedDestinations } from "@/data/curatedDestinations";
+import {
+  Calendar,
+  DollarSign,
+  Image as ImageIcon,
+  Check,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
+  MapPin,
+} from "lucide-react";
 
 const CURRENCY_OPTIONS = [
-  { code: "INR", symbol: "₹", label: "INR ₹" },
-  { code: "USD", symbol: "$", label: "USD $" },
-  { code: "EUR", symbol: "€", label: "EUR €" },
-  { code: "GBP", symbol: "£", label: "GBP £" },
-  { code: "JPY", symbol: "¥", label: "JPY ¥" },
-  { code: "AED", symbol: "د.إ", label: "AED د.إ" },
+  { symbol: "₹", label: "INR (₹)" },
+  { symbol: "$", label: "USD ($)" },
+  { symbol: "€", label: "EUR (€)" },
+  { symbol: "£", label: "GBP (£)" },
 ];
 
 interface CreateTripModalProps {
@@ -26,7 +33,8 @@ interface CreateTripModalProps {
 
 export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const router = useRouter();
-  const { createNewTrip, currency, setCurrency } = useTrips();
+  const { createNewTrip, currency, setCurrency, destinations } = useTrips();
+  const displayDestinations = destinations?.length > 0 ? destinations : curatedDestinations;
   const { toast } = useToast();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -63,7 +71,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
     setCurrency(selectedCurrency);
 
     // Fallback to first destination if user selected none
-    const citiesToUse = selectedCities.length > 0 ? selectedCities : [curatedDestinations[0]];
+    const citiesToUse = selectedCities.length > 0 ? selectedCities : [displayDestinations[0]];
 
     setIsSubmitting(true);
     try {
@@ -111,10 +119,14 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
       title={
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-          <span>Plan Your Next Journey</span>
+          <span>{step === 1 ? "Craft New Itinerary" : "Select Route Corridor"}</span>
         </div>
       }
-      description="Craft a personalized multi-city travel workspace in seconds."
+      description={
+        step === 1
+          ? "Configure your journey title, start date, budget, and custom banner"
+          : "Pick the curated stops you wish to link into your multi-city timeline"
+      }
       maxWidth="lg"
     >
       {step === 1 ? (
@@ -128,112 +140,106 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               required
               value={tripName}
               onChange={(e) => setTripName(e.target.value)}
-              placeholder="e.g. Italian Riviera & Amalfi Coast"
-              className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm font-semibold text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder="e.g. Royal Rajasthan Grand Circuit"
+              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div>
             <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
-              Travel Vibe / Tagline (Optional)
+              Tagline / Trip Focus
             </label>
             <input
               type="text"
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              placeholder="e.g. Coastal roads, sunsets, and local culinary discoveries"
-              className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder="e.g. 10 Days across forts, heritage palaces & culinary bazaars"
+              className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
-                Departure Start Date
+                Start Date
               </label>
               <div className="relative">
-                <Calendar className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Calendar className="w-4 h-4 text-[#9E978E] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                  className="w-full pl-9 pr-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
-                Currency
+                Target Budget
               </label>
-              <select
-                value={selectedCurrency}
-                onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] appearance-none"
-              >
-                {CURRENCY_OPTIONS.map((opt) => (
-                  <option key={opt.code} value={opt.symbol} className="dark:bg-[#1E1E1E]">
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1">
-            <div>
-              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
-                Target Budget ({selectedCurrency})
-              </label>
-              <input
-                type="number"
-                min="1000"
-                step="1000"
-                value={targetBudget}
-                onChange={(e) => setTargetBudget(Number(e.target.value))}
-                className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
-              />
+              <div className="flex gap-2">
+                <select
+                  value={selectedCurrency}
+                  onChange={(e) => setSelectedCurrency(e.target.value)}
+                  className="w-20 px-2 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] font-bold focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                >
+                  {CURRENCY_OPTIONS.map((opt) => (
+                    <option key={opt.symbol} value={opt.symbol}>
+                      {opt.symbol}
+                    </option>
+                  ))}
+                </select>
+                <div className="relative flex-1">
+                  <DollarSign className="w-3.5 h-3.5 text-[#9E978E] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="number"
+                    min="1000"
+                    step="1000"
+                    value={targetBudget}
+                    onChange={(e) => setTargetBudget(Number(e.target.value))}
+                    className="w-full pl-8 pr-3 py-2 text-xs bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] font-bold focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
-              Custom Cover Photo (Optional)
+              Custom Cover Banner (Optional)
             </label>
             <div className="flex items-center gap-3">
-              {coverPreview ? (
-                <img
-                  src={coverPreview}
-                  alt="Cover preview"
-                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B]"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-xl bg-[#FAF9F5] dark:bg-[#24221E] border border-dashed border-[#DDD7CB] dark:border-[#48443D] flex items-center justify-center text-[#9E978E] dark:text-[#7A746B]">
-                  <ImageIcon className="w-6 h-6" />
-                </div>
-              )}
-              <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-[#FAF9F5] dark:bg-[#24221E] hover:bg-[#EFECE6] dark:hover:bg-[#2E2C29] border border-[#E7E2D8] dark:border-[#33302B] text-xs font-bold text-[#181818] dark:text-[#F5F3EF] transition-colors shadow-2xs">
-                <span>{coverFile ? "Change Image" : "Upload Cover Image"}</span>
+              <label className="flex-1 border-2 border-dashed border-[#E7E2D8] dark:border-[#33302B] rounded-xl p-3 text-center cursor-pointer hover:border-[#F4A62A] transition-colors bg-[#FAF9F5]/50 dark:bg-[#24221E]/50">
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp"
+                  accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
                 />
+                <ImageIcon className="w-5 h-5 text-[#9E978E] mx-auto mb-1" />
+                <span className="text-xs text-[#6B655E] dark:text-[#A8A196] font-medium block">
+                  {coverFile ? coverFile.name : "Click to upload banner photo"}
+                </span>
+                <span className="text-[10px] text-[#9E978E]">JPG, PNG, WebP up to 5MB</span>
               </label>
+
+              {coverPreview && (
+                <div className="w-20 h-16 rounded-xl overflow-hidden border border-[#E7E2D8] dark:border-[#33302B] relative shrink-0">
+                  <img src={coverPreview} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-[#E7E2D8] dark:border-[#33302B]">
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
+          <div className="pt-3 flex justify-end">
             <Button
+              type="button"
               disabled={!tripName.trim()}
               onClick={() => setStep(2)}
-              rightIcon={<Sparkles className="w-4 h-4" />}
+              rightIcon={<ArrowRight className="w-4 h-4" />}
             >
-              Choose Destinations
+              Next: Select Route Stops
             </Button>
           </div>
         </div>
@@ -251,7 +257,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 max-h-60 overflow-y-auto pr-1">
-            {curatedDestinations.map((city) => {
+            {displayDestinations.map((city) => {
               const isSelected = selectedCities.some((c) => c.id === city.id);
               return (
                 <div
@@ -282,21 +288,22 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
           </div>
 
           <div className="pt-4 flex justify-between items-center border-t border-[#E7E2D8] dark:border-[#33302B]">
-            <Button variant="ghost" onClick={() => setStep(1)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setStep(1)}
+              leftIcon={<ArrowLeft className="w-4 h-4" />}
+            >
               Back
             </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleCreate}
-                disabled={isSubmitting}
-                rightIcon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-              >
-                {isSubmitting ? "Creating..." : "Launch Workspace"}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleCreate}
+              leftIcon={<Sparkles className="w-4 h-4 text-[#F4A62A]" />}
+            >
+              {isSubmitting ? "Generating Itinerary..." : "Launch Trip Workspace"}
+            </Button>
           </div>
         </div>
       )}

@@ -17,7 +17,8 @@ interface CuratedDestinationsProps {
 }
 
 export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsProps = {}) {
-  const { activeTrip, addStopToTrip, currency } = useTrips();
+  const { activeTrip, addStopToTrip, currency, destinations } = useTrips();
+  const displayDestinations = destinations?.length > 0 ? destinations : curatedDestinations;
   const { toast } = useToast();
   const [savedCityIds, setSavedCityIds] = useState<string[]>([]);
 
@@ -64,9 +65,11 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {curatedDestinations.slice(0, 4).map((city) => {
+        {displayDestinations.slice(0, 4).map((city) => {
           const isAlreadyInTrip = activeTrip
-            ? activeTrip.stops.some((s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase())
+            ? activeTrip.stops.some(
+                (s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase()
+              )
             : false;
           const isSaved = savedCityIds.includes(city.id);
 
@@ -105,33 +108,21 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
 
                 {/* Bottom Title */}
                 <div className="absolute bottom-3 left-3 right-3 text-white z-10">
-                  <h4 className="font-bold text-lg font-editorial leading-none">{city.name}</h4>
-                  <p className="text-xs text-[#D5CEBF] mt-0.5">{city.country}</p>
+                  <h4 className="font-extrabold text-lg leading-tight font-editorial">{city.name}</h4>
+                  <p className="text-xs text-[#FAF9F5]/90">{city.region}, {city.country}</p>
                 </div>
               </div>
 
-              <div className="p-4 bg-white dark:bg-[#1C1B18] flex-1 flex flex-col justify-between transition-colors">
-                <div>
-                  <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mb-3">
-                    {city.description}
-                  </p>
+              {/* Bottom Content */}
+              <div className="p-4 flex-1 flex flex-col justify-between bg-white dark:bg-[#1C1B18] transition-colors rounded-b-2xl">
+                <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mb-3 leading-relaxed">
+                  {city.description}
+                </p>
 
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {city.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="text-[10px] bg-[#FAF9F5] dark:bg-[#24221E] text-[#6B655E] dark:text-[#A8A196] px-2 py-0.5 rounded-md border border-[#E7E2D8] dark:border-[#33302B]"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between transition-colors">
                   <div>
-                    <span className="block text-[10px] text-[#9E978E] dark:text-[#7A746B]">Daily Avg</span>
-                    <span className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF]">
+                    <span className="text-[10px] text-[#9E978E] dark:text-[#7A746B] block">Daily Avg</span>
+                    <span className="text-xs font-black text-[#181818] dark:text-[#F5F3EF]">
                       {formatCurrency(city.avgDailyCost, currency)}
                     </span>
                   </div>
@@ -139,8 +130,8 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
                   <Button
                     size="sm"
                     variant={isAlreadyInTrip ? "outline" : "primary"}
-                    onClick={() => handleAddStop(city)}
                     disabled={isAlreadyInTrip}
+                    onClick={() => handleAddStop(city)}
                     leftIcon={
                       isAlreadyInTrip ? (
                         <Check className="w-3.5 h-3.5 text-[#1B8755] dark:text-[#34D399]" />
@@ -148,6 +139,7 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
                         <Plus className="w-3.5 h-3.5" />
                       )
                     }
+                    className="text-xs py-1.5 px-3"
                   >
                     {isAlreadyInTrip ? "Added" : "Add Stop"}
                   </Button>

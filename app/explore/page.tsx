@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { CityCard } from "@/components/explore/CityCard";
 import { ActivityCard } from "@/components/explore/ActivityCard";
 import { AddToTripModal } from "@/components/explore/AddToTripModal";
-import { curatedDestinations } from "@/data/curatedDestinations";
-import { curatedActivities } from "@/data/curatedActivities";
 import { CityDiscovery, ActivityDiscovery } from "@/types/trip";
+import { useTrips } from "@/context/TripContext";
 import { Card } from "@/components/ui/Card";
-import { Sparkles, Search, Compass, MapPin, Layers } from "lucide-react";
+import { Search, Compass, Layers, RefreshCw } from "lucide-react";
 
 export default function ExplorePage() {
+  const { destinations, activities, isDbConnected, isSyncing, syncAllFromDatabase } = useTrips();
   const [activeTab, setActiveTab] = useState<"cities" | "activities">("cities");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [search, setSearch] = useState<string>("");
@@ -21,26 +21,51 @@ export default function ExplorePage() {
   const [modalType, setModalType] = useState<"city" | "activity">("city");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const cityTags = ["all", "Heritage", "Architecture", "Palaces", "Lakes", "Romance", "Food", "Metropolis"];
-  const activityTags = ["all", "culture", "food", "sightseeing", "adventure", "nature", "shopping"];
+  // Dynamic tags computed from live destinations
+  const cityTags = useMemo(() => {
+    const set = new Set<string>();
+    destinations.forEach((c) => c.tags?.forEach((t) => set.add(t)));
+    return ["all", ...Array.from(set)];
+  }, [destinations]);
 
-  const filteredCities = curatedDestinations.filter((city) => {
-    const matchesTag = selectedTag === "all" || city.tags.includes(selectedTag);
-    const matchesSearch =
-      city.name.toLowerCase().includes(search.toLowerCase()) ||
-      city.country.toLowerCase().includes(search.toLowerCase()) ||
-      city.description.toLowerCase().includes(search.toLowerCase());
-    return matchesTag && matchesSearch;
-  });
+  // Dynamic tags computed from live activities
+  const activityTags = useMemo(() => {
+    const set = new Set<string>();
+    activities.forEach((a) => {
+      if (a.category) set.add(a.category.toLowerCase());
+    });
+    return ["all", ...Array.from(set)];
+  }, [activities]);
 
-  const filteredActivities = curatedActivities.filter((act) => {
-    const matchesTag = selectedTag === "all" || act.category.toLowerCase() === selectedTag.toLowerCase();
-    const matchesSearch =
-      act.name.toLowerCase().includes(search.toLowerCase()) ||
-      act.cityName.toLowerCase().includes(search.toLowerCase()) ||
-      act.description.toLowerCase().includes(search.toLowerCase());
-    return matchesTag && matchesSearch;
-  });
+  const filteredCities = useMemo(() => {
+    return destinations.filter((city) => {
+      const matchesTag =
+        selectedTag === "all" ||
+        (Array.isArray(city.tags) && city.tags.some((t) => t.toLowerCase() === selectedTag.toLowerCase()));
+      const q = search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        city.name.toLowerCase().includes(q) ||
+        city.country.toLowerCase().includes(q) ||
+        (city.region && city.region.toLowerCase().includes(q)) ||
+        city.description.toLowerCase().includes(q);
+      return matchesTag && matchesSearch;
+    });
+  }, [destinations, selectedTag, search]);
+
+  const filteredActivities = useMemo(() => {
+    return activities.filter((act) => {
+      const matchesTag =
+        selectedTag === "all" || act.category.toLowerCase() === selectedTag.toLowerCase();
+      const q = search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        act.name.toLowerCase().includes(q) ||
+        act.cityName.toLowerCase().includes(q) ||
+        act.description.toLowerCase().includes(q);
+      return matchesTag && matchesSearch;
+    });
+  }, [activities, selectedTag, search]);
 
   const handleOpenCityModal = (city: CityDiscovery) => {
     setModalItem(city);
@@ -57,16 +82,36 @@ export default function ExplorePage() {
   return (
     <AppShell>
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-          <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818] dark:text-[#F5F3EF]">
-            Global Discovery Hub
-          </h1>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818] dark:text-[#F5F3EF]">
+              Global Discovery Hub
+            </h1>
+          </div>
+          <p className="text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196]">
+            Explore iconic destinations, curated cultural tours, and local gastronomic adventures
+          </p>
         </div>
-        <p className="text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196]">
-          Explore iconic destinations, curated cultural tours, and local gastronomic adventures
-        </p>
+
+        {/* Database Live Telemetry Pill */}
+        <div className="flex items-center gap-2">
+          {isDbConnected && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EDF7F2] dark:bg-[#132D20] text-[#1B8755] dark:text-[#34D399] text-xs font-semibold border border-[#B7E4C7] dark:border-[#1E4D34]">
+              <span className="w-2 h-2 rounded-full bg-[#1B8755] dark:bg-[#34D399] animate-pulse" />
+              Live DB Synced
+            </span>
+          )}
+          <button
+            onClick={() => syncAllFromDatabase()}
+            disabled={isSyncing}
+            title="Refresh Catalog Data"
+            className="p-2 rounded-xl bg-white dark:bg-[#1E1E1E] text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF] border border-[#E7E2D8] dark:border-[#33302B] shadow-2xs hover:shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? "animate-spin text-[#F4A62A]" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Search & Main Tab Switcher */}
@@ -85,7 +130,7 @@ export default function ExplorePage() {
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span>Destinations ({curatedDestinations.length})</span>
+            <span>Destinations ({destinations.length})</span>
           </button>
           <button
             onClick={() => {
@@ -99,13 +144,13 @@ export default function ExplorePage() {
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Activities &amp; Tours ({curatedActivities.length})</span>
+            <span>Activities &amp; Tours ({activities.length})</span>
           </button>
         </div>
 
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={search}
