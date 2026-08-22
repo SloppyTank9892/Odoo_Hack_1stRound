@@ -15,6 +15,16 @@ export type TripStopWithActivities = TripStop & {
 
 export type TripWithDetails = DbTrip & {
   trip_stops: TripStopWithActivities[]
+  author_name?: string
+  author_avatar?: string | null
+}
+
+export type PublicTripItem = DbTrip & {
+  stops_count: number
+  cities_preview: string[]
+  author_name: string
+  author_avatar: string | null
+  trip_stops: TripStopWithActivities[]
 }
 
 export type CreateStopInput = {
@@ -47,7 +57,7 @@ export type CreateActivityInput = {
  */
 export async function createTrip(
   formData: FormData
-): Promise<ActionResponse<{ tripId: string }>> {
+): Promise<ActionResponse<{ tripId: string; coverImageUrl?: string | null }>> {
   try {
     const supabase = await createClient()
 
@@ -161,7 +171,7 @@ export async function createTrip(
     revalidatePath('/dashboard')
     revalidatePath('/')
 
-    return { success: true, data: { tripId: trip.id } }
+    return { success: true, data: { tripId: trip.id, coverImageUrl } }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'An unexpected error occurred while creating trip.'
     return { success: false, error: msg }
@@ -220,6 +230,22 @@ export async function getTripById(
       activities = acts || []
     }
 
+    // Fetch author profile if available
+    let author_name = 'GlobeTrotter Traveler'
+    let author_avatar: string | null = null
+    if (trip.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, avatar_url')
+        .eq('id', trip.user_id)
+        .maybeSingle()
+
+      if (profile) {
+        author_name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'GlobeTrotter Traveler'
+        author_avatar = profile.avatar_url || null
+      }
+    }
+
     // Combine stops with their activities
     const nestedStops: TripStopWithActivities[] = (stops || []).map((stop) => ({
       ...stop,
@@ -234,11 +260,101 @@ export async function getTripById(
     const result: TripWithDetails = {
       ...trip,
       trip_stops: nestedStops,
+      author_name,
+      author_avatar,
     }
 
     return { success: true, data: result }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to fetch trip details.'
+    return { success: false, error: msg }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// getPublicTrips
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns all publicly shared trips across GlobeTrotter community with author profiles.
+ */
+export async function getPublicTrips(): Promise<ActionResponse<PublicTripItem[]>> {
+  try {
+    const supabase = await createClient()
+
+    const { data: trips, error } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    if (!trips || trips.length === 0) {
+      return { success: true, data: [] }
+    }
+
+    const tripIds = trips.map((t) => t.id)
+    const userIds = Array.from(new Set(trips.map((t) => t.user_id).filter(Boolean)))
+
+    // Fetch author profiles
+    const profilesMap = new Map<string, { name: string; avatar: string | null }>()
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, avatar_url')
+        .in('id', userIds)
+
+      if (profiles) {
+        profiles.forEach((p) => {
+          const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Explorer'
+          profilesMap.set(p.id, { name: fullName, avatar: p.avatar_url })
+        })
+      }
+    }
+
+    // Fetch all stops
+    const { data: allStops } = await supabase
+      .from('trip_stops')
+      .select('*')
+      .in('trip_id', tripIds)
+      .order('order_index', { ascending: true })
+
+    const stopIds = (allStops || []).map((s) => s.id)
+    let allActivities: DbActivity[] = []
+    if (stopIds.length > 0) {
+      const { data: acts } = await supabase
+        .from('activities')
+        .select('*')
+        .in('stop_id', stopIds)
+        .order('order_index', { ascending: true })
+      allActivities = acts || []
+    }
+
+    const publicItems: PublicTripItem[] = trips.map((trip) => {
+      const author = profilesMap.get(trip.user_id) || { name: 'GlobeTrotter Traveler', avatar: null }
+      const tripStops = (allStops || [])
+        .filter((s) => s.trip_id === trip.id)
+        .map((s) => ({
+          ...s,
+          activities: allActivities.filter((a) => a.stop_id === s.id),
+        }))
+
+      return {
+        ...trip,
+        stops_count: tripStops.length,
+        cities_preview: tripStops.map((s) => s.city_name),
+        author_name: author.name,
+        author_avatar: author.avatar,
+        trip_stops: tripStops,
+      }
+    })
+
+    return { success: true, data: publicItems }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Failed to fetch public trips.'
     return { success: false, error: msg }
   }
 }

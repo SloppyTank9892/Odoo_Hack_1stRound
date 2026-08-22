@@ -45,9 +45,13 @@ export function UpcomingTripsGrid({ trips, activeTripId }: UpcomingTripsGridProp
               <Card className="h-full flex flex-col justify-between overflow-hidden p-0" hover>
                 <div className="relative h-44 overflow-hidden">
                   <img
-                    src={trip.coverImage}
+                    src={trip.coverImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80"}
                     alt={trip.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute top-3 left-3">

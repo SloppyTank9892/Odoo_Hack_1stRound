@@ -26,9 +26,13 @@ export function ActiveTripCard({ trip }: ActiveTripCardProps) {
         {/* Left Visual Banner */}
         <div className="lg:col-span-5 relative h-56 lg:h-auto min-h-[220px]">
           <img
-            src={trip.coverImage}
+            src={trip.coverImage || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80"}
             alt={trip.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src =
+                "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80";
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-black/60" />
           

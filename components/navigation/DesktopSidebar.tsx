@@ -59,10 +59,10 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
 
   const navItems = [
     { name: "Dashboard", href: "/", icon: Compass },
-    { name: "My Trips", href: "/trips", icon: MapPinned, badge: currentUser ? trips.length : undefined },
+    { name: "My Trips", href: "/trips", icon: MapPinned, badge: trips.length },
     { name: "Explore", href: "/explore", icon: Sparkles },
     { name: "Saved", href: "/explore/saved", icon: Bookmark },
-    { name: "Public Story", href: activeTrip ? `/share/${activeTrip.id}` : "/trips", icon: BookOpen },
+    { name: "Public Stories", href: "/share", icon: BookOpen },
     { name: "Settings", href: "/settings", icon: SlidersHorizontal },
     { name: "Admin Analytics", href: "/admin", icon: BarChart3 },
   ];

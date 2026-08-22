@@ -213,18 +213,31 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       setError(null);
       const res = await getUserTrips();
-      if (res.success && res.data && res.data.all.length > 0) {
+      if (res.success && res.data) {
+        if (res.data.all.length === 0) {
+          setTrips([]);
+          setActiveTripId(null);
+          return;
+        }
+
+        const detailPromises = res.data.all.map((dbTrip) => fetchTripDetailsFromDb(dbTrip.id));
+        const detailResults = await Promise.all(detailPromises);
         const dbTripsWithDetails: Trip[] = [];
-        for (const dbTrip of res.data.all) {
-          const detailRes = await fetchTripDetailsFromDb(dbTrip.id);
+
+        detailResults.forEach((detailRes) => {
           if (detailRes.success && detailRes.data) {
             dbTripsWithDetails.push(convertDbTripToUiTrip(detailRes.data));
           }
-        }
+        });
 
         if (dbTripsWithDetails.length > 0) {
           setTrips(dbTripsWithDetails);
-          setActiveTripId(dbTripsWithDetails[0].id);
+          setActiveTripId((prev) =>
+            prev && dbTripsWithDetails.some((t) => t.id === prev) ? prev : dbTripsWithDetails[0].id
+          );
+        } else {
+          setTrips([]);
+          setActiveTripId(null);
         }
       }
     } catch (err: unknown) {
@@ -566,15 +579,18 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       dailyMealsEstimate: Math.round(city.avgDailyCost * 0.3),
     }));
 
+    const optimisticCover =
+      coverImageUrl ||
+      (coverFile ? URL.createObjectURL(coverFile) : null) ||
+      stops[0]?.image ||
+      "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80";
+
     const rawTrip: Trip = {
       id: newId,
       name,
       tagline: tagline || "A custom crafted journey",
       description: `Personalized travel itinerary across ${stops.map((s) => s.cityName).join(", ")}.`,
-      coverImage:
-        coverImageUrl ||
-        stops[0]?.image ||
-        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
+      coverImage: optimisticCover,
       startDate: startDate || new Date().toISOString().split("T")[0],
       endDate: startDate || new Date().toISOString().split("T")[0],
       isPublic: false,
@@ -626,8 +642,13 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       const serverRes = await serverCreateTrip(formData);
       if (serverRes.success && serverRes.data?.tripId) {
         const dbTripId = serverRes.data.tripId;
+        const finalCover = serverRes.data.coverImageUrl;
         setTrips((prev) =>
-          prev.map((t) => (t.id === newId ? { ...t, id: dbTripId } : t))
+          prev.map((t) =>
+            t.id === newId
+              ? { ...t, id: dbTripId, coverImage: finalCover || t.coverImage }
+              : t
+          )
         );
         setActiveTripId(dbTripId);
         return dbTripId;
@@ -645,7 +666,20 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   };
 
   const copyTrip = async (tripId: string): Promise<Trip> => {
-    const original = getTripById(tripId) || activeTrip;
+    let original = getTripById(tripId);
+    if (!original) {
+      try {
+        const fetched = await fetchTripDetailsFromDb(tripId);
+        if (fetched.success && fetched.data) {
+          original = convertDbTripToUiTrip(fetched.data);
+        }
+      } catch (e) {
+        console.warn("Could not fetch remote trip to copy:", e);
+      }
+    }
+    if (!original) {
+      original = activeTrip || undefined;
+    }
     if (!original) {
       throw new Error("No trip found to copy");
     }

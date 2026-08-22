@@ -48,17 +48,24 @@ export default function MyTripsPage() {
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-1">
-        {(["all", "planning", "active", "completed"] as const).map((status) => (
+        {(
+          [
+            { id: "all" as const, label: `All Trips (${trips.length})` },
+            { id: "planning" as const, label: `Planning (${trips.filter((t) => t.status === "planning").length})` },
+            { id: "active" as const, label: `Active (${trips.filter((t) => t.status === "active").length})` },
+            { id: "completed" as const, label: `Completed (${trips.filter((t) => t.status === "completed").length})` },
+          ]
+        ).map((tab) => (
           <button
-            key={status}
-            onClick={() => setFilterStatus(status)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all shrink-0 ${
-              filterStatus === status
+            key={tab.id}
+            onClick={() => setFilterStatus(tab.id)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
+              filterStatus === tab.id
                 ? "bg-[#181818] text-white shadow-xs"
                 : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:bg-[#FAF9F5]"
             }`}
           >
-            {status === "all" ? `All Trips (${trips.length})` : status}
+            {tab.label}
           </button>
         ))}
       </div>

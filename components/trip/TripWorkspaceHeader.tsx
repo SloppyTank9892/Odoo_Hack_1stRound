@@ -73,7 +73,7 @@ export function TripWorkspaceHeader({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF7EC] text-[#B86E00] hover:bg-[#FCD89C]/50 rounded-xl text-xs font-bold border border-[#FCD89C] transition-colors"
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Public Travel Story</span>
+            <span>{trip.isPublic ? "Public Story (Live)" : "Preview Story (Private)"}</span>
           </Link>
         </div>
       </div>
