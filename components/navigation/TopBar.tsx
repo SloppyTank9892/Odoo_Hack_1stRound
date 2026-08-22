@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Globe2, Sparkles, Plus, ChevronDown, LogOut, User } from "lucide-react";
+import { Search, Globe2, Plus, ChevronDown, LogOut, User } from "lucide-react";
 import { useTrips } from "@/context/TripContext";
 import { Button } from "@/components/ui/Button";
 import { getAuthUser, signOut } from "@/app/actions/auth";
@@ -24,7 +24,9 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
       const res = await getAuthUser();
       if (res.success && res.data) {
         const p = res.data.profile;
-        const name = p?.first_name ? `${p.first_name} ${p.last_name || ""}`.trim() : res.data.email?.split("@")[0] || "Explorer";
+        const name = p?.first_name
+          ? `${p.first_name} ${p.last_name || ""}`.trim()
+          : res.data.email?.split("@")[0] || "Traveler";
         setCurrentUser({
           email: res.data.email,
           name,
@@ -72,7 +74,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9E978E] hover:text-[#181818]"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9E978E] hover:text-[#181818] cursor-pointer"
           >
             Clear
           </button>
@@ -103,7 +105,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         <div className="flex bg-white rounded-xl border border-[#E7E2D8] p-0.5 text-xs font-bold shadow-2xs">
           <button
             onClick={() => setCurrency("₹")}
-            className={`px-2 py-1 rounded-lg transition-colors ${
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
               currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
             }`}
           >
@@ -111,7 +113,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
           </button>
           <button
             onClick={() => setCurrency("$")}
-            className={`px-2 py-1 rounded-lg transition-colors ${
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
               currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
             }`}
           >
@@ -146,16 +148,16 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
                   className="w-5 h-5 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-5 h-5 rounded-full bg-[#76546F] text-white flex items-center justify-center text-[10px]">
-                  {currentUser.name?.charAt(0) || "U"}
+                <div className="w-5 h-5 rounded-full bg-[#76546F] text-white flex items-center justify-center text-[10px] font-bold">
+                  {currentUser.name?.charAt(0).toUpperCase() || "T"}
                 </div>
               )}
-              <span className="hidden sm:inline max-w-[100px] truncate">{currentUser.name}</span>
+              <span className="hidden sm:inline max-w-[100px] truncate">{currentUser.name || "Traveler"}</span>
             </Link>
             <button
               onClick={handleSignOut}
               title="Sign Out"
-              className="p-2 text-[#9E978E] hover:text-[#C84B31] hover:bg-white rounded-xl border border-transparent hover:border-[#E7E2D8] transition-colors"
+              className="p-2 text-[#9E978E] hover:text-[#C84B31] hover:bg-white rounded-xl border border-transparent hover:border-[#E7E2D8] transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

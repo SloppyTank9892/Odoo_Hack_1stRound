@@ -7,13 +7,7 @@ import { Globe2, Mail, ArrowLeft, Loader2, CheckCircle2, Sparkles } from "lucide
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 
-// Assume this server action exists (per task constraints)
-async function resetPasswordForEmail(email: string): Promise<{ success: boolean; error?: string }> {
-  // Stub — wired to real server action in backend layer
-  await new Promise((r) => setTimeout(r, 1200));
-  if (!email.includes("@")) return { success: false, error: "Invalid email address." };
-  return { success: true };
-}
+import { resetPasswordForEmail } from "@/app/actions/auth";
 
 export default function ResetPasswordPage() {
   const { toast } = useToast();

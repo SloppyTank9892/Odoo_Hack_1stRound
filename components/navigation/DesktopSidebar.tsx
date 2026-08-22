@@ -14,6 +14,7 @@ import {
   Plus,
   ArrowRight,
   Bookmark,
+  User,
 } from "lucide-react";
 import { useTrips } from "@/context/TripContext";
 import { formatCurrency, calculateTripTotalCost } from "@/lib/tripCalculations";
@@ -26,7 +27,11 @@ interface DesktopSidebarProps {
 export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
   const pathname = usePathname();
   const { trips, activeTrip } = useTrips();
-  const [currentUser, setCurrentUser] = React.useState<{ name: string; avatarUrl?: string; initials: string } | null>(null);
+  const [currentUser, setCurrentUser] = React.useState<{
+    name: string;
+    avatarUrl?: string;
+    initials: string;
+  } | null>(null);
 
   React.useEffect(() => {
     async function loadUser() {
@@ -34,8 +39,14 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
       const res = await getAuthUser();
       if (res.success && res.data) {
         const p = res.data.profile;
-        const name = p?.first_name ? `${p.first_name} ${p.last_name || ""}`.trim() : res.data.email?.split("@")[0] || "Explorer";
-        const initials = p?.first_name ? `${p.first_name.charAt(0)}${p.last_name?.charAt(0) || ""}`.toUpperCase() : "EX";
+        const name = p?.first_name
+          ? `${p.first_name} ${p.last_name || ""}`.trim()
+          : res.data.email
+          ? res.data.email.split("@")[0]
+          : "Traveler";
+        const initials = p?.first_name
+          ? `${p.first_name.charAt(0)}${p.last_name?.charAt(0) || ""}`.toUpperCase()
+          : (res.data.email?.charAt(0) || "T").toUpperCase();
         setCurrentUser({
           name,
           avatarUrl: p?.avatar_url || undefined,
@@ -51,7 +62,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
     { name: "My Trips", href: "/trips", icon: MapPinned, badge: trips.length },
     { name: "Explore", href: "/explore", icon: Sparkles },
     { name: "Saved", href: "/explore/saved", icon: Bookmark },
-    { name: "Public Story", href: `/share/${activeTrip.id}`, icon: BookOpen },
+    { name: "Public Story", href: `/share/${activeTrip?.id || "rajasthan-explorer"}`, icon: BookOpen },
     { name: "Settings", href: "/settings", icon: SlidersHorizontal },
     { name: "Admin Analytics", href: "/admin", icon: BarChart3 },
   ];
@@ -175,12 +186,14 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-[#76546F] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
-              {currentUser?.initials || "AR"}
+              {currentUser?.initials || <User className="w-4 h-4" />}
             </div>
           )}
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#181818] truncate">{currentUser?.name || "Aarav Roy"}</p>
-            <p className="text-[11px] text-[#9E978E] truncate">Pro Explorer</p>
+            <p className="text-xs font-bold text-[#181818] truncate">
+              {currentUser?.name || "Traveler"}
+            </p>
+            <p className="text-[11px] text-[#9E978E] truncate">Explorer Member</p>
           </div>
         </Link>
       </div>

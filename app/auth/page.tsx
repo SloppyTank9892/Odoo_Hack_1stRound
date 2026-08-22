@@ -3,7 +3,7 @@
 import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Globe2, Sparkles, ArrowRight, ShieldCheck, Check, Loader2, AlertCircle } from "lucide-react";
+import { Globe2, Sparkles, AlertCircle, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { signIn, signUp } from "@/app/actions/auth";
@@ -11,13 +11,13 @@ import { signIn, signUp } from "@/app/actions/auth";
 function AuthFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const redirectTo = searchParams.get("redirect") || "/";
   const { toast } = useToast();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("aarav.roy@globetrotter.travel");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -28,21 +28,22 @@ function AuthFormContent() {
     setErrorMessage(null);
 
     const formData = new FormData();
-    formData.append("email", email);
+    formData.append("email", email.trim());
     formData.append("password", password);
     if (mode === "signup") {
-      formData.append("first_name", firstName);
-      formData.append("last_name", lastName);
+      formData.append("first_name", firstName.trim());
+      formData.append("last_name", lastName.trim());
     }
 
     try {
       if (mode === "login") {
         const result = await signIn(formData);
         if (!result.success) {
-          setErrorMessage(result.error || "Authentication failed.");
+          const errMsg = result.error || "Authentication failed. Please check your credentials.";
+          setErrorMessage(errMsg);
           toast({
             title: "Sign In Failed",
-            description: result.error || "Please check your credentials and try again.",
+            description: errMsg,
             variant: "error",
           });
           setIsLoading(false);
@@ -57,10 +58,11 @@ function AuthFormContent() {
       } else {
         const result = await signUp(formData);
         if (!result.success) {
-          setErrorMessage(result.error || "Sign-up failed.");
+          const errMsg = result.error || "Could not complete account setup.";
+          setErrorMessage(errMsg);
           toast({
             title: "Account Creation Failed",
-            description: result.error || "Could not complete account setup.",
+            description: errMsg,
             variant: "error",
           });
           setIsLoading(false);
@@ -125,14 +127,14 @@ function AuthFormContent() {
         <div className="relative z-10 max-w-lg">
           <div className="p-6 rounded-3xl bg-white/10 backdrop-blur-md border border-white/15">
             <p className="text-base font-editorial italic text-white/95 leading-relaxed mb-4">
-              “GlobeTrotter transformed our 12-day North India expedition. Changing stop durations and immediately seeing the budget and calendar re-align was magic.”
+              “GlobeTrotter transformed our expedition planning. Changing stop durations and immediately seeing the budget and calendar re-align in real time was magic.”
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-[#F4A62A] text-[#181818] font-bold flex items-center justify-center text-sm">
-                AR
+                EV
               </div>
               <div>
-                <p className="text-xs font-bold text-white">Aarav & Priya Roy</p>
+                <p className="text-xs font-bold text-white">Elena & Marcus Vance</p>
                 <p className="text-[11px] text-[#D5CEBF]">Explorer Members · 8 Trips Planned</p>
               </div>
             </div>
@@ -170,7 +172,7 @@ function AuthFormContent() {
                 setMode("login");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                 mode === "login" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
               }`}
             >
@@ -182,7 +184,7 @@ function AuthFormContent() {
                 setMode("signup");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
                 mode === "signup" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
               }`}
             >
@@ -190,11 +192,11 @@ function AuthFormContent() {
             </button>
           </div>
 
-          {/* Inline Error Message if any */}
+          {/* Inline Error Message */}
           {errorMessage && (
-            <div className="mb-4 p-3 rounded-xl bg-[#FFF5F5] border border-[#FED7D7] flex items-center gap-2 text-xs text-[#C53030]">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
+            <div className="mb-5 p-3.5 rounded-xl bg-[#FFF5F5] border border-[#FED7D7] flex items-start gap-2.5 text-xs text-[#C53030]">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <div className="flex-1 font-medium">{errorMessage}</div>
             </div>
           )}
 
@@ -211,7 +213,7 @@ function AuthFormContent() {
                     required
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="e.g. Aarav"
+                    placeholder="e.g. Alex"
                     className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                   />
                 </div>
@@ -224,7 +226,7 @@ function AuthFormContent() {
                     required
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="e.g. Roy"
+                    placeholder="e.g. Morgan"
                     className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                   />
                 </div>
@@ -268,6 +270,10 @@ function AuthFormContent() {
                 placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
+              <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-[#9E978E]">
+                <Info className="w-3.5 h-3.5 shrink-0" />
+                <span>Minimum 6 characters required.</span>
+              </div>
             </div>
 
             <Button
@@ -292,7 +298,7 @@ function AuthFormContent() {
             <button
               type="button"
               onClick={handleGuestDemo}
-              className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
               <Sparkles className="w-4 h-4" />
               <span>Continue as Demo Guest Explorer</span>

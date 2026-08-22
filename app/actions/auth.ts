@@ -1,7 +1,6 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { Database, Profile } from '@/types/database'
 
@@ -95,7 +94,8 @@ export async function signUp(
   try {
     const supabase = await createClient()
 
-    const email = String(formData.get('email') ?? '').trim()
+    const rawEmail = String(formData.get('email') ?? '').trim()
+    const email = rawEmail.toLowerCase()
     const password = String(formData.get('password') ?? '')
     const first_name = String(formData.get('first_name') ?? '').trim()
     const last_name = String(formData.get('last_name') ?? '').trim()
@@ -104,11 +104,25 @@ export async function signUp(
       return { success: false, error: 'Email and password are required.' }
     }
 
+    // Standard email format validation (allows test@gmail.com, name+tag@domain.co, etc.)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return { success: false, error: 'Please enter a valid email address.' }
+    }
+
+    // Explicit Supabase password length check
+    if (password.length < 6) {
+      return { success: false, error: 'Password must be at least 6 characters long.' }
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { first_name, last_name },
+        data: {
+          first_name: first_name || undefined,
+          last_name: last_name || undefined,
+        },
       },
     })
 
@@ -117,7 +131,15 @@ export async function signUp(
     }
 
     if (!data.user) {
-      return { success: false, error: 'Sign-up failed: no user returned.' }
+      return { success: false, error: 'Sign-up failed: no user account returned.' }
+    }
+
+    // Handle Supabase existing user collision when email confirmation is enabled
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return {
+        success: false,
+        error: 'An account with this email already exists. Please sign in instead.',
+      }
     }
 
     revalidatePath('/', 'layout')
@@ -141,11 +163,17 @@ export async function signIn(
   try {
     const supabase = await createClient()
 
-    const email = String(formData.get('email') ?? '').trim()
+    const rawEmail = String(formData.get('email') ?? '').trim()
+    const email = rawEmail.toLowerCase()
     const password = String(formData.get('password') ?? '')
 
     if (!email || !password) {
       return { success: false, error: 'Email and password are required.' }
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return { success: false, error: 'Please enter a valid email address.' }
     }
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -187,6 +215,35 @@ export async function signOut(): Promise<ActionResult> {
     return { success: true, data: undefined }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An error occurred during sign out.'
+    return { success: false, error: message }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// resetPasswordForEmail
+// ---------------------------------------------------------------------------
+
+/** Sends a password reset email via Supabase Auth */
+export async function resetPasswordForEmail(
+  email: string
+): Promise<ActionResult> {
+  try {
+    const supabase = await createClient()
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (!normalizedEmail) {
+      return { success: false, error: 'Email address is required.' }
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail)
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data: undefined }
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to send password reset email.'
     return { success: false, error: message }
   }
 }
@@ -242,6 +299,7 @@ export async function updateProfile(
     }
 
     revalidatePath('/settings')
+    revalidatePath('/', 'layout')
     return { success: true, data }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to update profile.'

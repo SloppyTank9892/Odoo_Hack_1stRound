@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
-import { User, Sliders, Globe, Shield, Bell, Check, Save, Upload, Loader2 } from "lucide-react";
+import { Check, Save, Upload, Loader2, User } from "lucide-react";
 import { updateProfile, getAuthUser } from "@/app/actions/auth";
 import { uploadMedia } from "@/app/actions/storage";
 import { PreferencesForm } from "@/components/settings/PreferencesForm";
@@ -15,17 +15,18 @@ export default function SettingsPage() {
   const { currency, setCurrency } = useTrips();
   const { toast } = useToast();
 
-  const [firstName, setFirstName] = useState("Aarav");
-  const [lastName, setLastName] = useState("Roy");
-  const [email, setEmail] = useState("aarav.roy@globetrotter.travel");
-  const [phoneNumber, setPhoneNumber] = useState("+91 98765 43210");
-  const [city, setCity] = useState("New Delhi");
-  const [country, setCountry] = useState("India");
-  const [bio, setBio] = useState("Passionate cultural traveler and heritage architecture enthusiast.");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [city, setCity] = useState("");
+  const [country, setCountry] = useState("");
+  const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [pacing, setPacing] = useState<"relaxed" | "balanced" | "fast">("balanced");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     async function loadUserData() {
@@ -43,6 +44,7 @@ export default function SettingsPage() {
           if (p.avatar_url) setAvatarUrl(p.avatar_url);
         }
       }
+      setIsLoaded(true);
     }
     loadUserData();
   }, []);
@@ -83,12 +85,12 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setIsSaving(true);
     const formData = new FormData();
-    formData.append("first_name", firstName);
-    formData.append("last_name", lastName);
-    formData.append("phone_number", phoneNumber);
-    formData.append("city", city);
-    formData.append("country", country);
-    formData.append("bio", bio);
+    formData.append("first_name", firstName.trim());
+    formData.append("last_name", lastName.trim());
+    formData.append("phone_number", phoneNumber.trim());
+    formData.append("city", city.trim());
+    formData.append("country", country.trim());
+    formData.append("bio", bio.trim());
     if (avatarUrl) formData.append("avatar_url", avatarUrl);
 
     try {
@@ -101,21 +103,25 @@ export default function SettingsPage() {
         });
       } else {
         toast({
-          title: "Saved Locally",
-          description: "Preferences updated in active session.",
-          variant: "info",
+          title: "Update Failed",
+          description: res.error || "Could not save profile preferences.",
+          variant: "error",
         });
       }
-    } catch {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Save error.";
       toast({
-        title: "Preferences Updated",
-        description: "Your traveler profile settings have been updated.",
-        variant: "success",
+        title: "Preferences Error",
+        description: msg,
+        variant: "error",
       });
     } finally {
       setIsSaving(false);
     }
   };
+
+  const displayName = firstName || lastName ? `${firstName} ${lastName}`.trim() : email ? email.split("@")[0] : "Traveler";
+  const displayInitial = firstName ? firstName.charAt(0).toUpperCase() : email ? email.charAt(0).toUpperCase() : "T";
 
   return (
     <AppShell>
@@ -144,13 +150,12 @@ export default function SettingsPage() {
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
-                    alt={`${firstName} ${lastName}`}
+                    alt={displayName}
                     className="w-16 h-16 rounded-2xl object-cover border border-[#E7E2D8] shadow-sm"
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-2xl bg-[#76546F] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
-                    {firstName.charAt(0) || "A"}
-                    {lastName.charAt(0) || "R"}
+                    {displayInitial}
                   </div>
                 )}
                 {isUploadingAvatar && (
@@ -162,11 +167,11 @@ export default function SettingsPage() {
 
               <div>
                 <h3 className="text-lg font-bold text-[#181818]">
-                  {firstName} {lastName}
+                  {displayName}
                 </h3>
-                <p className="text-xs text-[#6B655E]">{email}</p>
+                <p className="text-xs text-[#6B655E]">{email || "No email linked"}</p>
                 <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-[#B86E00] bg-[#FEF7EC] px-2 py-0.5 rounded border border-[#FCD89C]">
-                  Pro Traveler Tier
+                  Explorer Tier
                 </span>
               </div>
             </div>
@@ -194,6 +199,7 @@ export default function SettingsPage() {
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                placeholder="e.g. Alex"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -206,6 +212,7 @@ export default function SettingsPage() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                placeholder="e.g. Morgan"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -218,6 +225,7 @@ export default function SettingsPage() {
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="e.g. +1 555 123 4567"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -230,6 +238,7 @@ export default function SettingsPage() {
                 type="email"
                 readOnly
                 value={email}
+                placeholder="Sign in to view email"
                 className="w-full px-3.5 py-2.5 bg-[#F0EFEA] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#6B655E] cursor-not-allowed"
               />
             </div>
@@ -242,6 +251,7 @@ export default function SettingsPage() {
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
+                placeholder="e.g. London"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -254,6 +264,7 @@ export default function SettingsPage() {
                 type="text"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
+                placeholder="e.g. United Kingdom"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -266,6 +277,7 @@ export default function SettingsPage() {
                 rows={2}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
+                placeholder="Share your travel style, preferred cuisines, and dream destinations..."
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
