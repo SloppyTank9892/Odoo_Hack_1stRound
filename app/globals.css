@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Warm Modern Explorer Design System Tokens */
+  --bg-ivory: #F7F6F2;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #FAF9F5;
+  --border-warm: #E7E2D8;
+  --border-warm-strong: #D5CEBF;
+  
+  --text-primary: #181818;
+  --text-secondary: #6B655E;
+  --text-muted: #9E978E;
+  
+  --amber-primary: #F4A62A;
+  --amber-hover: #E09115;
+  --amber-tint: #FEF7EC;
+  --amber-border: #FCD89C;
+
+  --purple-muted: #76546F;
+  --purple-tint: #F6F0F5;
+  --purple-border: #DBCBD8;
+
+  --emerald-success: #1B8755;
+  --emerald-tint: #EDF7F2;
+  --terracotta-danger: #C84B31;
+  --terracotta-tint: #FDF1EE;
+  --cobalt-info: #2B6CB0;
+  --cobalt-tint: #EEF5FC;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border-warm);
+  }
+  
+  body {
+    background-color: var(--bg-ivory);
+    color: var(--text-primary);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom subtle scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #DDD7CB;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C4BDAF;
+}
+
+/* Subtle glassmorphism and card elevation */
+.card-warm {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-warm);
+  box-shadow: 0 1px 3px 0 rgba(24, 24, 24, 0.03), 0 4px 12px -2px rgba(24, 24, 24, 0.04);
+}
+
+.card-warm-hover {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-warm-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(24, 24, 24, 0.05), 0 12px 24px -4px rgba(24, 24, 24, 0.08);
+}
+
+.font-editorial {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.timeline-connector {
+  position: absolute;
+  top: 24px;
+  bottom: -24px;
+  left: 19px;
+  width: 2px;
+  background-color: var(--border-warm);
 }
