@@ -31,6 +31,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
     name: string;
     avatarUrl?: string;
     initials: string;
+    isAdmin: boolean;
   } | null>(null);
 
   React.useEffect(() => {
@@ -51,6 +52,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
           name,
           avatarUrl: p?.avatar_url || undefined,
           initials,
+          isAdmin: p?.is_admin || false,
         });
       }
     }
@@ -64,7 +66,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
     { name: "Saved", href: "/explore/saved", icon: Bookmark },
     { name: "Public Stories", href: "/share", icon: BookOpen },
     { name: "Settings", href: "/settings", icon: SlidersHorizontal },
-    { name: "Admin Analytics", href: "/admin", icon: BarChart3 },
+    ...(currentUser?.isAdmin ? [{ name: "Admin Analytics", href: "/admin", icon: BarChart3 }] : []),
   ];
 
   return (

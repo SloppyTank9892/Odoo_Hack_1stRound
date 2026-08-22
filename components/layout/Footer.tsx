@@ -5,6 +5,19 @@ import Link from "next/link";
 import { Globe2, MapPin, Mail, Phone, Clock, Shield, Sparkles, ArrowUpRight } from "lucide-react";
 
 export function Footer() {
+  const [isAdmin, setIsAdmin] = React.useState(false);
+
+  React.useEffect(() => {
+    async function loadUser() {
+      const { getAuthUser } = await import("@/app/actions/auth");
+      const res = await getAuthUser();
+      if (res.success && res.data?.profile?.is_admin) {
+        setIsAdmin(true);
+      }
+    }
+    loadUser();
+  }, []);
+
   return (
     <footer className="mt-16 border-t border-[#E7E2D8] dark:border-[#33302B] bg-white dark:bg-[#181816] text-[#181818] dark:text-[#F5F3EF] pt-12 pb-16 sm:pb-12 text-xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
@@ -96,11 +109,13 @@ export function Footer() {
                   Preferences & Currency
                 </Link>
               </li>
-              <li>
-                <Link href="/admin" className="hover:text-[#F4A62A] transition-colors">
-                  Admin Analytics
-                </Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link href="/admin" className="hover:text-[#F4A62A] transition-colors">
+                    Admin Analytics
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/auth" className="hover:text-[#F4A62A] transition-colors">
                   Account Sign In

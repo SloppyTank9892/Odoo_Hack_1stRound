@@ -1,5 +1,5 @@
 -- =============================================================================
--- GlobeTrotter: Admin Curation Schema Migration
+-- GlobeTrotter: Admin Curation Schema Migration & Initial Seed
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
@@ -86,3 +86,36 @@ CREATE POLICY "Only admins can modify curated activities"
       SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true
     )
   );
+
+-- ---------------------------------------------------------------------------
+-- 6. Initial Seed Data
+-- ---------------------------------------------------------------------------
+
+-- Seed Curated Destinations
+INSERT INTO public.curated_destinations (name, trip_count, growth, rank)
+SELECT * FROM (VALUES
+  ('Jaipur, India', 3420, '+28%', '#1'),
+  ('Udaipur, India', 2890, '+24%', '#2'),
+  ('Tokyo, Japan', 5120, '+35%', '#3'),
+  ('Kyoto, Japan', 4890, '+19%', '#4'),
+  ('Rome, Italy', 4150, '+15%', '#5'),
+  ('Positano, Italy', 2310, '+31%', '#6'),
+  ('Bali, Indonesia', 3820, '+22%', '#7'),
+  ('Zermatt, Switzerland', 1980, '+18%', '#8')
+) AS v(name, trip_count, growth, rank)
+WHERE NOT EXISTS (SELECT 1 FROM public.curated_destinations LIMIT 1);
+
+-- Seed Curated Activities
+INSERT INTO public.curated_activities (name, city, views, category)
+SELECT * FROM (VALUES
+  ('Amber Fort & Sheesh Mahal Exploration', 'Jaipur', 3420, 'culture'),
+  ('Shibuya Crossing & Hidden Izakaya Crawl', 'Tokyo', 5120, 'food'),
+  ('Fushimi Inari 10,000 Torii Gates Dawn Hike', 'Kyoto', 4890, 'nature'),
+  ('Old Delhi Chandni Chowk Midnight Food Trail', 'Delhi', 4200, 'food'),
+  ('Udaipur City Palace Museum & Crystal Gallery', 'Udaipur', 3100, 'culture'),
+  ('Chokhi Dhani Rajasthani Village Experience', 'Jaipur', 2890, 'food'),
+  ('Private Sunset Boat Charter on Lake Pichola', 'Udaipur', 2150, 'sightseeing'),
+  ('Hawa Mahal & Old Bazaar Guided Walk', 'Jaipur', 1950, 'sightseeing')
+) AS v(name, city, views, category)
+WHERE NOT EXISTS (SELECT 1 FROM public.curated_activities LIMIT 1);
+
