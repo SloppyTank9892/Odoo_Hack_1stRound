@@ -7,11 +7,11 @@
   --bg-surface-subtle: #FAF9F5;
   --border-warm: #E7E2D8;
   --border-warm-strong: #D5CEBF;
-  
+
   --text-primary: #181818;
   --text-secondary: #6B655E;
   --text-muted: #9E978E;
-  
+
   --amber-primary: #F4A62A;
   --amber-hover: #E09115;
   --amber-tint: #FEF7EC;
@@ -38,7 +38,7 @@
   * {
     border-color: var(--border-warm);
   }
-  
+
   body {
     background-color: var(--bg-ivory);
     color: var(--text-primary);
@@ -51,13 +51,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #DDD7CB;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #C4BDAF;
 }

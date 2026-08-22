@@ -59,11 +59,10 @@ export default function MyTripsPage() {
           <button
             key={tab.id}
             onClick={() => setFilterStatus(tab.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${
-              filterStatus === tab.id
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${filterStatus === tab.id
                 ? "bg-[#181818] text-white shadow-xs"
                 : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:bg-[#FAF9F5]"
-            }`}
+              }`}
           >
             {tab.label}
           </button>

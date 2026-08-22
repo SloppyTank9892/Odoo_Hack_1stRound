@@ -78,11 +78,10 @@ export default function ExplorePage() {
               setActiveTab("cities");
               setSelectedTag("all");
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              activeTab === "cities"
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === "cities"
                 ? "bg-[#181818] text-white shadow-xs"
                 : "text-[#6B655E] hover:text-[#181818]"
-            }`}
+              }`}
           >
             <Compass className="w-4 h-4" />
             <span>Destinations ({curatedDestinations.length})</span>
@@ -92,11 +91,10 @@ export default function ExplorePage() {
               setActiveTab("activities");
               setSelectedTag("all");
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              activeTab === "activities"
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === "activities"
                 ? "bg-[#181818] text-white shadow-xs"
                 : "text-[#6B655E] hover:text-[#181818]"
-            }`}
+              }`}
           >
             <Layers className="w-4 h-4" />
             <span>Activities & Tours ({curatedActivities.length})</span>
@@ -126,11 +124,10 @@ export default function ExplorePage() {
           <button
             key={tag}
             onClick={() => setSelectedTag(tag)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all shrink-0 ${
-              selectedTag === tag
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all shrink-0 ${selectedTag === tag
                 ? "bg-[#FEF7EC] text-[#B86E00] border border-[#FCD89C] shadow-2xs"
                 : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:bg-[#FAF9F5]"
-            }`}
+              }`}
           >
             {tag === "all" ? "All Categories" : tag}
           </button>
@@ -155,16 +152,16 @@ export default function ExplorePage() {
       {/* Empty State */}
       {((activeTab === "cities" && filteredCities.length === 0) ||
         (activeTab === "activities" && filteredActivities.length === 0)) && (
-        <Card className="text-center py-16 px-6 bg-white max-w-md mx-auto my-8">
-          <Compass className="w-12 h-12 text-[#9E978E] mx-auto mb-3" />
-          <h3 className="text-base font-bold text-[#181818] mb-1 font-editorial">
-            No matches found
-          </h3>
-          <p className="text-xs text-[#6B655E]">
-            Try searching for a different keyword or resetting your category filter.
-          </p>
-        </Card>
-      )}
+          <Card className="text-center py-16 px-6 bg-white max-w-md mx-auto my-8">
+            <Compass className="w-12 h-12 text-[#9E978E] mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#181818] mb-1 font-editorial">
+              No matches found
+            </h3>
+            <p className="text-xs text-[#6B655E]">
+              Try searching for a different keyword or resetting your category filter.
+            </p>
+          </Card>
+        )}
 
       {/* Add To Trip Modal */}
       <AddToTripModal

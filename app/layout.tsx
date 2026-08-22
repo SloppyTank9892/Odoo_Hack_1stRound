@@ -17,6 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://globetrotter-travel.vercel.app"),
   title: "GlobeTrotter — Warm Modern Explorer",
   description: "A personalized, interactive travel planning workspace. Plan the journey, see the journey, share the journey.",
 };

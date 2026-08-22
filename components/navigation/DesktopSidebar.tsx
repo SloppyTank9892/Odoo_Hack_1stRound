@@ -42,8 +42,8 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
         const name = p?.first_name
           ? `${p.first_name} ${p.last_name || ""}`.trim()
           : res.data.email
-          ? res.data.email.split("@")[0]
-          : "Traveler";
+            ? res.data.email.split("@")[0]
+            : "Traveler";
         const initials = p?.first_name
           ? `${p.first_name.charAt(0)}${p.last_name?.charAt(0) || ""}`.toUpperCase()
           : (res.data.email?.charAt(0) || "T").toUpperCase();

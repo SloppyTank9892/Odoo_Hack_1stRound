@@ -319,11 +319,10 @@ export default function SettingsPage() {
               <div
                 key={item.id}
                 onClick={() => setPacing(item.id)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  pacing === item.id
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${pacing === item.id
                     ? "bg-[#FEF7EC] border-[#FCD89C] shadow-2xs"
                     : "bg-[#FAF9F5] border-[#E7E2D8] hover:border-[#D5CEBF]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between mb-1">
                   <h4 className="font-bold text-xs sm:text-sm text-[#181818]">{item.label}</h4>

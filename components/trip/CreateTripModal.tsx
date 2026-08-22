@@ -257,22 +257,20 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
                 <div
                   key={city.id}
                   onClick={() => toggleCity(city)}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${
-                    isSelected
+                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${isSelected
                       ? "bg-[#FEF7EC] border-[#FCD89C] shadow-2xs"
                       : "bg-[#FAF9F5] border-[#E7E2D8] hover:border-[#D5CEBF]"
-                  }`}
+                    }`}
                 >
                   <div className="min-w-0">
                     <p className="font-bold text-xs text-[#181818] truncate">{city.name}</p>
                     <p className="text-[11px] text-[#6B655E] truncate">{city.country}</p>
                   </div>
                   <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] ${
-                      isSelected
+                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] ${isSelected
                         ? "bg-[#F4A62A] text-[#181818] font-bold"
                         : "border border-[#DDD7CB] bg-white text-transparent"
-                    }`}
+                      }`}
                   >
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>

@@ -89,13 +89,12 @@ function SortableActivityItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`p-3.5 rounded-xl border transition-all duration-200 bg-white select-none ${
-        activity.completed
+      className={`p-3.5 rounded-xl border transition-all duration-200 bg-white select-none ${activity.completed
           ? "border-[#E7E2D8] bg-[#FAF9F5] opacity-75"
           : isDragOverlay
-          ? "border-[#F4A62A] shadow-xl ring-2 ring-[#F4A62A]/30 rotate-1"
-          : "border-[#E7E2D8] hover:border-[#D5CEBF] hover:shadow-xs"
-      }`}
+            ? "border-[#F4A62A] shadow-xl ring-2 ring-[#F4A62A]/30 rotate-1"
+            : "border-[#E7E2D8] hover:border-[#D5CEBF] hover:shadow-xs"
+        }`}
     >
       <div className="flex items-start gap-2">
         {/* Drag handle */}
@@ -127,9 +126,8 @@ function SortableActivityItem({
             </div>
 
             <h5
-              className={`font-bold text-sm text-[#181818] leading-tight ${
-                activity.completed ? "line-through text-[#9E978E]" : ""
-              }`}
+              className={`font-bold text-sm text-[#181818] leading-tight ${activity.completed ? "line-through text-[#9E978E]" : ""
+                }`}
             >
               {activity.name}
             </h5>
@@ -382,11 +380,11 @@ export function TimelineView({ trip }: TimelineViewProps) {
   // Find the dragged activity for the overlay
   const draggedActivity = activeDragId
     ? (() => {
-        const [dayStr, ...rest] = String(activeDragId).split("::");
-        const actId = rest.join("::");
-        const day = trip.days.find((d) => d.dayNumber === Number(dayStr));
-        return day?.activities.find((a) => a.id === actId) || null;
-      })()
+      const [dayStr, ...rest] = String(activeDragId).split("::");
+      const actId = rest.join("::");
+      const day = trip.days.find((d) => d.dayNumber === Number(dayStr));
+      return day?.activities.find((a) => a.id === actId) || null;
+    })()
     : null;
 
   const sensors = useSensors(
@@ -481,11 +479,10 @@ export function TimelineView({ trip }: TimelineViewProps) {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 max-w-full">
           <button
             onClick={() => setSelectedCityFilter("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              selectedCityFilter === "all"
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${selectedCityFilter === "all"
                 ? "bg-[#181818] text-white"
                 : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8]"
-            }`}
+              }`}
           >
             All Days ({trip.days.length})
           </button>
@@ -493,11 +490,10 @@ export function TimelineView({ trip }: TimelineViewProps) {
             <button
               key={stop.id}
               onClick={() => setSelectedCityFilter(stop.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
-                selectedCityFilter === stop.id
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${selectedCityFilter === stop.id
                   ? "bg-[#FEF7EC] text-[#B86E00] border border-[#FCD89C]"
                   : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8]"
-              }`}
+                }`}
             >
               <span>{stop.cityName}</span>
               <span className="text-[10px] opacity-75">({stop.daysCount}d)</span>

@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { initialTrips } from "@/data/mockTrips";
+import { curatedDestinations } from "@/data/curatedDestinations";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://globetrotter-travel.vercel.app";
@@ -21,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${siteUrl}/trips`,
+      lastModified: currentDate,
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${siteUrl}/share`,
       lastModified: currentDate,
       changeFrequency: "daily",
       priority: 0.8,
@@ -51,13 +57,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Dynamic public share and trip pages
-  const tripRoutes: MetadataRoute.Sitemap = initialTrips.map((trip) => ({
-    url: `${siteUrl}/share/${trip.id}`,
-    lastModified: new Date(trip.createdAt || currentDate),
+  // Explore curated destination paths
+  const destinationRoutes: MetadataRoute.Sitemap = curatedDestinations.map((dest) => ({
+    url: `${siteUrl}/explore?city=${encodeURIComponent(dest.name)}`,
+    lastModified: currentDate,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...tripRoutes];
+  return [...staticRoutes, ...destinationRoutes];
 }

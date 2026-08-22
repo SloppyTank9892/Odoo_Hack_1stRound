@@ -38,9 +38,8 @@ export function AppShell({
           </div>
         ) : (
           <main
-            className={`flex-1 overflow-y-auto min-h-0 px-4 sm:px-8 py-6 sm:py-8 pb-24 md:pb-8 w-full ${
-              fullWidth ? "" : "max-w-7xl mx-auto"
-            } ${className}`}
+            className={`flex-1 overflow-y-auto min-h-0 px-4 sm:px-8 py-6 sm:py-8 pb-24 md:pb-8 w-full ${fullWidth ? "" : "max-w-7xl mx-auto"
+              } ${className}`}
           >
             {children}
           </main>

@@ -35,7 +35,7 @@ export function ActiveTripCard({ trip }: ActiveTripCardProps) {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-black/60" />
-          
+
           <div className="absolute top-4 left-4 flex gap-2">
             <Badge variant="amber" size="sm">
               Current Spotlight

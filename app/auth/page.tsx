@@ -197,9 +197,8 @@ function AuthFormContent() {
                 setMode("login");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                mode === "login" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${mode === "login" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
+                }`}
             >
               Sign In
             </button>
@@ -209,9 +208,8 @@ function AuthFormContent() {
                 setMode("signup");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
-                mode === "signup" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
-              }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${mode === "signup" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
+                }`}
             >
               Create Account
             </button>
@@ -313,8 +311,8 @@ function AuthFormContent() {
                   ? "Signing in..."
                   : "Creating account..."
                 : mode === "login"
-                ? "Sign In to Workspace"
-                : "Get Started Free"}
+                  ? "Sign In to Workspace"
+                  : "Get Started Free"}
             </Button>
           </form>
 

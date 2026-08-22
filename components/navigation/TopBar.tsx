@@ -105,17 +105,15 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         <div className="flex bg-white rounded-xl border border-[#E7E2D8] p-0.5 text-xs font-bold shadow-2xs">
           <button
             onClick={() => setCurrency("₹")}
-            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
-              currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-            }`}
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
+              }`}
           >
             ₹ INR
           </button>
           <button
             onClick={() => setCurrency("$")}
-            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
-              currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-            }`}
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
+              }`}
           >
             $ USD
           </button>

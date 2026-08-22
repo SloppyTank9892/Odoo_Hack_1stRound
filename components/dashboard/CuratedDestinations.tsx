@@ -95,9 +95,8 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
                   className="absolute top-3 right-3 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-white transition-colors cursor-pointer"
                 >
                   <Heart
-                    className={`w-3.5 h-3.5 ${
-                      isSaved ? "fill-[#C84B31] text-[#C84B31]" : "stroke-white"
-                    }`}
+                    className={`w-3.5 h-3.5 ${isSaved ? "fill-[#C84B31] text-[#C84B31]" : "stroke-white"
+                      }`}
                   />
                 </button>
 
