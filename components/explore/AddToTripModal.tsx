@@ -60,12 +60,23 @@ export function AddToTripModal({
 
     if (type === "city") {
       const city = item as CityDiscovery;
-      addStopToTrip(targetTrip.id, city);
-      toast({
-        title: "City Added to Trip!",
-        description: `${city.name} is now a stop in ${targetTrip.name}.`,
-        variant: "success",
-      });
+      const isAlreadyStop = targetTrip.stops.some(
+        (s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase()
+      );
+      if (isAlreadyStop) {
+        toast({
+          title: "Already in Itinerary",
+          description: `"${city.name}" is already a stop in ${targetTrip.name}.`,
+          variant: "info",
+        });
+      } else {
+        addStopToTrip(targetTrip.id, city);
+        toast({
+          title: "City Added to Trip!",
+          description: `${city.name} is now a stop in ${targetTrip.name}.`,
+          variant: "success",
+        });
+      }
     } else {
       const act = item as ActivityDiscovery;
       const targetDay = targetTrip.days.find((d) => d.dayNumber === selectedDayNumber);

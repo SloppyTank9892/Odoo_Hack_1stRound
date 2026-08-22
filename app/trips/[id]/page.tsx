@@ -85,6 +85,16 @@ export default function TripWorkspacePage() {
     );
   }
 
+  const handleSwitchToItinerary = (dayNumber?: number) => {
+    setActiveTab("itinerary");
+    if (dayNumber) {
+      setTimeout(() => {
+        const el = document.getElementById(`day-${dayNumber}`);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 150);
+    }
+  };
+
   return (
     <AppShell noScroll fullWidth>
       <div className="flex-1 flex flex-col h-full overflow-hidden">
@@ -98,7 +108,9 @@ export default function TripWorkspacePage() {
         {/* Tab Views Container */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-8 py-6 max-w-7xl w-full mx-auto pb-24 md:pb-12 animate-in fade-in duration-200">
           {activeTab === "itinerary" && <TimelineView trip={trip} />}
-          {activeTab === "map" && <TripMap trip={trip} />}
+          {activeTab === "map" && (
+            <TripMap trip={trip} onSwitchToItinerary={handleSwitchToItinerary} />
+          )}
           {activeTab === "calendar" && <TripCalendar trip={trip} />}
           {activeTab === "budget" && <BudgetOverview trip={trip} />}
         </div>

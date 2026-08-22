@@ -18,7 +18,9 @@ interface CityCardProps {
 export function CityCard({ city, onAddToTrip }: CityCardProps) {
   const { activeTrip, currency } = useTrips();
   const isAlreadyInActiveTrip = activeTrip?.stops
-    ? activeTrip.stops.some((s) => s.id === city.id)
+    ? activeTrip.stops.some(
+        (s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase()
+      )
     : false;
 
   // Bookmark state — persisted in localStorage keyed by city id

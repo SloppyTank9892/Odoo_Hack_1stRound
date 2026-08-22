@@ -11,11 +11,16 @@ import { MapPin, Navigation, Compass, Layers, Sparkles, Clock, ArrowRight } from
 
 interface TripMapProps {
   trip: Trip;
+  onSwitchToItinerary?: (dayNumber?: number) => void;
 }
 
-export function TripMap({ trip }: TripMapProps) {
+export function TripMap({ trip, onSwitchToItinerary }: TripMapProps) {
   const { currency } = useTrips();
   const [selectedStop, setSelectedStop] = useState<DestinationStop>(trip.stops[0] || null);
+
+  const selectedStopDay = trip.days.find(
+    (d) => d.cityId === selectedStop?.id || d.cityName.toLowerCase() === selectedStop?.cityName?.toLowerCase()
+  )?.dayNumber || 1;
 
   const minLat = Math.min(...trip.stops.map((s) => s.lat));
   const maxLat = Math.max(...trip.stops.map((s) => s.lat));
@@ -239,12 +244,20 @@ export function TripMap({ trip }: TripMapProps) {
                 <span className="text-[11px] text-[#76546F] dark:text-[#B88BAF] font-bold">
                   {selectedStop.highlights.slice(0, 2).join(", ")}
                 </span>
-                <a
-                  href={`#day-1`}
-                  className="text-xs font-bold text-[#F4A62A] hover:underline flex items-center gap-1 cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onSwitchToItinerary) {
+                      onSwitchToItinerary(selectedStopDay);
+                    } else {
+                      const el = document.getElementById(`day-${selectedStopDay}`);
+                      el?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="text-xs font-bold text-[#F4A62A] hover:underline flex items-center gap-1 cursor-pointer bg-transparent border-0 p-0"
                 >
-                  View Days <ArrowRight className="w-3 h-3" />
-                </a>
+                  View in Itinerary <ArrowRight className="w-3 h-3" />
+                </button>
               </div>
             </div>
           )}

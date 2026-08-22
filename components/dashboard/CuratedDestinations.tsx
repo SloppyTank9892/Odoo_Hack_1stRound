@@ -42,7 +42,7 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
   };
 
   return (
-    <div className="mb-12">
+    <div id="featured-destinations" className="mb-12">
       <div className="flex items-center justify-between mb-5">
         <div>
           <div className="flex items-center gap-2">
@@ -65,7 +65,9 @@ export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsPro
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {curatedDestinations.slice(0, 4).map((city) => {
-          const isAlreadyInTrip = activeTrip ? activeTrip.stops.some((s) => s.id === city.id) : false;
+          const isAlreadyInTrip = activeTrip
+            ? activeTrip.stops.some((s) => s.id === city.id || s.cityName.toLowerCase() === city.name.toLowerCase())
+            : false;
           const isSaved = savedCityIds.includes(city.id);
 
           return (

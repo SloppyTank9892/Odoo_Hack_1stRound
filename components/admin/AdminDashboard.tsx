@@ -348,9 +348,10 @@ export function AdminDashboard({ stats, destinations, activities }: AdminDashboa
                   <p className="text-sm text-[#6B655E] dark:text-[#A8A196] italic mb-3">No curated destinations in database.</p>
                   <button
                     onClick={handleSeedData}
-                    className="text-xs font-bold text-[#1B8755] underline hover:no-underline"
+                    disabled={seeding}
+                    className="text-xs font-bold text-[#1B8755] underline hover:no-underline cursor-pointer disabled:opacity-50"
                   >
-                    Click to import default destinations
+                    {seeding ? "Importing defaults..." : "Click to import default destinations"}
                   </button>
                 </div>
               )}
@@ -445,9 +446,10 @@ export function AdminDashboard({ stats, destinations, activities }: AdminDashboa
                   <p className="text-sm text-[#6B655E] dark:text-[#A8A196] italic mb-3">No curated activities in database.</p>
                   <button
                     onClick={handleSeedData}
-                    className="text-xs font-bold text-[#2B6CB0] underline hover:no-underline"
+                    disabled={seeding}
+                    className="text-xs font-bold text-[#2B6CB0] underline hover:no-underline cursor-pointer disabled:opacity-50"
                   >
-                    Click to import default activities
+                    {seeding ? "Importing defaults..." : "Click to import default activities"}
                   </button>
                 </div>
               )}

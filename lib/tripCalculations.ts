@@ -169,22 +169,38 @@ export function recalculateTrip(trip: Trip): Trip {
 
   let currentDayNumber = 1;
   const newDays: DayPlan[] = [];
-  const existingActivitiesByCityAndDayIndex = new Map<string, Activity[]>();
+  const activitiesByStop = new Map<string, Map<number, Activity[]>>();
 
   // Index existing activities
   (trip.days || []).forEach((d) => {
-    const key = `${d.cityId}-${d.cityDayNumber}`;
-    existingActivitiesByCityAndDayIndex.set(key, d.activities || []);
+    if (!activitiesByStop.has(d.cityId)) {
+      activitiesByStop.set(d.cityId, new Map());
+    }
+    activitiesByStop.get(d.cityId)!.set(d.cityDayNumber, d.activities || []);
   });
 
   // Re-index days sequentially across stops
   const finalStops: DestinationStop[] = updatedStops.map((stop) => {
     const daysCount = Math.max(1, stop.daysCount || 1);
+    const stopActivitiesMap = activitiesByStop.get(stop.id);
+
+    // Collect any orphaned activities from days > daysCount (e.g. when stop days are reduced)
+    const orphanedActivities: Activity[] = [];
+    if (stopActivitiesMap) {
+      stopActivitiesMap.forEach((acts, dayIdx) => {
+        if (dayIdx > daysCount) {
+          orphanedActivities.push(...acts);
+        }
+      });
+    }
 
     for (let cityDay = 1; cityDay <= daysCount; cityDay++) {
       const dateStr = addDaysToDate(startDate, currentDayNumber - 1);
-      const key = `${stop.id}-${cityDay}`;
-      const existingActivities = existingActivitiesByCityAndDayIndex.get(key) || [];
+      const dayActs = stopActivitiesMap?.get(cityDay) || [];
+      const existingActivities =
+        cityDay === daysCount && orphanedActivities.length > 0
+          ? [...dayActs, ...orphanedActivities]
+          : dayActs;
 
       // Calculate daily activity cost sum
       const activityCostSum = existingActivities.reduce((sum, act) => sum + (Number(act.cost) || 0), 0);
