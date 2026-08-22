@@ -306,5 +306,5 @@ GlobeTrotter adheres to modern web production and SEO standards:
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for the Odoo Hackathon · Designed around the Warm Modern Explorer Philosophy</sub>
+  <sub>Built with ❤️ for the Odoo Hackathon.</sub>
 </div>
