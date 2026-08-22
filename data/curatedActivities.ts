@@ -1,6 +1,6 @@
 import { ActivityDiscovery } from "@/types/trip";
 
-export const mockActivities: ActivityDiscovery[] = [
+export const curatedActivities: ActivityDiscovery[] = [
   // Jaipur Activities
   {
     id: "act-jpr-1",

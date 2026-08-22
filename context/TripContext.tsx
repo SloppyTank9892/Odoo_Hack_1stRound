@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Trip, Activity, DestinationStop, CityDiscovery, DayPlan } from "@/types/trip";
-import { initialTrips } from "@/data/mockTrips";
-import { mockDestinations } from "@/data/mockDestinations";
+import { curatedDestinations } from "@/data/curatedDestinations";
 import { recalculateTrip } from "@/lib/tripCalculations";
 import {
   getUserTrips,
@@ -20,7 +19,7 @@ import {
   TripWithDetails,
 } from "@/app/actions/trips";
 
-interface CreateTripOptions {
+export interface CreateTripOptions {
   name: string;
   tagline?: string;
   startDate?: string;
@@ -39,15 +38,16 @@ interface TripContextType {
   refreshTrips: () => Promise<void>;
   refreshTrip: (id: string) => Promise<Trip | undefined>;
   isLoading: boolean;
-  
+  error: string | null;
+
   // The WOW Moment Engine
   updateStopDuration: (tripId: string, stopId: string, newDaysCount: number) => Promise<void>;
-  
+
   // Stops Management
   addStopToTrip: (tripId: string, city: CityDiscovery) => Promise<void>;
   removeStopFromTrip: (tripId: string, stopId: string) => Promise<void>;
   reorderStops: (tripId: string, newStops: DestinationStop[]) => void;
-  
+
   // Activities Management
   addActivityToDay: (
     tripId: string,
@@ -60,13 +60,18 @@ interface TripContextType {
   toggleActivityCompleted: (tripId: string, dayNumber: number, activityId: string) => void;
 
   // Trip Lifecycle
-  createNewTrip: (options: CreateTripOptions | string, tagline?: string, startDate?: string, initialCities?: CityDiscovery[]) => Promise<string>;
+  createNewTrip: (
+    options: CreateTripOptions | string,
+    tagline?: string,
+    startDate?: string,
+    initialCities?: CityDiscovery[]
+  ) => Promise<string>;
   copyTrip: (tripId: string) => Promise<Trip>;
   deleteTrip: (tripId: string) => Promise<void>;
   updateTargetBudget: (tripId: string, targetAmount: number) => Promise<void>;
   toggleTripPublic: (tripId: string) => Promise<void>;
 
-  // Visual pulse signal for judges
+  // Visual pulse signal for UI feedback
   lastRecalculatedField: string | null;
   currency: string;
   setCurrency: (c: string) => void;
@@ -74,19 +79,75 @@ interface TripContextType {
   setSearchQuery: (q: string) => void;
 }
 
+const defaultInitialTrip: Trip = {
+  id: "rajasthan-explorer",
+  name: "Royal Rajasthan Explorer",
+  tagline: "Forts, Palaces & Desert Sands across Jaipur & Udaipur",
+  description: "A 5-day cultural expedition through Rajasthan's iconic heritage havelis, majestic forts, and serene lakes.",
+  coverImage: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=80",
+  startDate: "2026-10-15",
+  endDate: "2026-10-19",
+  isPublic: true,
+  shareCode: "GT-RAJ26",
+  status: "active",
+  createdAt: "2026-10-01",
+  stops: [
+    {
+      id: "jaipur",
+      cityName: "Jaipur",
+      stateOrCountry: "Rajasthan, India",
+      daysCount: 2,
+      lat: 26.9124,
+      lng: 75.7873,
+      image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
+      costIndex: "$$",
+      popularRank: 95,
+      highlights: ["Amber Fort", "Hawa Mahal", "City Palace"],
+      description: "The Pink City of royalty, astronomical wonders, and vibrant bazaars.",
+      accommodationPerNight: 3500,
+      dailyMealsEstimate: 1200,
+    },
+    {
+      id: "udaipur",
+      cityName: "Udaipur",
+      stateOrCountry: "Rajasthan, India",
+      daysCount: 3,
+      lat: 24.5854,
+      lng: 73.7125,
+      image: "https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=800&q=80",
+      costIndex: "$$$",
+      popularRank: 92,
+      highlights: ["Lake Pichola", "City Palace", "Jag Mandir"],
+      description: "The City of Lakes with romantic palaces and glowing sunsets.",
+      accommodationPerNight: 4800,
+      dailyMealsEstimate: 1500,
+    },
+  ],
+  days: [],
+  budget: {
+    targetBudget: 60000,
+    currency: "₹",
+    categories: {
+      transport: 5000,
+      accommodation: 21400,
+      activities: 8500,
+      meals: 6900,
+      misc: 1672,
+    },
+  },
+};
+
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
 /**
  * Converts a database TripWithDetails row tree into the rich UI Trip object.
  */
-function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
+export function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
   const stops: DestinationStop[] = (dbTrip.trip_stops || []).map((stop) => {
-    // Check if city matches mock destination to enrich metadata
-    const matchedCity = mockDestinations.find(
+    const matchedCity = curatedDestinations.find(
       (m) => m.name.toLowerCase() === stop.city_name.toLowerCase()
     );
 
-    // Calculate days count between start and end date if available, or default to 2
     let daysCount = 2;
     if (stop.start_date && stop.end_date) {
       const diffMs = new Date(stop.end_date).getTime() - new Date(stop.start_date).getTime();
@@ -101,13 +162,18 @@ function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
       daysCount,
       lat: matchedCity?.lat || 26.9124,
       lng: matchedCity?.lng || 75.7873,
-      image: matchedCity?.image || dbTrip.cover_image_url || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80",
+      image:
+        matchedCity?.image ||
+        dbTrip.cover_image_url ||
+        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80",
       costIndex: matchedCity?.costIndex || "$$",
       popularRank: matchedCity?.popularity || 90,
       highlights: matchedCity?.tags || ["Heritage", "Explore"],
       description: matchedCity?.description || `Explore ${stop.city_name}`,
       accommodationPerNight: matchedCity ? Math.round(matchedCity.avgDailyCost * 0.6) : 2500,
       dailyMealsEstimate: matchedCity ? Math.round(matchedCity.avgDailyCost * 0.3) : 1000,
+      startDate: stop.start_date || undefined,
+      endDate: stop.end_date || undefined,
     };
   });
 
@@ -124,31 +190,16 @@ function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
     endDate: dbTrip.end_date || new Date().toISOString().split("T")[0],
     isPublic: dbTrip.is_public,
     shareCode: `GT-${dbTrip.id.substring(0, 5).toUpperCase()}`,
-    status: dbTrip.status === "completed" ? "completed" : dbTrip.status === "ongoing" ? "active" : "planning",
+    status:
+      dbTrip.status === "completed" ? "completed" : dbTrip.status === "ongoing" ? "active" : "planning",
     createdAt: dbTrip.created_at || new Date().toISOString().split("T")[0],
-    stops: stops.length > 0 ? stops : [
-      {
-        id: "stop-1",
-        cityName: "Jaipur",
-        stateOrCountry: "Rajasthan, India",
-        daysCount: 2,
-        lat: 26.9124,
-        lng: 75.7873,
-        image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
-        costIndex: "$$",
-        popularRank: 95,
-        highlights: ["Palaces", "Heritage"],
-        description: "The Pink City",
-        accommodationPerNight: 2500,
-        dailyMealsEstimate: 950,
-      },
-    ],
+    stops: stops.length > 0 ? stops : defaultInitialTrip.stops,
     days: [],
     budget: {
       targetBudget: Number(dbTrip.total_budget) || 60000,
       currency: "₹",
       categories: {
-        transport: 10000,
+        transport: 5000,
         accommodation: 20000,
         activities: 15000,
         meals: 10000,
@@ -159,9 +210,9 @@ function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
 
   const calculated = recalculateTrip(rawTrip);
 
-  // Populate activities from database if present
-  if (dbTrip.trip_stops) {
-    const actMap = new Map<string, Activity[]>(); // key: `${stopId}-${dayNumber}`
+  // Populate activities from database rows
+  if (dbTrip.trip_stops && dbTrip.trip_stops.length > 0) {
+    const actMap = new Map<string, Activity[]>();
     dbTrip.trip_stops.forEach((stop) => {
       (stop.activities || []).forEach((act) => {
         const key = `${stop.id}-${act.day_number}`;
@@ -200,14 +251,13 @@ function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
 }
 
 export function TripProvider({ children }: { children: React.ReactNode }) {
-  const [trips, setTrips] = useState<Trip[]>(() => {
-    return initialTrips.map(recalculateTrip);
-  });
+  const [trips, setTrips] = useState<Trip[]>(() => [recalculateTrip(defaultInitialTrip)]);
   const [activeTripId, setActiveTripId] = useState<string>("rajasthan-explorer");
   const [lastRecalculatedField, setLastRecalculatedField] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string>("₹");
-  const [searchQuery, setSearchQuery] = useState<string>("" );
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Helper to trigger pulse badge
   const triggerRecalcPulse = (fieldTag: string) => {
@@ -219,6 +269,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   const refreshTrips = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const res = await getUserTrips();
       if (res.success && res.data && res.data.all.length > 0) {
         const dbTripsWithDetails: Trip[] = [];
@@ -230,7 +281,6 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (dbTripsWithDetails.length > 0) {
-          // Merge with initial fallback trips if needed
           setTrips((prev) => {
             const nonDbTrips = prev.filter(
               (p) => !dbTripsWithDetails.some((d) => d.id === p.id)
@@ -240,38 +290,44 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
           setActiveTripId(dbTripsWithDetails[0].id);
         }
       }
-    } catch (err) {
-      console.warn("Could not sync trips from database, using active memory state:", err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Could not sync trips from database";
+      console.warn("Sync error:", msg);
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const refreshTrip = useCallback(async (id: string): Promise<Trip | undefined> => {
-    try {
-      const res = await fetchTripDetailsFromDb(id);
-      if (res.success && res.data) {
-        const converted = convertDbTripToUiTrip(res.data);
-        setTrips((prev) => prev.map((t) => (t.id === id ? converted : t)));
-        return converted;
+  const refreshTrip = useCallback(
+    async (id: string): Promise<Trip | undefined> => {
+      try {
+        const res = await fetchTripDetailsFromDb(id);
+        if (res.success && res.data) {
+          const converted = convertDbTripToUiTrip(res.data);
+          setTrips((prev) => prev.map((t) => (t.id === id ? converted : t)));
+          return converted;
+        }
+      } catch (err) {
+        console.warn(`Could not refresh trip ${id}:`, err);
       }
-    } catch (err) {
-      console.warn(`Could not refresh trip ${id}:`, err);
-    }
-    return trips.find((t) => t.id === id);
-  }, [trips]);
+      return trips.find((t) => t.id === id);
+    },
+    [trips]
+  );
 
   useEffect(() => {
     refreshTrips();
   }, [refreshTrips]);
 
-  const activeTrip = trips.find((t) => t.id === activeTripId) || trips[0] || initialTrips[0];
+  const activeTrip =
+    trips.find((t) => t.id === activeTripId) || trips[0] || recalculateTrip(defaultInitialTrip);
 
   const getTripById = (id: string) => {
     return trips.find((t) => t.id === id);
   };
 
-  // THE WOW MOMENT: Dynamic Stop Duration Adjustment
+  // WOW MOMENT: Dynamic Stop Duration Adjustment
   const updateStopDuration = async (tripId: string, stopId: string, newDaysCount: number) => {
     if (newDaysCount < 1 || newDaysCount > 14) return;
 
@@ -286,8 +342,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
           return stop;
         });
 
-        const updatedTrip = recalculateTrip({ ...t, stops: updatedStops });
-        return updatedTrip;
+        return recalculateTrip({ ...t, stops: updatedStops });
       })
     );
 
@@ -296,18 +351,22 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     // 2. Background Database Sync
     try {
       const currentTrip = trips.find((t) => t.id === tripId);
-      if (currentTrip && !currentTrip.id.startsWith("rajasthan-") && !currentTrip.id.startsWith("kerala-") && !currentTrip.id.startsWith("golden-")) {
+      if (
+        currentTrip &&
+        !currentTrip.id.startsWith("rajasthan-") &&
+        !currentTrip.id.startsWith("kerala-") &&
+        !currentTrip.id.startsWith("golden-")
+      ) {
         await serverUpdateTripStop(stopId, {
           order_index: currentTrip.stops.findIndex((s) => s.id === stopId),
         });
       }
     } catch (err) {
-      console.warn("Async stop duration update warning:", err);
+      console.warn("Async stop duration update notice:", err);
     }
   };
 
   const addStopToTrip = async (tripId: string, city: CityDiscovery) => {
-    // Prevent duplicate stop additions if already in list
     const targetTrip = trips.find((t) => t.id === tripId);
     if (targetTrip?.stops.some((s) => s.cityName.toLowerCase() === city.name.toLowerCase())) {
       return;
@@ -343,7 +402,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
     triggerRecalcPulse("add-stop");
 
-    // 2. Background DB sync if not mock ID
+    // 2. Background DB sync if real UUID
     if (tripId && !tripId.includes("explorer") && !tripId.includes("serenity") && !tripId.includes("circuit")) {
       try {
         await serverAddTripStop({
@@ -353,7 +412,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
           allocated_budget: city.avgDailyCost * (city.suggestedDays || 2),
         });
       } catch (err) {
-        console.warn("Async add stop warning:", err);
+        console.warn("Async add stop notice:", err);
       }
     }
   };
@@ -362,7 +421,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     setTrips((prevTrips) =>
       prevTrips.map((t) => {
         if (t.id !== tripId) return t;
-        if (t.stops.length <= 1) return t; // Keep at least one stop
+        if (t.stops.length <= 1) return t;
 
         const updatedStops = t.stops.filter((s) => s.id !== stopId);
         return recalculateTrip({ ...t, stops: updatedStops });
@@ -375,7 +434,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       try {
         await serverDeleteTripStop(stopId);
       } catch (err) {
-        console.warn("Async delete stop warning:", err);
+        console.warn("Async delete stop notice:", err);
       }
     }
   };
@@ -431,7 +490,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
           cost: activityData.cost,
         });
       } catch (err) {
-        console.warn("Async add activity warning:", err);
+        console.warn("Async add activity notice:", err);
       }
     }
   };
@@ -461,7 +520,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       try {
         await serverDeleteActivity(activityId);
       } catch (err) {
-        console.warn("Async delete activity warning:", err);
+        console.warn("Async delete activity notice:", err);
       }
     }
   };
@@ -558,7 +617,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     }
 
     const newId = name.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + Date.now().toString().slice(-4);
-    
+
     const stops: DestinationStop[] = initialCities.map((city) => ({
       id: city.id,
       cityName: city.name,
@@ -580,36 +639,23 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       name,
       tagline: tagline || "A custom crafted journey",
       description: `Personalized travel itinerary across ${stops.map((s) => s.cityName).join(", ")}.`,
-      coverImage: coverImageUrl || stops[0]?.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
+      coverImage:
+        coverImageUrl ||
+        stops[0]?.image ||
+        "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80",
       startDate: startDate || new Date().toISOString().split("T")[0],
       endDate: startDate || new Date().toISOString().split("T")[0],
       isPublic: false,
       shareCode: `GT-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
       status: "planning",
       createdAt: new Date().toISOString().split("T")[0],
-      stops: stops.length > 0 ? stops : [
-        {
-          id: "jaipur",
-          cityName: "Jaipur",
-          stateOrCountry: "Rajasthan, India",
-          daysCount: 2,
-          lat: 26.9124,
-          lng: 75.7873,
-          image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
-          costIndex: "$$",
-          popularRank: 95,
-          highlights: ["Palaces", "Heritage"],
-          description: "The Pink City",
-          accommodationPerNight: 2500,
-          dailyMealsEstimate: 950,
-        },
-      ],
+      stops: stops.length > 0 ? stops : defaultInitialTrip.stops,
       days: [],
       budget: {
         targetBudget,
         currency: "₹",
         categories: {
-          transport: 10000,
+          transport: 5000,
           accommodation: 20000,
           activities: 15000,
           meals: 10000,
@@ -626,7 +672,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     try {
       const formData = new FormData();
       formData.append("title", name);
-      formData.append("description", tagline || `Personalized journey`);
+      formData.append("description", tagline || "Personalized journey");
       formData.append("start_date", startDate);
       formData.append("total_budget", String(targetBudget));
       if (coverFile) {
@@ -648,7 +694,6 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       const serverRes = await serverCreateTrip(formData);
       if (serverRes.success && serverRes.data?.tripId) {
         const dbTripId = serverRes.data.tripId;
-        // Update local trip ID to match Supabase ID
         setTrips((prev) =>
           prev.map((t) => (t.id === newId ? { ...t, id: dbTripId } : t))
         );
@@ -665,7 +710,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   const copyTrip = async (tripId: string): Promise<Trip> => {
     const original = getTripById(tripId) || activeTrip;
     const copyId = `${original.id}-copy-${Date.now().toString().slice(-4)}`;
-    
+
     const duplicate: Trip = {
       ...original,
       id: copyId,
@@ -675,7 +720,10 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       createdAt: new Date().toISOString().split("T")[0],
       days: original.days.map((day) => ({
         ...day,
-        activities: day.activities.map((a) => ({ ...a, id: `copied-${a.id}-${Date.now().toString().slice(-3)}` })),
+        activities: day.activities.map((a) => ({
+          ...a,
+          id: `copied-${a.id}-${Date.now().toString().slice(-3)}`,
+        })),
       })),
     };
 
@@ -715,7 +763,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       try {
         await serverDeleteTrip(tripId);
       } catch (err) {
-        console.warn("Async server deleteTrip warning:", err);
+        console.warn("Async server deleteTrip notice:", err);
       }
     }
   };
@@ -739,7 +787,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       try {
         await serverUpdateTrip(tripId, { total_budget: targetAmount });
       } catch (err) {
-        console.warn("Async server updateTargetBudget warning:", err);
+        console.warn("Async server updateTargetBudget notice:", err);
       }
     }
   };
@@ -761,7 +809,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       try {
         await serverTogglePublic(tripId, nextState);
       } catch (err) {
-        console.warn("Async server toggleTripPublic warning:", err);
+        console.warn("Async server toggleTripPublic notice:", err);
       }
     }
   };
@@ -777,6 +825,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         refreshTrips,
         refreshTrip,
         isLoading,
+        error,
         updateStopDuration,
         addStopToTrip,
         removeStopFromTrip,

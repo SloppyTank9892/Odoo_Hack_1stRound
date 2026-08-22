@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { mockActivities } from "@/data/mockActivities";
+import { curatedActivities } from "@/data/curatedActivities";
 import { ActivityCategory, Activity } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
@@ -44,7 +44,7 @@ export function AddActivityDrawer({
   const [location, setLocation] = useState<string>("");
 
   // Filter activities matching city or global
-  const availableActivities = mockActivities.filter((act) => {
+  const availableActivities = curatedActivities.filter((act) => {
     const matchesCity = act.cityName.toLowerCase() === cityName.toLowerCase();
     const matchesSearch =
       act.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -53,7 +53,7 @@ export function AddActivityDrawer({
     return (matchesCity || !cityName) && matchesSearch;
   });
 
-  const handleAddFromCatalog = (act: (typeof mockActivities)[0]) => {
+  const handleAddFromCatalog = (act: (typeof curatedActivities)[0]) => {
     addActivityToDay(
       tripId,
       dayNumber,

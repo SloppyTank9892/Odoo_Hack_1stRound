@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { mockDestinations } from "@/data/mockDestinations";
+import { curatedDestinations } from "@/data/curatedDestinations";
 import { CityDiscovery } from "@/types/trip";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -56,7 +56,7 @@ export function CuratedDestinations() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {mockDestinations.slice(0, 4).map((city) => {
+        {curatedDestinations.slice(0, 4).map((city) => {
           const isAlreadyInTrip = activeTrip.stops.some((s) => s.id === city.id);
           const isSaved = savedCityIds.includes(city.id);
 

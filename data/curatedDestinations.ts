@@ -1,6 +1,6 @@
 import { CityDiscovery } from "@/types/trip";
 
-export const mockDestinations: CityDiscovery[] = [
+export const curatedDestinations: CityDiscovery[] = [
   {
     id: "jaipur",
     name: "Jaipur",

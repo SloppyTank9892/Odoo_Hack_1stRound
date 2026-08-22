@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { mockDestinations } from "@/data/mockDestinations";
+import { curatedDestinations } from "@/data/curatedDestinations";
 import { CityDiscovery } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
@@ -29,8 +29,8 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCities, setSelectedCities] = useState<CityDiscovery[]>([
-    mockDestinations[0], // Jaipur
-    mockDestinations[1], // Udaipur
+    curatedDestinations[0], // Jaipur
+    curatedDestinations[1], // Udaipur
   ]);
 
   const toggleCity = (city: CityDiscovery) => {
@@ -217,7 +217,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-2.5 max-h-60 overflow-y-auto pr-1">
-            {mockDestinations.map((city) => {
+            {curatedDestinations.map((city) => {
               const isSelected = selectedCities.some((c) => c.id === city.id);
               return (
                 <div

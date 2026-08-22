@@ -171,7 +171,7 @@ export async function getTripById(
       return { success: false, error: tripError?.message || 'Trip not found.' }
     }
 
-    // Fetch stops
+    // Fetch stops ordered by order_index
     const { data: stops, error: stopsError } = await supabase
       .from('trip_stops')
       .select('*')
@@ -202,7 +202,12 @@ export async function getTripById(
     // Combine stops with their activities
     const nestedStops: TripStopWithActivities[] = (stops || []).map((stop) => ({
       ...stop,
-      activities: activities.filter((act) => act.stop_id === stop.id),
+      activities: activities
+        .filter((act) => act.stop_id === stop.id)
+        .sort((a, b) => {
+          if (a.day_number !== b.day_number) return a.day_number - b.day_number
+          return a.order_index - b.order_index
+        }),
     }))
 
     const result: TripWithDetails = {
@@ -280,20 +285,37 @@ export async function getUserTrips(): Promise<
 
 /**
  * Adds a destination stop to a trip.
+ * Supports both `addTripStop(stopData)` and `addTripStop(tripId, stopData)`.
  */
 export async function addTripStop(
-  stopData: CreateStopInput
+  stopDataOrTripId: CreateStopInput | string,
+  maybeStopData?: Partial<CreateStopInput>
 ): Promise<ActionResponse<TripStop>> {
   try {
     const supabase = await createClient()
 
+    let payload: CreateStopInput
+    if (typeof stopDataOrTripId === 'string') {
+      payload = {
+        trip_id: stopDataOrTripId,
+        city_name: maybeStopData?.city_name || 'Destination',
+        country: maybeStopData?.country || 'Country',
+        start_date: maybeStopData?.start_date || null,
+        end_date: maybeStopData?.end_date || null,
+        allocated_budget: maybeStopData?.allocated_budget || null,
+        order_index: maybeStopData?.order_index,
+      }
+    } else {
+      payload = stopDataOrTripId
+    }
+
     // Determine highest order index if not specified
-    let orderIndex = stopData.order_index
+    let orderIndex = payload.order_index
     if (orderIndex === undefined) {
       const { data: existingStops } = await supabase
         .from('trip_stops')
         .select('order_index')
-        .eq('trip_id', stopData.trip_id)
+        .eq('trip_id', payload.trip_id)
         .order('order_index', { ascending: false })
         .limit(1)
 
@@ -303,12 +325,12 @@ export async function addTripStop(
     const { data, error } = await supabase
       .from('trip_stops')
       .insert({
-        trip_id: stopData.trip_id,
-        city_name: stopData.city_name,
-        country: stopData.country,
-        start_date: stopData.start_date || null,
-        end_date: stopData.end_date || null,
-        allocated_budget: stopData.allocated_budget || null,
+        trip_id: payload.trip_id,
+        city_name: payload.city_name,
+        country: payload.country,
+        start_date: payload.start_date || null,
+        end_date: payload.end_date || null,
+        allocated_budget: payload.allocated_budget || null,
         order_index: orderIndex,
       })
       .select('*')
@@ -318,7 +340,7 @@ export async function addTripStop(
       return { success: false, error: error?.message || 'Failed to add stop.' }
     }
 
-    revalidatePath(`/trips/${stopData.trip_id}`)
+    revalidatePath(`/trips/${payload.trip_id}`)
     revalidatePath('/trips')
     revalidatePath('/dashboard')
 
@@ -376,7 +398,7 @@ export async function updateTripStop(
 // ---------------------------------------------------------------------------
 
 /**
- * Deletes a stop and cascades its activities.
+ * Deletes a stop, cascades its activities, and re-indexes remaining stops.
  */
 export async function deleteTripStop(
   stopId: string
@@ -384,7 +406,7 @@ export async function deleteTripStop(
   try {
     const supabase = await createClient()
 
-    // Get trip_id first for cache invalidation
+    // Get trip_id first for cache invalidation & re-indexing
     const { data: stop } = await supabase
       .from('trip_stops')
       .select('trip_id')
@@ -398,6 +420,22 @@ export async function deleteTripStop(
     }
 
     if (stop?.trip_id) {
+      // Re-index remaining stops sequentially
+      const { data: remaining } = await supabase
+        .from('trip_stops')
+        .select('id')
+        .eq('trip_id', stop.trip_id)
+        .order('order_index', { ascending: true })
+
+      if (remaining && remaining.length > 0) {
+        for (let i = 0; i < remaining.length; i++) {
+          await supabase
+            .from('trip_stops')
+            .update({ order_index: i })
+            .eq('id', remaining[i].id)
+        }
+      }
+
       revalidatePath(`/trips/${stop.trip_id}`)
     }
     revalidatePath('/trips')
@@ -509,6 +547,45 @@ export async function deleteActivity(
     return { success: true, data: { activityId } }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Error deleting activity.'
+    return { success: false, error: msg }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// reorderActivities
+// ---------------------------------------------------------------------------
+
+/**
+ * Reorders activities for drag-and-drop sequencing within a stop.
+ */
+export async function reorderActivities(
+  stopId: string,
+  activityIds: string[]
+): Promise<ActionResponse<{ stopId: string }>> {
+  try {
+    const supabase = await createClient()
+
+    for (let i = 0; i < activityIds.length; i++) {
+      await supabase
+        .from('activities')
+        .update({ order_index: i })
+        .eq('id', activityIds[i])
+        .eq('stop_id', stopId)
+    }
+
+    const { data: stop } = await supabase
+      .from('trip_stops')
+      .select('trip_id')
+      .eq('id', stopId)
+      .single()
+
+    if (stop?.trip_id) {
+      revalidatePath(`/trips/${stop.trip_id}`)
+    }
+
+    return { success: true, data: { stopId } }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Error reordering activities.'
     return { success: false, error: msg }
   }
 }

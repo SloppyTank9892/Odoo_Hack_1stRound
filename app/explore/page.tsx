@@ -5,8 +5,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { CityCard } from "@/components/explore/CityCard";
 import { ActivityCard } from "@/components/explore/ActivityCard";
 import { AddToTripModal } from "@/components/explore/AddToTripModal";
-import { mockDestinations } from "@/data/mockDestinations";
-import { mockActivities } from "@/data/mockActivities";
+import { curatedDestinations } from "@/data/curatedDestinations";
+import { curatedActivities } from "@/data/curatedActivities";
 import { CityDiscovery, ActivityDiscovery } from "@/types/trip";
 import { Card } from "@/components/ui/Card";
 import { Sparkles, Search, Compass, MapPin, Layers } from "lucide-react";
@@ -24,7 +24,7 @@ export default function ExplorePage() {
   const cityTags = ["all", "Heritage", "Architecture", "Palaces", "Lakes", "Romance", "Food", "Metropolis"];
   const activityTags = ["all", "culture", "food", "sightseeing", "adventure", "nature", "shopping"];
 
-  const filteredCities = mockDestinations.filter((city) => {
+  const filteredCities = curatedDestinations.filter((city) => {
     const matchesTag = selectedTag === "all" || city.tags.includes(selectedTag);
     const matchesSearch =
       city.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -33,7 +33,7 @@ export default function ExplorePage() {
     return matchesTag && matchesSearch;
   });
 
-  const filteredActivities = mockActivities.filter((act) => {
+  const filteredActivities = curatedActivities.filter((act) => {
     const matchesTag = selectedTag === "all" || act.category.toLowerCase() === selectedTag.toLowerCase();
     const matchesSearch =
       act.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -85,7 +85,7 @@ export default function ExplorePage() {
             }`}
           >
             <Compass className="w-4 h-4" />
-            <span>Destinations ({mockDestinations.length})</span>
+            <span>Destinations ({curatedDestinations.length})</span>
           </button>
           <button
             onClick={() => {
@@ -99,7 +99,7 @@ export default function ExplorePage() {
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Activities & Tours ({mockActivities.length})</span>
+            <span>Activities & Tours ({curatedActivities.length})</span>
           </button>
         </div>
 

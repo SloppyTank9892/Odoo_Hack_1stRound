@@ -6,7 +6,8 @@ export type ActivityCategory =
   | "sightseeing"
   | "shopping"
   | "transport"
-  | "stay";
+  | "stay"
+  | "misc";
 
 export interface Activity {
   id: string;
@@ -47,6 +48,8 @@ export interface DestinationStop {
   description: string;
   accommodationPerNight: number;
   dailyMealsEstimate: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface BudgetBreakdown {
@@ -59,6 +62,29 @@ export interface BudgetBreakdown {
     meals: number;
     misc: number;
   };
+}
+
+export interface BudgetSummary {
+  targetBudget: number;
+  totalEstimatedCost: number;
+  remainingBudget: number;
+  budgetPercentage: number;
+  isOverBudget: boolean;
+  exceededAmount: number;
+  avgDailyCost: number;
+  categories: {
+    transport: number;
+    accommodation: number;
+    activities: number;
+    meals: number;
+    misc: number;
+  };
+  categoryBreakdown: Array<{
+    category: string;
+    label: string;
+    amount: number;
+    percentage: number;
+  }>;
 }
 
 export interface Trip {
