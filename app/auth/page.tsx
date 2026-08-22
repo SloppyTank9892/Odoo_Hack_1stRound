@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Globe2, Sparkles, AlertCircle, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
-import { signIn, signUp } from "@/app/actions/auth";
+import { signIn, signUp, signInAsGuest } from "@/app/actions/auth";
 
 function AuthFormContent() {
   const router = useRouter();
@@ -20,6 +20,7 @@ function AuthFormContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -90,18 +91,42 @@ function AuthFormContent() {
     }
   };
 
-  const handleGuestDemo = () => {
-    toast({
-      title: "Welcome Guest Explorer!",
-      description: "Full access granted to all GlobeTrotter workspaces.",
-      variant: "info",
-    });
-    router.push(redirectTo);
+  const handleGuestDemo = async () => {
+    setIsGuestLoading(true);
+    try {
+      const result = await signInAsGuest();
+      if (!result.success) {
+        toast({
+          title: "Guest Session Active",
+          description: "Entering workspace in guest explorer mode.",
+          variant: "info",
+        });
+      } else {
+        toast({
+          title: "Welcome Guest Explorer!",
+          description: "Full access granted to all GlobeTrotter workspaces.",
+          variant: "success",
+        });
+      }
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Entering workspace...";
+      toast({
+        title: "Welcome Guest Explorer!",
+        description: msg,
+        variant: "info",
+      });
+      router.push(redirectTo);
+      router.refresh();
+    } finally {
+      setIsGuestLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen flex bg-[#F7F6F2]">
-      {/* Left Visual Editorial Column (Hidden on mobile) */}
+      {/* Left Visual Editorial Column */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#181818] p-12 flex-col justify-between text-white">
         <img
           src="https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=80"
@@ -279,7 +304,7 @@ function AuthFormContent() {
             <Button
               size="lg"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isGuestLoading}
               className="w-full font-bold shadow-sm mt-2"
               leftIcon={isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
             >
@@ -298,10 +323,15 @@ function AuthFormContent() {
             <button
               type="button"
               onClick={handleGuestDemo}
-              className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isLoading || isGuestLoading}
+              className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Continue as Demo Guest Explorer</span>
+              {isGuestLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#B86E00]" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              <span>{isGuestLoading ? "Entering as Demo Guest..." : "Continue as Demo Guest Explorer"}</span>
             </button>
 
             <p className="text-[11px] text-[#9E978E] mt-3">

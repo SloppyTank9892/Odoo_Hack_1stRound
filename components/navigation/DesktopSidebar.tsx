@@ -59,7 +59,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
 
   const navItems = [
     { name: "Dashboard", href: "/", icon: Compass },
-    { name: "My Trips", href: "/trips", icon: MapPinned, badge: trips.length },
+    { name: "My Trips", href: "/trips", icon: MapPinned, badge: currentUser ? trips.length : undefined },
     { name: "Explore", href: "/explore", icon: Sparkles },
     { name: "Saved", href: "/explore/saved", icon: Bookmark },
     { name: "Public Story", href: `/share/${activeTrip?.id || "rajasthan-explorer"}`, icon: BookOpen },

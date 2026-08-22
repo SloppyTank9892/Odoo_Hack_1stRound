@@ -11,11 +11,13 @@ export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname } = request.nextUrl
 
+  const isGuest = request.cookies.get('gt_guest_mode')?.value === 'true'
+
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   )
 
-  if (isProtected && !user) {
+  if (isProtected && !user && !isGuest) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/auth'
     redirectUrl.searchParams.set('redirect', pathname)
