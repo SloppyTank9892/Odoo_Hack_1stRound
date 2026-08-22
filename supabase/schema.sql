@@ -1,9 +1,9 @@
 -- ==============================================================================
--- GLOBETROTTER SUPABASE POSTGRESQL SCHEMA & SEED SCRIPT
+-- GLOBETROTTER SUPABASE POSTGRESQL CATALOG SCHEMA & SEED SCRIPT
 -- Run this script in the Supabase SQL Editor (Dashboard -> SQL Editor)
 -- ==============================================================================
 
--- 1. Create Destinations Table
+-- 1. Create Destinations Catalog Table
 CREATE TABLE IF NOT EXISTS public.destinations (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS public.destinations (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. Create Activities Table
-CREATE TABLE IF NOT EXISTS public.activities (
+-- 2. Create Catalog Activities Discovery Table
+CREATE TABLE IF NOT EXISTS public.catalog_activities (
     id TEXT PRIMARY KEY,
     city_name TEXT NOT NULL,
     name TEXT NOT NULL,
@@ -40,54 +40,41 @@ CREATE TABLE IF NOT EXISTS public.activities (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3. Create Trips Table
-CREATE TABLE IF NOT EXISTS public.trips (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    tagline TEXT NOT NULL DEFAULT '',
-    description TEXT NOT NULL DEFAULT '',
-    cover_image TEXT NOT NULL,
-    start_date TEXT NOT NULL,
-    end_date TEXT NOT NULL,
-    stops JSONB NOT NULL DEFAULT '[]',
-    days JSONB NOT NULL DEFAULT '[]',
-    budget JSONB NOT NULL DEFAULT '{}',
-    is_public BOOLEAN NOT NULL DEFAULT FALSE,
-    share_code TEXT NOT NULL UNIQUE,
-    status TEXT NOT NULL DEFAULT 'planning',
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
 -- ==============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
--- Enable open read/write access for demonstration and prototype usage
 -- ==============================================================================
 
 ALTER TABLE public.destinations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.activities ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.trips ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.catalog_activities ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access
+DROP POLICY IF EXISTS "Allow public read destinations" ON public.destinations;
 CREATE POLICY "Allow public read destinations" ON public.destinations FOR SELECT USING (true);
-CREATE POLICY "Allow public read activities" ON public.activities FOR SELECT USING (true);
-CREATE POLICY "Allow public read trips" ON public.trips FOR SELECT USING (true);
 
--- Allow public / anon write & update access
+DROP POLICY IF EXISTS "Allow public read catalog_activities" ON public.catalog_activities;
+CREATE POLICY "Allow public read catalog_activities" ON public.catalog_activities FOR SELECT USING (true);
+
+-- Allow public / authenticated write & update access
+DROP POLICY IF EXISTS "Allow public insert destinations" ON public.destinations;
 CREATE POLICY "Allow public insert destinations" ON public.destinations FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public update destinations" ON public.destinations;
 CREATE POLICY "Allow public update destinations" ON public.destinations FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow public delete destinations" ON public.destinations;
 CREATE POLICY "Allow public delete destinations" ON public.destinations FOR DELETE USING (true);
 
-CREATE POLICY "Allow public insert activities" ON public.activities FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update activities" ON public.activities FOR UPDATE USING (true);
-CREATE POLICY "Allow public delete activities" ON public.activities FOR DELETE USING (true);
+DROP POLICY IF EXISTS "Allow public insert catalog_activities" ON public.catalog_activities;
+CREATE POLICY "Allow public insert catalog_activities" ON public.catalog_activities FOR INSERT WITH CHECK (true);
 
-CREATE POLICY "Allow public insert trips" ON public.trips FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update trips" ON public.trips FOR UPDATE USING (true);
-CREATE POLICY "Allow public delete trips" ON public.trips FOR DELETE USING (true);
+DROP POLICY IF EXISTS "Allow public update catalog_activities" ON public.catalog_activities;
+CREATE POLICY "Allow public update catalog_activities" ON public.catalog_activities FOR UPDATE USING (true);
+
+DROP POLICY IF EXISTS "Allow public delete catalog_activities" ON public.catalog_activities;
+CREATE POLICY "Allow public delete catalog_activities" ON public.catalog_activities FOR DELETE USING (true);
 
 -- ==============================================================================
--- INITIAL SEED DATA (Curated Destinations, Activities & Starter Trips)
+-- INITIAL SEED DATA (Curated Destinations & Activities Catalog)
 -- ==============================================================================
 
 INSERT INTO public.destinations (id, name, country, region, image, cost_index, popularity, tags, description, avg_daily_cost, suggested_days, lat, lng)
@@ -114,7 +101,7 @@ ON CONFLICT (id) DO UPDATE SET
     lat = EXCLUDED.lat,
     lng = EXCLUDED.lng;
 
-INSERT INTO public.activities (id, city_name, name, description, category, cost, duration_minutes, rating, review_count, image, tags, best_time_of_day)
+INSERT INTO public.catalog_activities (id, city_name, name, description, category, cost, duration_minutes, rating, review_count, image, tags, best_time_of_day)
 VALUES
     ('act-jpr-1', 'Jaipur', 'Amber Fort & Sheesh Mahal Exploration', 'Ascend the royal ramparts of Amer, marveling at the mirror-inlaid palace ceilings and hilltop battlements.', 'culture', 800, 180, 4.9, 3420, 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=600&q=80', ARRAY['Must See', 'Heritage', 'Photography'], 'Morning'),
     ('act-jpr-2', 'Jaipur', 'Chokhi Dhani Rajasthani Village Experience', 'Immersive traditional evening featuring Kalbelia dancers, camel rides, puppet shows, and royal thali dinner.', 'food', 1600, 240, 4.8, 2890, 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80', ARRAY['Culinary', 'Folklore', 'Evening'], 'Evening'),

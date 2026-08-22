@@ -258,7 +258,7 @@ export async function fetchActivitiesDB(): Promise<ActivityDiscovery[] | null> {
 
   try {
     const { data, error } = await client
-      .from("activities")
+      .from("catalog_activities")
       .select("*")
       .order("rating", { ascending: false });
 
@@ -286,7 +286,7 @@ export async function upsertActivityDB(activity: ActivityDiscovery): Promise<boo
   try {
     const row = mapActivityToRow(activity);
     const { error } = await client
-      .from("activities")
+      .from("catalog_activities")
       .upsert(row, { onConflict: "id" });
 
     if (error) {
@@ -305,7 +305,7 @@ export async function deleteActivityDB(id: string): Promise<boolean> {
   if (!client) return false;
 
   try {
-    const { error } = await client.from("activities").delete().eq("id", id);
+    const { error } = await client.from("catalog_activities").delete().eq("id", id);
     if (error) {
       console.error("Supabase deleteActivityDB error:", error.message);
       return false;
@@ -323,7 +323,7 @@ export async function seedActivitiesDB(activities: ActivityDiscovery[]): Promise
 
   try {
     const rows = activities.map(mapActivityToRow);
-    const { error } = await client.from("activities").upsert(rows, { onConflict: "id" });
+    const { error } = await client.from("catalog_activities").upsert(rows, { onConflict: "id" });
     if (error) {
       console.error("Supabase seedActivitiesDB error:", error.message);
       return false;
@@ -428,10 +428,9 @@ export async function seedAllToSupabase(): Promise<{ success: boolean; message: 
 
   const dOk = await seedDestinationsDB(mockDestinations);
   const aOk = await seedActivitiesDB(mockActivities);
-  const tOk = await seedTripsDB(initialTrips.map(recalculateTrip));
 
-  if (dOk && aOk && tOk) {
-    return { success: true, message: "Successfully synced and seeded all data into Supabase!" };
+  if (dOk && aOk) {
+    return { success: true, message: "Successfully synced and seeded all catalog data into Supabase!" };
   } else {
     return { success: false, message: "Partial sync completed. Check console for table error details." };
   }
