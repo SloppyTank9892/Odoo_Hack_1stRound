@@ -204,6 +204,7 @@ CREATE POLICY "Users can delete their own trips"
   USING (auth.uid() = user_id);
 
 -- ---- trip_stops ----
+DROP POLICY IF EXISTS "Stops are viewable if trip is public or user owns trip" ON public.trip_stops;
 DROP POLICY IF EXISTS "Public trip stops are viewable by all" ON public.trip_stops;
 DROP POLICY IF EXISTS "Users can view stops for their trips" ON public.trip_stops;
 CREATE POLICY "Stops are viewable if trip is public or user owns trip"
@@ -235,6 +236,7 @@ CREATE POLICY "Users can update stops for their trips"
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete their own stops" ON public.trip_stops;
 DROP POLICY IF EXISTS "Users can delete stops for their trips" ON public.trip_stops;
 CREATE POLICY "Users can delete their own stops"
   ON public.trip_stops FOR DELETE
@@ -246,6 +248,7 @@ CREATE POLICY "Users can delete their own stops"
   );
 
 -- ---- activities ----
+DROP POLICY IF EXISTS "Activities are viewable if trip is public or user owns trip" ON public.activities;
 DROP POLICY IF EXISTS "Public activities are viewable by all" ON public.activities;
 DROP POLICY IF EXISTS "Users can view activities for their trips" ON public.activities;
 CREATE POLICY "Activities are viewable if trip is public or user owns trip"
