@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/Toast";
 import { User, Sliders, Globe, Shield, Bell, Check, Save, Upload, Loader2 } from "lucide-react";
 import { updateProfile, getAuthUser } from "@/app/actions/auth";
 import { uploadMedia } from "@/app/actions/storage";
+import { PreferencesForm } from "@/components/settings/PreferencesForm";
 
 export default function SettingsPage() {
   const { currency, setCurrency } = useTrips();
@@ -131,6 +132,9 @@ export default function SettingsPage() {
             Customize your default pacing, preferred currencies, and planning preferences
           </p>
         </div>
+
+        {/* Currency & Preferences Card */}
+        <PreferencesForm />
 
         {/* Profile Card */}
         <Card className="p-6 bg-white border-[#E7E2D8]">

@@ -13,6 +13,7 @@ import {
   Globe2,
   Plus,
   ArrowRight,
+  Bookmark,
 } from "lucide-react";
 import { useTrips } from "@/context/TripContext";
 import { formatCurrency, calculateTripTotalCost } from "@/lib/tripCalculations";
@@ -49,6 +50,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
     { name: "Dashboard", href: "/", icon: Compass },
     { name: "My Trips", href: "/trips", icon: MapPinned, badge: trips.length },
     { name: "Explore", href: "/explore", icon: Sparkles },
+    { name: "Saved", href: "/explore/saved", icon: Bookmark },
     { name: "Public Story", href: `/share/${activeTrip.id}`, icon: BookOpen },
     { name: "Settings", href: "/settings", icon: SlidersHorizontal },
     { name: "Admin Analytics", href: "/admin", icon: BarChart3 },

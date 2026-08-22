@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { TripProvider } from "@/context/TripContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SplashReveal } from "@/components/layout/SplashReveal";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -31,7 +32,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col font-sans bg-[#F7F6F2] text-[#181818] selection:bg-[#FEF7EC] selection:text-[#E09115]">
         <TripProvider>
           <ToastProvider>
-            {children}
+            <SplashReveal>
+              {children}
+            </SplashReveal>
           </ToastProvider>
         </TripProvider>
       </body>

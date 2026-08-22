@@ -246,9 +246,19 @@ function AuthFormContent() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider">
+                  Password
+                </label>
+                {mode === "login" && (
+                  <Link
+                    href="/auth/reset"
+                    className="text-[10px] font-bold text-[#76546F] hover:text-[#F4A62A] transition-colors"
+                  >
+                    Forgot password?
+                  </Link>
+                )}
+              </div>
               <input
                 type="password"
                 required

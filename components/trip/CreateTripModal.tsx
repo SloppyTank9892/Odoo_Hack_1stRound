@@ -8,6 +8,15 @@ import { curatedDestinations } from "@/data/curatedDestinations";
 import { CityDiscovery } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
+
+const CURRENCY_OPTIONS = [
+  { code: "INR", symbol: "₹", label: "INR ₹" },
+  { code: "USD", symbol: "$", label: "USD $" },
+  { code: "EUR", symbol: "€", label: "EUR €" },
+  { code: "GBP", symbol: "£", label: "GBP £" },
+  { code: "JPY", symbol: "¥", label: "JPY ¥" },
+  { code: "AED", symbol: "د.إ", label: "AED د.إ" },
+];
 import { Sparkles, Calendar, MapPin, Check, Image as ImageIcon, Loader2, IndianRupee } from "lucide-react";
 
 interface CreateTripModalProps {
@@ -17,7 +26,7 @@ interface CreateTripModalProps {
 
 export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const router = useRouter();
-  const { createNewTrip, currency } = useTrips();
+  const { createNewTrip, currency, setCurrency } = useTrips();
   const { toast } = useToast();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -25,6 +34,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const [tagline, setTagline] = useState("");
   const [startDate, setStartDate] = useState("2026-10-15");
   const [targetBudget, setTargetBudget] = useState(60000);
+  const [selectedCurrency, setSelectedCurrency] = useState(currency || "₹");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +63,9 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
 
   const handleCreate = async () => {
     if (!tripName.trim()) return;
+
+    // Apply currency to global context
+    setCurrency(selectedCurrency);
 
     setIsSubmitting(true);
     try {
@@ -151,12 +164,31 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
 
             <div>
               <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-                Target Budget ({currency})
+                Currency
+              </label>
+              <select
+                value={selectedCurrency}
+                onChange={(e) => setSelectedCurrency(e.target.value)}
+                className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] appearance-none"
+              >
+                {CURRENCY_OPTIONS.map((opt) => (
+                  <option key={opt.code} value={opt.symbol}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1">
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Target Budget ({selectedCurrency})
               </label>
               <input
                 type="number"
-                min="5000"
-                step="5000"
+                min="1000"
+                step="1000"
                 value={targetBudget}
                 onChange={(e) => setTargetBudget(Number(e.target.value))}
                 className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"

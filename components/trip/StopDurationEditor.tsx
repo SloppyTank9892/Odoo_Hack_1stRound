@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { DestinationStop, Trip } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { formatCurrency } from "@/lib/tripCalculations";
-import { Minus, Plus, Sparkles, Clock, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Minus, Plus, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 
 interface StopDurationEditorProps {
@@ -13,9 +14,20 @@ interface StopDurationEditorProps {
   isJaipurDemo?: boolean;
 }
 
-export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEditorProps) {
+export function StopDurationEditor({ trip, stop }: StopDurationEditorProps) {
   const { updateStopDuration, lastRecalculatedField, currency } = useTrips();
   const isRecalculated = lastRecalculatedField === `stop-duration-${stop.id}`;
+
+  // Track which stops are "cascading" (all stops after the changed one)
+  const stopIndex = trip.stops.findIndex((s) => s.id === stop.id);
+  const isDownstream =
+    lastRecalculatedField?.startsWith("stop-duration-") &&
+    lastRecalculatedField !== `stop-duration-${stop.id}` &&
+    (() => {
+      const changedId = lastRecalculatedField?.replace("stop-duration-", "");
+      const changedIdx = trip.stops.findIndex((s) => s.id === changedId);
+      return changedIdx !== -1 && stopIndex > changedIdx;
+    })();
 
   const handleDecrease = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -35,12 +47,32 @@ export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEdi
   };
 
   return (
-    <div
-      className={`p-3 sm:p-4 rounded-2xl border transition-all duration-300 ${
+    <motion.div
+      animate={
         isRecalculated
-          ? "bg-[#FEF7EC] border-[#F4A62A] shadow-md ring-2 ring-[#F4A62A]/40"
-          : "bg-white border-[#E7E2D8]"
-      }`}
+          ? {
+              borderColor: "#F4A62A",
+              boxShadow: [
+                "0 0 0 0px rgba(244,166,42,0)",
+                "0 0 0 4px rgba(244,166,42,0.35)",
+                "0 0 0 2px rgba(244,166,42,0.15)",
+              ],
+              backgroundColor: "#FEF7EC",
+            }
+          : isDownstream
+          ? {
+              borderColor: "#F4A62A",
+              boxShadow: "0 0 0 2px rgba(244,166,42,0.18)",
+              backgroundColor: "#FFFDF7",
+            }
+          : {
+              borderColor: "#E7E2D8",
+              boxShadow: "none",
+              backgroundColor: "#FFFFFF",
+            }
+      }
+      transition={{ duration: isRecalculated ? 0.5 : 0.7, ease: "easeOut" }}
+      className="p-3 sm:p-4 rounded-2xl border"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -54,13 +86,49 @@ export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEdi
               <h4 className="font-bold text-sm text-[#181818] truncate">{stop.cityName}</h4>
               {stop.id === "jaipur" && (
                 <span className="text-[10px] bg-[#F6F0F5] text-[#76546F] font-bold px-2 py-0.5 rounded-full border border-[#DBCBD8]">
-                  Demo Focus
+                  Demo
                 </span>
               )}
+              {/* Cascade indicator badge */}
+              <AnimatePresence>
+                {isDownstream && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.7 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.7 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                    className="text-[9px] bg-[#FEF7EC] text-[#B86E00] font-black px-1.5 py-0.5 rounded-full border border-[#FCD89C]"
+                  >
+                    ↺ shifted
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
             <p className="text-[11px] text-[#6B655E] truncate">
-              {formatCurrency(stop.accommodationPerNight, currency)}/night stay · {formatCurrency(stop.dailyMealsEstimate, currency)}/day meals
+              {formatCurrency(stop.accommodationPerNight, currency)}/night ·{" "}
+              {formatCurrency(stop.dailyMealsEstimate, currency)}/day meals
             </p>
+
+            {/* Cascaded date display */}
+            {stop.startDate && stop.endDate && (
+              <motion.p
+                key={`${stop.startDate}-${stop.endDate}`}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: 0.05 }}
+                className="text-[10px] text-[#76546F] font-semibold mt-0.5"
+              >
+                {new Date(stop.startDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                →{" "}
+                {new Date(stop.endDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })}
+              </motion.p>
+            )}
           </div>
         </div>
 
@@ -75,14 +143,22 @@ export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEdi
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <span className="w-10 text-center font-bold text-xs sm:text-sm text-[#181818]">
+
+            <motion.span
+              key={stop.daysCount}
+              initial={{ scale: 1.35, color: "#F4A62A" }}
+              animate={{ scale: 1, color: "#181818" }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="w-10 text-center font-bold text-xs sm:text-sm"
+            >
               {stop.daysCount}d
-            </span>
+            </motion.span>
+
             <button
               onClick={handleIncrease}
               disabled={stop.daysCount >= 14}
               aria-label="Increase days"
-              className="w-7 h-7 rounded-lg bg-[#F4A62A] text-[#181818] flex items-center justify-center hover:bg-[#E09115] disabled:opacity-30 disabled:pointer-events-none font-bold transition-colors shadow-2xs"
+              className="w-7 h-7 rounded-lg bg-[#F4A62A] text-[#181818] flex items-center justify-center hover:bg-[#E09115] disabled:opacity-30 disabled:pointer-events-none font-bold transition-colors shadow-xs"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
@@ -90,14 +166,15 @@ export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEdi
         </div>
       </div>
 
-      {/* Demo callout badge for Jaipur */}
+      {/* Demo callout for Jaipur */}
       {stop.id === "jaipur" && (
         <div className="mt-2.5 pt-2 border-t border-[#E7E2D8] flex items-start gap-1.5 text-[11px] text-[#76546F]">
           <Sparkles className="w-3.5 h-3.5 text-[#F4A62A] shrink-0 mt-0.5" />
           <span>
             {stop.daysCount === 2 ? (
               <span>
-                <strong>Try changing to 3 days</strong>: Watch dates, timeline, Udaipur schedule, and budget synchronize instantly.
+                <strong>Try changing to 3 days</strong>: Watch dates, timeline, Udaipur schedule,
+                and budget synchronize instantly.
               </span>
             ) : (
               <span className="text-[#1B8755] font-semibold">
@@ -107,6 +184,6 @@ export function StopDurationEditor({ trip, stop, isJaipurDemo }: StopDurationEdi
           </span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
