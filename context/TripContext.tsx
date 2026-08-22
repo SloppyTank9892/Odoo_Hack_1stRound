@@ -31,8 +31,8 @@ export interface CreateTripOptions {
 
 interface TripContextType {
   trips: Trip[];
-  activeTrip: Trip;
-  activeTripId: string;
+  activeTrip: Trip | null;
+  activeTripId: string | null;
   setActiveTripId: (id: string) => void;
   getTripById: (id: string) => Trip | undefined;
   refreshTrips: () => Promise<void>;
@@ -78,64 +78,6 @@ interface TripContextType {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 }
-
-const defaultInitialTrip: Trip = {
-  id: "rajasthan-explorer",
-  name: "Royal Rajasthan Explorer",
-  tagline: "Forts, Palaces & Desert Sands across Jaipur & Udaipur",
-  description: "A 5-day cultural expedition through Rajasthan's iconic heritage havelis, majestic forts, and serene lakes.",
-  coverImage: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1600&q=80",
-  startDate: "2026-10-15",
-  endDate: "2026-10-19",
-  isPublic: true,
-  shareCode: "GT-RAJ26",
-  status: "active",
-  createdAt: "2026-10-01",
-  stops: [
-    {
-      id: "jaipur",
-      cityName: "Jaipur",
-      stateOrCountry: "Rajasthan, India",
-      daysCount: 2,
-      lat: 26.9124,
-      lng: 75.7873,
-      image: "https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80",
-      costIndex: "$$",
-      popularRank: 95,
-      highlights: ["Amber Fort", "Hawa Mahal", "City Palace"],
-      description: "The Pink City of royalty, astronomical wonders, and vibrant bazaars.",
-      accommodationPerNight: 3500,
-      dailyMealsEstimate: 1200,
-    },
-    {
-      id: "udaipur",
-      cityName: "Udaipur",
-      stateOrCountry: "Rajasthan, India",
-      daysCount: 3,
-      lat: 24.5854,
-      lng: 73.7125,
-      image: "https://images.unsplash.com/photo-1615836245337-f5b9b2303f10?auto=format&fit=crop&w=800&q=80",
-      costIndex: "$$$",
-      popularRank: 92,
-      highlights: ["Lake Pichola", "City Palace", "Jag Mandir"],
-      description: "The City of Lakes with romantic palaces and glowing sunsets.",
-      accommodationPerNight: 4800,
-      dailyMealsEstimate: 1500,
-    },
-  ],
-  days: [],
-  budget: {
-    targetBudget: 60000,
-    currency: "₹",
-    categories: {
-      transport: 5000,
-      accommodation: 21400,
-      activities: 8500,
-      meals: 6900,
-      misc: 1672,
-    },
-  },
-};
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
 
@@ -193,10 +135,10 @@ export function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
     status:
       dbTrip.status === "completed" ? "completed" : dbTrip.status === "ongoing" ? "active" : "planning",
     createdAt: dbTrip.created_at || new Date().toISOString().split("T")[0],
-    stops: stops.length > 0 ? stops : defaultInitialTrip.stops,
+    stops: stops,
     days: [],
     budget: {
-      targetBudget: Number(dbTrip.total_budget) || 60000,
+      targetBudget: Number(dbTrip.total_budget) || 50000,
       currency: "₹",
       categories: {
         transport: 5000,
@@ -251,8 +193,8 @@ export function convertDbTripToUiTrip(dbTrip: TripWithDetails): Trip {
 }
 
 export function TripProvider({ children }: { children: React.ReactNode }) {
-  const [trips, setTrips] = useState<Trip[]>(() => [recalculateTrip(defaultInitialTrip)]);
-  const [activeTripId, setActiveTripId] = useState<string>("rajasthan-explorer");
+  const [trips, setTrips] = useState<Trip[]>([]);
+  const [activeTripId, setActiveTripId] = useState<string | null>(null);
   const [lastRecalculatedField, setLastRecalculatedField] = useState<string | null>(null);
   const [currency, setCurrency] = useState<string>("₹");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -281,12 +223,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (dbTripsWithDetails.length > 0) {
-          setTrips((prev) => {
-            const nonDbTrips = prev.filter(
-              (p) => !dbTripsWithDetails.some((d) => d.id === p.id)
-            );
-            return [...dbTripsWithDetails, ...nonDbTrips];
-          });
+          setTrips(dbTripsWithDetails);
           setActiveTripId(dbTripsWithDetails[0].id);
         }
       }
@@ -321,7 +258,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
   }, [refreshTrips]);
 
   const activeTrip =
-    trips.find((t) => t.id === activeTripId) || trips[0] || recalculateTrip(defaultInitialTrip);
+    trips.find((t) => t.id === activeTripId) || trips[0] || null;
 
   const getTripById = (id: string) => {
     return trips.find((t) => t.id === id);
@@ -351,12 +288,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     // 2. Background Database Sync
     try {
       const currentTrip = trips.find((t) => t.id === tripId);
-      if (
-        currentTrip &&
-        !currentTrip.id.startsWith("rajasthan-") &&
-        !currentTrip.id.startsWith("kerala-") &&
-        !currentTrip.id.startsWith("golden-")
-      ) {
+      if (currentTrip) {
         await serverUpdateTripStop(stopId, {
           order_index: currentTrip.stops.findIndex((s) => s.id === stopId),
         });
@@ -402,8 +334,8 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
     triggerRecalcPulse("add-stop");
 
-    // 2. Background DB sync if real UUID
-    if (tripId && !tripId.includes("explorer") && !tripId.includes("serenity") && !tripId.includes("circuit")) {
+    // 2. Background DB sync
+    if (tripId && !tripId.startsWith("demo-")) {
       try {
         await serverAddTripStop({
           trip_id: tripId,
@@ -430,7 +362,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
     triggerRecalcPulse("remove-stop");
 
-    if (stopId && !stopId.startsWith("stop-") && !stopId.includes("jaipur") && !stopId.includes("jodhpur")) {
+    if (stopId && !stopId.startsWith("stop-")) {
       try {
         await serverDeleteTripStop(stopId);
       } catch (err) {
@@ -480,7 +412,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
     triggerRecalcPulse("add-activity");
 
-    if (stopId && !stopId.startsWith("stop-") && !stopId.includes("jaipur")) {
+    if (stopId && !stopId.startsWith("stop-")) {
       try {
         await serverAddActivity({
           stop_id: stopId,
@@ -516,7 +448,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
     triggerRecalcPulse("remove-activity");
 
-    if (activityId && !activityId.startsWith("act-") && !activityId.includes("amber")) {
+    if (activityId && !activityId.startsWith("act-")) {
       try {
         await serverDeleteActivity(activityId);
       } catch (err) {
@@ -599,7 +531,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     let initialCities: CityDiscovery[] = [];
     let coverFile: File | null = null;
     let coverImageUrl: string | null = null;
-    let targetBudget = 60000;
+    let targetBudget = 50000;
 
     if (typeof optionsOrName === "object") {
       name = optionsOrName.name;
@@ -608,7 +540,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       initialCities = optionsOrName.initialCities || [];
       coverFile = optionsOrName.coverFile || null;
       coverImageUrl = optionsOrName.coverImageUrl || null;
-      targetBudget = optionsOrName.targetBudget || 60000;
+      targetBudget = optionsOrName.targetBudget || 50000;
     } else {
       name = optionsOrName;
       tagline = rawTagline || "";
@@ -649,7 +581,7 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       shareCode: `GT-${Math.random().toString(36).substring(2, 7).toUpperCase()}`,
       status: "planning",
       createdAt: new Date().toISOString().split("T")[0],
-      stops: stops.length > 0 ? stops : defaultInitialTrip.stops,
+      stops: stops,
       days: [],
       budget: {
         targetBudget,
@@ -709,6 +641,9 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
 
   const copyTrip = async (tripId: string): Promise<Trip> => {
     const original = getTripById(tripId) || activeTrip;
+    if (!original) {
+      throw new Error("No trip found to copy");
+    }
     const copyId = `${original.id}-copy-${Date.now().toString().slice(-4)}`;
 
     const duplicate: Trip = {
@@ -732,21 +667,19 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     setActiveTripId(copyId);
 
     // Call copy API if valid UUID
-    if (tripId && !tripId.startsWith("rajasthan-") && !tripId.startsWith("kerala-")) {
-      try {
-        const res = await fetch(`/api/trips/${tripId}/copy`, { method: "POST" });
-        if (res.ok) {
-          const body = await res.json();
-          if (body.success && body.data?.newTripId) {
-            setTrips((prev) =>
-              prev.map((t) => (t.id === copyId ? { ...t, id: body.data.newTripId } : t))
-            );
-            setActiveTripId(body.data.newTripId);
-          }
+    try {
+      const res = await fetch(`/api/trips/${tripId}/copy`, { method: "POST" });
+      if (res.ok) {
+        const body = await res.json();
+        if (body.success && body.data?.newTripId) {
+          setTrips((prev) =>
+            prev.map((t) => (t.id === copyId ? { ...t, id: body.data.newTripId } : t))
+          );
+          setActiveTripId(body.data.newTripId);
         }
-      } catch (err) {
-        console.warn("Could not copy trip via API:", err);
       }
+    } catch (err) {
+      console.warn("Could not copy trip via API:", err);
     }
 
     return finalTrip;
@@ -757,14 +690,14 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     if (activeTripId === tripId && trips.length > 1) {
       const fallback = trips.find((t) => t.id !== tripId);
       if (fallback) setActiveTripId(fallback.id);
+    } else if (activeTripId === tripId) {
+      setActiveTripId(null);
     }
 
-    if (tripId && !tripId.startsWith("rajasthan-") && !tripId.startsWith("kerala-")) {
-      try {
-        await serverDeleteTrip(tripId);
-      } catch (err) {
-        console.warn("Async server deleteTrip notice:", err);
-      }
+    try {
+      await serverDeleteTrip(tripId);
+    } catch (err) {
+      console.warn("Async server deleteTrip notice:", err);
     }
   };
 
@@ -783,12 +716,10 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     );
     triggerRecalcPulse("budget-target");
 
-    if (tripId && !tripId.startsWith("rajasthan-") && !tripId.startsWith("kerala-")) {
-      try {
-        await serverUpdateTrip(tripId, { total_budget: targetAmount });
-      } catch (err) {
-        console.warn("Async server updateTargetBudget notice:", err);
-      }
+    try {
+      await serverUpdateTrip(tripId, { total_budget: targetAmount });
+    } catch (err) {
+      console.warn("Async server updateTargetBudget notice:", err);
     }
   };
 
@@ -805,12 +736,10 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
       })
     );
 
-    if (tripId && !tripId.startsWith("rajasthan-") && !tripId.startsWith("kerala-")) {
-      try {
-        await serverTogglePublic(tripId, nextState);
-      } catch (err) {
-        console.warn("Async server toggleTripPublic notice:", err);
-      }
+    try {
+      await serverTogglePublic(tripId, nextState);
+    } catch (err) {
+      console.warn("Async server toggleTripPublic notice:", err);
     }
   };
 

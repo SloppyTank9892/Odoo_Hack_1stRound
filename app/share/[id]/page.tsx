@@ -46,7 +46,7 @@ export default function SharedTripPage() {
     };
   }, [tripId, getTripById, refreshTrip]);
 
-  const trip = liveTrip || getTripById(tripId) || (tripId === "rajasthan-explorer" ? trips[0] : undefined);
+  const trip = liveTrip || getTripById(tripId);
 
   if (isFetching) {
     return (

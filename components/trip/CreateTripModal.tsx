@@ -8,6 +8,7 @@ import { curatedDestinations } from "@/data/curatedDestinations";
 import { CityDiscovery } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
+import { Sparkles, Calendar, MapPin, Check, Image as ImageIcon, Loader2 } from "lucide-react";
 
 const CURRENCY_OPTIONS = [
   { code: "INR", symbol: "₹", label: "INR ₹" },
@@ -17,7 +18,6 @@ const CURRENCY_OPTIONS = [
   { code: "JPY", symbol: "¥", label: "JPY ¥" },
   { code: "AED", symbol: "د.إ", label: "AED د.إ" },
 ];
-import { Sparkles, Calendar, MapPin, Check, Image as ImageIcon, Loader2, IndianRupee } from "lucide-react";
 
 interface CreateTripModalProps {
   isOpen: boolean;
@@ -33,21 +33,16 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const [tripName, setTripName] = useState("");
   const [tagline, setTagline] = useState("");
   const [startDate, setStartDate] = useState("2026-10-15");
-  const [targetBudget, setTargetBudget] = useState(60000);
+  const [targetBudget, setTargetBudget] = useState(50000);
   const [selectedCurrency, setSelectedCurrency] = useState(currency || "₹");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedCities, setSelectedCities] = useState<CityDiscovery[]>([
-    curatedDestinations[0], // Jaipur
-    curatedDestinations[1], // Udaipur
-  ]);
+  const [selectedCities, setSelectedCities] = useState<CityDiscovery[]>([]);
 
   const toggleCity = (city: CityDiscovery) => {
     if (selectedCities.some((c) => c.id === city.id)) {
-      if (selectedCities.length > 1) {
-        setSelectedCities((prev) => prev.filter((c) => c.id !== city.id));
-      }
+      setSelectedCities((prev) => prev.filter((c) => c.id !== city.id));
     } else {
       setSelectedCities((prev) => [...prev, city]);
     }
@@ -67,13 +62,16 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
     // Apply currency to global context
     setCurrency(selectedCurrency);
 
+    // Fallback to first destination if user selected none
+    const citiesToUse = selectedCities.length > 0 ? selectedCities : [curatedDestinations[0]];
+
     setIsSubmitting(true);
     try {
       const newId = await createNewTrip({
         name: tripName.trim(),
-        tagline: tagline.trim() || `Exploring ${selectedCities.map((c) => c.name).join(", ")}`,
+        tagline: tagline.trim() || `Exploring ${citiesToUse.map((c) => c.name).join(", ")}`,
         startDate,
-        initialCities: selectedCities,
+        initialCities: citiesToUse,
         coverFile,
         targetBudget,
       });
@@ -90,10 +88,11 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
       setTagline("");
       setCoverFile(null);
       setCoverPreview(null);
+      setSelectedCities([]);
       setStep(1);
 
       router.push(`/trips/${newId}`);
-    } catch (err) {
+    } catch {
       toast({
         title: "Creation Error",
         description: "Could not create trip. Please try again.",
@@ -128,7 +127,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               required
               value={tripName}
               onChange={(e) => setTripName(e.target.value)}
-              placeholder="e.g. Royal Rajasthan Grand Heritage"
+              placeholder="e.g. Italian Riviera & Amalfi Coast"
               className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm font-semibold text-[#181818] placeholder-[#9E978E] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
@@ -141,7 +140,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               type="text"
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
-              placeholder="e.g. Palaces, desert skies, and royal dining"
+              placeholder="e.g. Coastal roads, sunsets, and local culinary discoveries"
               className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] placeholder-[#9E978E] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
@@ -243,8 +242,10 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
             <span className="text-xs font-bold text-[#181818] uppercase tracking-wider">
               Select Initial Stops ({selectedCities.length} selected)
             </span>
-            <span className="text-xs text-[#76546F] font-semibold">
-              Route: {selectedCities.map((c) => c.name).join(" → ")}
+            <span className="text-xs text-[#76546F] font-semibold truncate max-w-[200px]">
+              {selectedCities.length > 0
+                ? `Route: ${selectedCities.map((c) => c.name).join(" → ")}`
+                : "Select 1 or more stops"}
             </span>
           </div>
 

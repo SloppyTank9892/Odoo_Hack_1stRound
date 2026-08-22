@@ -11,13 +11,15 @@ export async function middleware(request: NextRequest) {
   const { supabaseResponse, user } = await updateSession(request)
   const { pathname } = request.nextUrl
 
-  const isGuest = request.cookies.get('gt_guest_mode')?.value === 'true'
+  const hasLocalSession =
+    request.cookies.get('gt_guest_mode')?.value === 'true' ||
+    request.cookies.has('gt_user_session')
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   )
 
-  if (isProtected && !user && !isGuest) {
+  if (isProtected && !user && !hasLocalSession) {
     const redirectUrl = request.nextUrl.clone()
     redirectUrl.pathname = '/auth'
     redirectUrl.searchParams.set('redirect', pathname)

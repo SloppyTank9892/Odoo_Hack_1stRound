@@ -62,7 +62,7 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
     { name: "My Trips", href: "/trips", icon: MapPinned, badge: currentUser ? trips.length : undefined },
     { name: "Explore", href: "/explore", icon: Sparkles },
     { name: "Saved", href: "/explore/saved", icon: Bookmark },
-    { name: "Public Story", href: `/share/${activeTrip?.id || "rajasthan-explorer"}`, icon: BookOpen },
+    { name: "Public Story", href: activeTrip ? `/share/${activeTrip.id}` : "/trips", icon: BookOpen },
     { name: "Settings", href: "/settings", icon: SlidersHorizontal },
     { name: "Admin Analytics", href: "/admin", icon: BarChart3 },
   ];

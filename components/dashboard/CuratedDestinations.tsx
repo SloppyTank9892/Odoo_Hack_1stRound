@@ -10,20 +10,28 @@ import { Button } from "@/components/ui/Button";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
 import { formatCurrency } from "@/lib/tripCalculations";
-import { Sparkles, Plus, Check, ArrowRight, Heart } from "lucide-react";
+import { Plus, Check, ArrowRight, Heart } from "lucide-react";
 
-export function CuratedDestinations() {
+interface CuratedDestinationsProps {
+  onOpenCreateTrip?: () => void;
+}
+
+export function CuratedDestinations({ onOpenCreateTrip }: CuratedDestinationsProps = {}) {
   const { activeTrip, addStopToTrip, currency } = useTrips();
   const { toast } = useToast();
   const [savedCityIds, setSavedCityIds] = useState<string[]>([]);
 
   const handleAddStop = (city: CityDiscovery) => {
-    addStopToTrip(activeTrip.id, city);
-    toast({
-      title: `${city.name} added!`,
-      description: `Added to ${activeTrip.name} stop itinerary.`,
-      variant: "success",
-    });
+    if (activeTrip) {
+      addStopToTrip(activeTrip.id, city);
+      toast({
+        title: `${city.name} added!`,
+        description: `Added to ${activeTrip.name} stop itinerary.`,
+        variant: "success",
+      });
+    } else if (onOpenCreateTrip) {
+      onOpenCreateTrip();
+    }
   };
 
   const toggleSave = (cityId: string, e: React.MouseEvent) => {
@@ -57,7 +65,7 @@ export function CuratedDestinations() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {curatedDestinations.slice(0, 4).map((city) => {
-          const isAlreadyInTrip = activeTrip.stops.some((s) => s.id === city.id);
+          const isAlreadyInTrip = activeTrip ? activeTrip.stops.some((s) => s.id === city.id) : false;
           const isSaved = savedCityIds.includes(city.id);
 
           return (
@@ -84,7 +92,7 @@ export function CuratedDestinations() {
                 <button
                   onClick={(e) => toggleSave(city.id, e)}
                   aria-label="Save destination"
-                  className="absolute top-3 right-3 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-white transition-colors"
+                  className="absolute top-3 right-3 p-2 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md text-white transition-colors cursor-pointer"
                 >
                   <Heart
                     className={`w-3.5 h-3.5 ${
