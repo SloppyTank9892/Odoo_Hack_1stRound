@@ -1,159 +1,310 @@
-# GlobeTrotter: Personalized Travel Planning & Interactive Itinerary Platform
+<div align="center">
 
-GlobeTrotter is a personalized, interactive travel planning platform designed to streamline multi-city travel. Built with **Next.js 16 App Router**, **Supabase PostgreSQL & SSR Auth**, and the **Warm Modern Explorer** design system, GlobeTrotter provides an intuitive workspace for discovering destinations, constructing multi-city itineraries, managing dates with automatic cascade updates, calculating live budgets, and sharing travel stories.
+# 🌍 GlobeTrotter
+### Personalized Travel Planning & Interactive Itinerary Platform
 
----
+[![Next.js](https://img.shields.io/badge/Next.js-16.3.2-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Build Status](https://img.shields.io/badge/Build-Passing-1B8755?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/SloppyTank9892/Odoo_Hack_1stRound)
+[![License](https://img.shields.io/badge/License-MIT-F4A62A?style=for-the-badge)](LICENSE)
 
-## 1. Key Features & Capabilities
+<p align="center">
+  <b>Warm Modern Explorer</b> — Where editorial travel journal meets an intelligent, interactive multi-city workspace.
+</p>
 
-### 🗺️ Interactive Trip Workspace
-* **Multi-City Route Builder**: Add stops (e.g., Delhi → Agra → Jaipur → Udaipur), adjust durations, and view chronological date cascades.
-* **Drag-and-Drop Activity Reordering**: Reorder activities within days and move items between days using `@dnd-kit`.
-* **Dynamic Date Cascading**: Changing the duration of any stop automatically adjusts downstream dates, day numbers, and itinerary schedules.
-* **Stop Duration Syncer**: Interactive stepper for each city stop with visual cascade alerts.
-
-### 💰 Live Budget & Cost Breakdown Engine
-* **Real-time Financial Ledger**: Automatic recalculation of accommodation, meals, activities, transit, and contingency buffers.
-* **Multi-Currency Support**: Instant conversion between INR (₹), USD ($), EUR (€), GBP (£), and JPY (¥).
-* **Target Budget & Overrun Alerts**: Interactive target spending caps with automatic cap adjustment suggestions.
-* **Category Distribution**: Visual progress bars and day-by-day expense tables.
-
-### 🧭 Exploration & Discovery Hub
-* **Curated Destinations**: Rich destination cards with cost indicators, popular rank, and region tags.
-* **Curated Activities**: Filter by category (Culture, Food, Adventure, Nature, Transport, Sightseeing), time of day, and duration.
-* **Quick Add to Trip**: Modal selector to schedule any destination or activity directly into the active trip or any chosen day.
-* **Saved Bookmarks**: Local storage and database bookmarking for quick reference.
-
-### 📖 Social Stories & Sharing
-* **Public Editorial Itinerary Reader** (`/share/[id]`): Clean, magazine-style read-only view with interactive route maps and chapter breakdowns.
-* **One-Click Trip Duplication**: Fork and clone public itineraries directly into your personal workspace.
-* **Social Share Modal**: Instant links, WhatsApp share, and X/Twitter share.
-
-### 🔐 Supabase SSR Authentication & Profile
-* **Email & Password Authentication**: Full SSR cookie session handling via `@supabase/ssr`.
-* **Guest / Demo Mode**: Instant one-click guest login for demonstration without signup friction.
-* **User Profile & Settings**: Avatar upload, preferred travel pacing (relaxed, balanced, fast-paced), currency preferences, and home city.
+[✨ Live Features](#-key-features) • [🏛️ Architecture](#%EF%B8%8F-system-architecture) • [🗄️ Database Schema](#%EF%B8%8F-database-schema) • [🚀 Getting Started](#-getting-started) • [📋 Production Audit](#-production-readiness--compliance)
 
 ---
 
-## 2. Technical Stack
+</div>
 
-| Layer | Technology |
-| :--- | :--- |
-| **Framework** | Next.js 16 (App Router + Server Actions) |
-| **Language** | TypeScript (Strict Mode) |
-| **Styling** | Vanilla Tailwind CSS (Warm Modern Explorer Theme) |
-| **Drag & Drop** | `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` |
-| **Animations** | Framer Motion & Canvas Confetti |
-| **Icons** | Lucide React |
-| **Database & Auth** | Supabase (PostgreSQL, SSR Cookie Auth, Storage) |
-| **State Management**| React Context (`TripContext`, `ToastProvider`) + Supabase DB Sync |
+## 📌 Executive Summary
 
----
+**GlobeTrotter** is a personalized multi-city travel planning platform designed to eliminate the friction of organizing complex trips across destinations. 
 
-## 3. Design System: Warm Modern Explorer
-
-The user interface follows the **Warm Modern Explorer** aesthetic:
-* **Background Canvas**: Ivory / Parchment (`#F7F6F2`)
-* **Primary Contrast**: Deep Charcoal (`#181818`)
-* **Warm Accents**: Rich Amber (`#F4A62A` / `#B86E00`), Plum (`#76546F`), Forest Green (`#1B8755`)
-* **Card Surfaces**: Pure White (`#FFFFFF`) with warm neutral borders (`#E7E2D8`)
-* **Typography**: *Playfair Display* for editorial headings & *Plus Jakarta Sans* for clean UI hierarchy
-
----
-
-## 4. Project Structure
+Rather than competing with transaction-heavy travel booking engines (such as MakeMyTrip or Trivago), GlobeTrotter focuses entirely on the **travel planning and journey visualization experience**:
+* **Discovering** handpicked destinations, local heritage spots, and curated activities.
+* **Constructing** day-by-day multi-city routes with automatic duration and date adjustments.
+* **Synchronizing** expenses, stay benchmarks, transit costs, and daily budget limits in real time.
+* **Visualizing** itineraries simultaneously across structured lists, dynamic maps, and timelines.
+* **Sharing** publication-grade travel stories that fellow explorers can view and clone.
 
 ```text
-├── app/
-│   ├── actions/                  # Next.js Server Actions (Auth, Trips, Storage)
-│   ├── admin/                    # Admin Intelligence & KPI Dashboard
-│   ├── api/                      # Route Handlers (/api/trips/[id]/copy)
-│   ├── auth/                     # Auth login & signup pages
-│   ├── explore/                  # Discovery hub & saved bookmarks
-│   ├── privacy/                  # Privacy policy
-│   ├── settings/                 # Profile & travel preferences
-│   ├── share/                    # Public stories gallery & [id] reader
-│   ├── terms/                    # Terms of service
-│   ├── thank-you/                # Post-sync celebration page
-│   ├── trips/                    # My Trips collection & [id] Workspace
-│   ├── globals.css               # Design tokens & core styles
-│   ├── layout.tsx                # Root layout with font and providers
-│   ├── page.tsx                  # Home dashboard
-│   ├── robots.ts                 # SEO robots configuration
-│   └── sitemap.ts                # Dynamic sitemap generator
-├── components/
-│   ├── analytics/                # Analytics & telemetry
-│   ├── budget/                   # Budget overview, alerts & ledgers
-│   ├── dashboard/                # Hero banner, active trip card & upcoming grid
-│   ├── explore/                  # ActivityCard & AddToTripModal
-│   ├── itinerary/                # TimelineView, DayCard, ActivityItem, AddDrawer
-│   ├── layout/                   # AppShell, Footer
-│   ├── navigation/               # TopBar, DesktopSidebar, MobileBottomNav
-│   ├── settings/                 # PreferencesForm, AvatarUpload
-│   ├── share/                    # PublicStoryView, SocialShareModal
-│   ├── trip/                     # CreateTripModal, TripMap, TripCalendar, StopDurationEditor
-│   └── ui/                       # Button, Card, Badge, Modal, Drawer, Toast, Skeleton
-├── context/
-│   └── TripContext.tsx           # Global state engine, calculations & Supabase sync
-├── data/
-│   ├── curatedDestinations.ts    # Curated cities catalog
-│   └── curatedActivities.ts      # Curated activity catalog
-├── lib/
-│   ├── supabase/                 # Supabase client, server & middleware helpers
-│   ├── tripCalculations.ts       # Date cascade & budget recalculation engine
-│   └── utils.ts                  # Classname merging utility
-└── supabase/
-    └── migrations/               # SQL schema definitions & RLS policies
+    ┌──────────┐      ┌──────────┐      ┌─────────────┐      ┌──────────┐      ┌──────────┐
+    │ DISCOVER │ ───► │   PLAN   │ ───► │  VISUALIZE  │ ───► │  BUDGET  │ ───► │  SHARE   │
+    └──────────┘      └──────────┘      └─────────────┘      └──────────┘      └──────────┘
 ```
 
 ---
 
-## 5. Getting Started
+## ✨ Key Features
+
+### 1. 🛫 Hybrid "Flight Path + Editorial Curtain" Intro
+* **Warm Ivory Reveal:** Full-screen editorial canvas (`#F7F6F2`) with subtle topographic textures and warm ambient accents.
+* **Sequential Route Animation:** Thin Sunset Amber (`#F4A62A`) flight path drawing sequentially across 4 destination nodes: **Delhi $\rightarrow$ Agra $\rightarrow$ Jaipur $\rightarrow$ Udaipur**.
+* **Smooth Curtain Lift:** Seamless 600ms spring transition unveiling the pre-mounted workspace with zero layout pop-in. Includes 1-click **Replay Intro** and instant keyboard skip.
+
+### 2. 🗺️ Unified Interactive Trip Workspace
+* **Single Source of Truth:** Changes made to stops, durations, or activities immediately propagate across the **Itinerary**, **Interactive Map**, **Timeline Calendar**, and **Budget Engine**.
+* **Drag-and-Drop Reordering:** Easily rearrange cities and daily activity schedules with automatic date re-alignment.
+* **Multi-Currency Support:** Switch between **₹ INR** and **$ USD** on the fly.
+
+### 3. 💰 Dynamic Budget & Expense Engine
+* **Real-time Cost Allocations:** Automated category breakdowns for **Transport**, **Accommodation**, **Activities**, **Meals**, and **Miscellaneous**.
+* **Budget Limit Gauge:** Visual progress bar against trip budget targets (e.g., `₹47,200 / ₹50,000`).
+* **Over-Budget Warning Alerts:** Automatically identifies expensive destinations and flags days exceeding daily allocation thresholds.
+
+### 4. 🧭 City & Activity Discovery Atlas
+* **Visual Destination Cards:** Rich cards displaying cost index (`$$$`), popularity score, tags, and suggested visit durations.
+* **Decision-Oriented Filtering:** Filter activities by category (Culture, Food, Adventure, Nature, Sightseeing, Transport), cost, duration, and time of day.
+* **Custom Activity Builder:** Add custom experiences with reservation notes, locations, and custom budgets.
+
+### 5. 📖 Public Story & Shared Itinerary
+* **Publication-Grade Read-Only URL:** Generate public share links (`/share/[id]`) presenting the trip as an editorial visual journal.
+* **1-Click Clone:** Allows other travelers to clone the full itinerary into their personal workspace.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Framework** | **Next.js 16 (App Router & Turbopack)** | Full-stack SSR, Server Components & Route Handlers |
+| **Language** | **TypeScript 5** | Strict end-to-end type safety |
+| **Frontend** | **React 19** | Concurrent UI rendering and modern hook primitives |
+| **Styling** | **Tailwind CSS v4** | Utility-first responsive design tokens |
+| **UI Components** | **shadcn/ui & Custom Primitives** | Accessible, headless UI architecture |
+| **Icons** | **Lucide React** | Editorial, consistent vector iconography |
+| **Database** | **Supabase PostgreSQL** | Relational data model with Row-Level Security |
+| **Authentication** | **Supabase Auth** | Session handling, user profiles, and route protection |
+| **Deployment** | **Vercel** | Edge network deployment, CI/CD, and preview staging |
+
+---
+
+## 🏛️ System Architecture
+
+```text
+                                ┌─────────────────────────┐
+                                │      NEXT.JS 16 APP     │
+                                └────────────┬────────────┘
+                                             │
+                      ┌──────────────────────┼──────────────────────┐
+                      ▼                      ▼                      ▼
+               ┌──────────────┐      ┌──────────────┐      ┌──────────────┐
+               │  APP ROUTER  │      │ SERVER ACTS  │      │  API ROUTES  │
+               └──────┬───────┘      └──────┬───────┘      └──────┬───────┘
+                      │                     │                     │
+                      └─────────────────────┼─────────────────────┘
+                                             │
+                                             ▼
+                               ┌───────────────────────────┐
+                               │       TRIP ENGINE         │
+                               │   Single Source of Truth  │
+                               └─────────────┬─────────────┘
+                                             │
+                 ┌───────────────────────────┼───────────────────────────┐
+                 ▼                           ▼                           ▼
+        ┌─────────────────┐         ┌─────────────────┐         ┌─────────────────┐
+        │  ITINERARY VIEW │         │    MAP ENGINE   │         │  BUDGET ENGINE  │
+        │  Day-by-Day     │         │  Visual Lat/Lng │         │  Real-time Cost │
+        └─────────────────┘         └─────────────────┘         └─────────────────┘
+```
+
+---
+
+## 🗄️ Database Schema
+
+GlobeTrotter utilizes a relational PostgreSQL schema designed for multi-city travel workflows:
+
+```mermaid
+erDiagram
+    PROFILES ||--o{ TRIPS : creates
+    PROFILES ||--o{ SAVED_DESTINATIONS : saves
+    TRIPS ||--o{ TRIP_STOPS : contains
+    TRIPS ||--o{ EXPENSES : incurs
+    TRIPS ||--o| SHARED_TRIPS : exposes
+    CITIES ||--o{ TRIP_STOPS : references
+    CITIES ||--o{ ACTIVITIES : hosts
+    TRIP_STOPS ||--o{ ITINERARY_ITEMS : schedules
+    ACTIVITIES ||--o{ ITINERARY_ITEMS : links
+
+    PROFILES {
+        uuid id PK
+        uuid user_id FK
+        string name
+        string email
+        string language
+        string role
+        timestamp created_at
+    }
+
+    TRIPS {
+        uuid id PK
+        uuid user_id FK
+        string name
+        string tagline
+        text description
+        string cover_image
+        date start_date
+        date end_date
+        numeric budget
+        string currency
+        string status
+        boolean is_public
+        timestamp created_at
+    }
+
+    CITIES {
+        uuid id PK
+        string name
+        string country
+        string region
+        string cost_index
+        int popularity
+        float latitude
+        float longitude
+    }
+
+    TRIP_STOPS {
+        uuid id PK
+        uuid trip_id FK
+        uuid city_id FK
+        date start_date
+        date end_date
+        int order_index
+    }
+
+    ACTIVITIES {
+        uuid id PK
+        uuid city_id FK
+        string name
+        string category
+        int duration_minutes
+        numeric estimated_cost
+    }
+
+    ITINERARY_ITEMS {
+        uuid id PK
+        uuid trip_stop_id FK
+        uuid activity_id FK
+        date date
+        time start_time
+        int order_index
+        text notes
+    }
+
+    EXPENSES {
+        uuid id PK
+        uuid trip_id FK
+        string category
+        numeric amount
+        string description
+        date date
+    }
+```
+
+---
+
+## 📂 Route Architecture
+
+```text
+app/
+├── (auth)/
+│   └── auth/                     # Authentication & Guest Explorer Login
+├── admin/                        # Admin analytics & usage statistics
+├── explore/                      # Destination atlas & activity filtering
+├── privacy/                      # GDPR Privacy Policy
+├── terms/                        # Terms of Service
+├── thank-you/                    # Celebratory itinerary confirmation
+├── trips/                        # Saved trips overview
+│   └── [id]/                     # Unified trip workspace
+├── share/
+│   └── [id]/                     # Public read-only travel stories
+├── not-found.tsx                 # Custom Warm Modern Explorer 404
+├── loading.tsx                   # Shimmer skeleton suspense boundaries
+├── opengraph-image.tsx           # Dynamic Open Graph social preview generator
+├── robots.ts                     # Search engine crawler policies
+└── sitemap.ts                    # Dynamic XML sitemap generator
+```
+
+---
+
+## 📋 Production Readiness & Compliance
+
+GlobeTrotter adheres to modern web production and SEO standards:
+
+- [x] **SEO Metadata:** Dynamic per-page titles, descriptions, and keywords across all 10+ routes.
+- [x] **Open Graph & Twitter Cards:** Dynamic 1200x630px social card generated with Next.js `ImageResponse`.
+- [x] **Favicon Suite:** Scalable SVG favicon (`app/icon.svg`), PNG touch icons, and `site.webmanifest`.
+- [x] **Search Indexing:** Automated `sitemap.xml` and `robots.txt` endpoints.
+- [x] **Legal & Privacy Compliance:** Full **Privacy Policy**, **Terms of Service**, and GDPR/ePrivacy compliant **Cookie Consent Banner** with local persistence.
+- [x] **Loading & Suspense Skeletons:** Warm Ivory shimmer placeholders for zero layout shifts.
+- [x] **Form Error Handling:** Highlighting invalid states (`#C84B31`) and descriptive inline feedback.
+- [x] **Responsive Mobile Experience:** Mobile bottom navigation, touch targets, and a contextual **Sticky Mobile CTA**.
+- [x] **Real Physical Contact Footer:** Registered headquarters address in New Delhi, direct support email, phone numbers, and operating hours.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-* Node.js 18+ or 20+
-* npm or pnpm
-* Supabase project (optional for local mock fallback, required for live DB persistence)
+* **Node.js** `>= 20.0.0`
+* **npm** `>= 10.0.0` (or `pnpm` / `yarn`)
+* **Git**
 
 ### Installation
 
-1. **Clone the repository**:
+1. **Clone the repository:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/SloppyTank9892/Odoo_Hack_1stRound.git
    cd Odoo_Hack_1stRound
    ```
 
-2. **Install dependencies**:
+2. **Install dependencies:**
    ```bash
    npm install
    ```
 
-3. **Configure Environment Variables**:
-   Create a `.env.local` file in the root directory:
+3. **Configure Environment Variables (Optional):**
+   ```bash
+   cp .env.example .env.local
+   ```
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    ```
 
-4. **Run Database Migrations (Supabase)**:
-   Apply the SQL migration in `supabase/migrations/` to set up tables (`profiles`, `trips`, `trip_stops`, `itinerary_items`, `expenses`, `saved_destinations`) and Row Level Security (RLS) policies.
-
-5. **Start the Development Server**:
+4. **Start the development server:**
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) to view the workspace.
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-6. **Production Build**:
+5. **Build for Production:**
    ```bash
    npm run build
-   npm start
+   npm run start
    ```
 
 ---
 
-## 6. License
+## 🎨 Design System Tokens
 
-MIT License. Designed for the Odoo Hackathon.
+| Token | Value | Role |
+| :--- | :--- | :--- |
+| `--bg-ivory` | `#F7F6F2` | Warm Explorer canvas background |
+| `--bg-surface` | `#FFFFFF` | Crisp elevated cards and containers |
+| `--text-primary` | `#181818` | Deep charcoal typography |
+| `--amber-primary`| `#F4A62A` | Primary action accent (Sunset Amber) |
+| `--amber-hover`  | `#E09115` | Interactive hover state |
+| `--purple-muted` | `#76546F` | Secondary editorial accents & tags |
+| `--emerald-success` | `#1B8755` | Verified sync & success states |
+| `--border-warm`  | `#E7E2D8` | Warm neutral hairline borders |
+| `--font-editorial` | `Playfair Display` | Elegant serif headlines and storytelling |
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ for the Odoo Hackathon · Designed around the Warm Modern Explorer Philosophy</sub>
+</div>
