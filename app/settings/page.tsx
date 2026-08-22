@@ -4,9 +4,10 @@ import React, { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
-import { Check, Save, Upload, Loader2, User } from "lucide-react";
+import { Check, Save, Upload, Loader2 } from "lucide-react";
 import { updateProfile, getAuthUser } from "@/app/actions/auth";
 import { uploadMedia } from "@/app/actions/storage";
 import { PreferencesForm } from "@/components/settings/PreferencesForm";
@@ -130,28 +131,48 @@ export default function SettingsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818] dark:text-[#F5F3EF]">
               Traveler Profile & Preferences
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-[#6B655E]">
-            Customize your default pacing, preferred currencies, and planning preferences
+          <p className="text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196]">
+            Customize your default theme, pacing, preferred currencies, and planning preferences
           </p>
         </div>
+
+        {/* Display Theme Selector Card */}
+        <Card className="p-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#F4A62A]" />
+              <h3 className="text-base font-bold font-editorial text-[#181818] dark:text-[#F5F3EF]">
+                Workspace Theme & Appearance
+              </h3>
+            </div>
+            <span className="text-[11px] text-[#76546F] dark:text-[#B88BAF] font-semibold">
+              Instant Sync
+            </span>
+          </div>
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mb-4">
+            Select between the signature Warm Ivory daytime journal or the Warm Midnight Explorer theme.
+          </p>
+
+          <ThemeToggle variant="cards" />
+        </Card>
 
         {/* Currency & Preferences Card */}
         <PreferencesForm />
 
         {/* Profile Card */}
-        <Card className="p-6 bg-white border-[#E7E2D8]">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E7E2D8]">
+        <Card className="p-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E7E2D8] dark:border-[#33302B]">
             <div className="flex items-center gap-4">
               <div className="relative">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
                     alt={displayName}
-                    className="w-16 h-16 rounded-2xl object-cover border border-[#E7E2D8] shadow-sm"
+                    className="w-16 h-16 rounded-2xl object-cover border border-[#E7E2D8] dark:border-[#33302B] shadow-sm"
                   />
                 ) : (
                   <div className="w-16 h-16 rounded-2xl bg-[#76546F] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
@@ -166,18 +187,18 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <h3 className="text-lg font-bold text-[#181818]">
+                <h3 className="text-lg font-bold text-[#181818] dark:text-[#F5F3EF]">
                   {displayName}
                 </h3>
-                <p className="text-xs text-[#6B655E]">{email || "No email linked"}</p>
-                <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-[#B86E00] bg-[#FEF7EC] px-2 py-0.5 rounded border border-[#FCD89C]">
-                  Explorer Tier
+                <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">{email || "No email linked"}</p>
+                <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-[#B86E00] dark:text-[#F4A62A] bg-[#FEF7EC] dark:bg-[#2B2113] px-2 py-0.5 rounded border border-[#FCD89C] dark:border-[#5E431E]">
+                  Explorer Member
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] text-xs font-bold text-[#181818] transition-colors shadow-2xs">
+              <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FAF9F5] dark:bg-[#24221E] hover:bg-[#EFECE6] dark:hover:bg-[#2E2C29] border border-[#E7E2D8] dark:border-[#33302B] text-xs font-bold text-[#181818] dark:text-[#F5F3EF] transition-colors shadow-2xs">
                 <Upload className="w-3.5 h-3.5" />
                 <span>{avatarUrl ? "Change Photo" : "Upload Avatar"}</span>
                 <input
@@ -192,7 +213,7 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 First Name
               </label>
               <input
@@ -200,12 +221,12 @@ export default function SettingsPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="e.g. Alex"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Last Name
               </label>
               <input
@@ -213,12 +234,12 @@ export default function SettingsPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="e.g. Morgan"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Phone Number
               </label>
               <input
@@ -226,12 +247,12 @@ export default function SettingsPage() {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="e.g. +1 555 123 4567"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Email Address (Read-only)
               </label>
               <input
@@ -239,12 +260,12 @@ export default function SettingsPage() {
                 readOnly
                 value={email}
                 placeholder="Sign in to view email"
-                className="w-full px-3.5 py-2.5 bg-[#F0EFEA] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#6B655E] cursor-not-allowed"
+                className="w-full px-3.5 py-2.5 bg-[#F0EFEA] dark:bg-[#201F1B] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196] cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 City of Origin
               </label>
               <input
@@ -252,12 +273,12 @@ export default function SettingsPage() {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="e.g. London"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Country
               </label>
               <input
@@ -265,12 +286,12 @@ export default function SettingsPage() {
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
                 placeholder="e.g. United Kingdom"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Bio & Travel Persona
               </label>
               <textarea
@@ -278,35 +299,18 @@ export default function SettingsPage() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Share your travel style, preferred cuisines, and dream destinations..."
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-                Default Currency
-              </label>
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
-              >
-                <option value="₹">₹ INR (Indian Rupee)</option>
-                <option value="$">$ USD (US Dollar)</option>
-                <option value="€">€ EUR (Euro)</option>
-                <option value="£">£ GBP (British Pound)</option>
-                <option value="¥">¥ JPY (Japanese Yen)</option>
-              </select>
             </div>
           </div>
         </Card>
 
         {/* Travel Pacing & Style */}
-        <Card className="p-6 bg-white border-[#E7E2D8]">
-          <h3 className="text-base font-bold font-editorial text-[#181818] mb-1">
+        <Card className="p-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+          <h3 className="text-base font-bold font-editorial text-[#181818] dark:text-[#F5F3EF] mb-1">
             Travel Pacing Preference
           </h3>
-          <p className="text-xs text-[#6B655E] mb-4">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mb-4">
             Determines how many activities are suggested per day when crafting new itineraries
           </p>
 
@@ -319,16 +323,17 @@ export default function SettingsPage() {
               <div
                 key={item.id}
                 onClick={() => setPacing(item.id)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all ${pacing === item.id
-                    ? "bg-[#FEF7EC] border-[#FCD89C] shadow-2xs"
-                    : "bg-[#FAF9F5] border-[#E7E2D8] hover:border-[#D5CEBF]"
-                  }`}
+                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                  pacing === item.id
+                    ? "bg-[#FEF7EC] dark:bg-[#2B2113] border-[#FCD89C] dark:border-[#5E431E] shadow-2xs ring-1 ring-[#F4A62A]/40"
+                    : "bg-[#FAF9F5] dark:bg-[#24221E] border-[#E7E2D8] dark:border-[#33302B] hover:border-[#D5CEBF] dark:hover:border-[#48443D]"
+                }`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-bold text-xs sm:text-sm text-[#181818]">{item.label}</h4>
-                  {pacing === item.id && <Check className="w-4 h-4 text-[#B86E00]" />}
+                  <h4 className="font-bold text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF]">{item.label}</h4>
+                  {pacing === item.id && <Check className="w-4 h-4 text-[#B86E00] dark:text-[#F4A62A]" />}
                 </div>
-                <p className="text-[11px] text-[#6B655E]">{item.desc}</p>
+                <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196]">{item.desc}</p>
               </div>
             ))}
           </div>

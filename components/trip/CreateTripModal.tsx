@@ -120,7 +120,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
       {step === 1 ? (
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
               Trip Title *
             </label>
             <input
@@ -129,12 +129,12 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               value={tripName}
               onChange={(e) => setTripName(e.target.value)}
               placeholder="e.g. Italian Riviera & Amalfi Coast"
-              className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm font-semibold text-[#181818] placeholder-[#9E978E] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm font-semibold text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
               Travel Vibe / Tagline (Optional)
             </label>
             <input
@@ -142,37 +142,37 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               value={tagline}
               onChange={(e) => setTagline(e.target.value)}
               placeholder="e.g. Coastal roads, sunsets, and local culinary discoveries"
-              className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] placeholder-[#9E978E] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Departure Start Date
               </label>
               <div className="relative">
-                <Calendar className="w-4 h-4 text-[#9E978E] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Calendar className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Currency
               </label>
               <select
                 value={selectedCurrency}
                 onChange={(e) => setSelectedCurrency(e.target.value)}
-                className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] appearance-none"
+                className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] appearance-none"
               >
                 {CURRENCY_OPTIONS.map((opt) => (
-                  <option key={opt.code} value={opt.symbol}>
+                  <option key={opt.code} value={opt.symbol} className="dark:bg-[#1E1E1E]">
                     {opt.label}
                   </option>
                 ))}
@@ -182,7 +182,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
 
           <div className="grid grid-cols-1">
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
                 Target Budget ({selectedCurrency})
               </label>
               <input
@@ -191,13 +191,13 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
                 step="1000"
                 value={targetBudget}
                 onChange={(e) => setTargetBudget(Number(e.target.value))}
-                className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-4 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
               Custom Cover Photo (Optional)
             </label>
             <div className="flex items-center gap-3">
@@ -205,14 +205,14 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
                 <img
                   src={coverPreview}
                   alt="Cover preview"
-                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8]"
+                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B]"
                 />
               ) : (
-                <div className="w-14 h-14 rounded-xl bg-[#FAF9F5] border border-dashed border-[#DDD7CB] flex items-center justify-center text-[#9E978E]">
+                <div className="w-14 h-14 rounded-xl bg-[#FAF9F5] dark:bg-[#24221E] border border-dashed border-[#DDD7CB] dark:border-[#48443D] flex items-center justify-center text-[#9E978E] dark:text-[#7A746B]">
                   <ImageIcon className="w-6 h-6" />
                 </div>
               )}
-              <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] text-xs font-bold text-[#181818] transition-colors shadow-2xs">
+              <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-[#FAF9F5] dark:bg-[#24221E] hover:bg-[#EFECE6] dark:hover:bg-[#2E2C29] border border-[#E7E2D8] dark:border-[#33302B] text-xs font-bold text-[#181818] dark:text-[#F5F3EF] transition-colors shadow-2xs">
                 <span>{coverFile ? "Change Image" : "Upload Cover Image"}</span>
                 <input
                   type="file"
@@ -224,7 +224,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
             </div>
           </div>
 
-          <div className="pt-4 flex justify-end gap-3 border-t border-[#E7E2D8]">
+          <div className="pt-4 flex justify-end gap-3 border-t border-[#E7E2D8] dark:border-[#33302B]">
             <Button variant="ghost" onClick={onClose}>
               Cancel
             </Button>
@@ -240,10 +240,10 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-[#181818] uppercase tracking-wider">
+            <span className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider">
               Select Initial Stops ({selectedCities.length} selected)
             </span>
-            <span className="text-xs text-[#76546F] font-semibold truncate max-w-[200px]">
+            <span className="text-xs text-[#76546F] dark:text-[#B88BAF] font-semibold truncate max-w-[200px]">
               {selectedCities.length > 0
                 ? `Route: ${selectedCities.map((c) => c.name).join(" → ")}`
                 : "Select 1 or more stops"}
@@ -257,20 +257,22 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
                 <div
                   key={city.id}
                   onClick={() => toggleCity(city)}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${isSelected
-                      ? "bg-[#FEF7EC] border-[#FCD89C] shadow-2xs"
-                      : "bg-[#FAF9F5] border-[#E7E2D8] hover:border-[#D5CEBF]"
-                    }`}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-2 ${
+                    isSelected
+                      ? "bg-[#FEF7EC] dark:bg-[#2B2113] border-[#FCD89C] dark:border-[#5E431E] shadow-2xs"
+                      : "bg-[#FAF9F5] dark:bg-[#24221E] border-[#E7E2D8] dark:border-[#33302B] hover:border-[#D5CEBF] dark:hover:border-[#48443D]"
+                  }`}
                 >
                   <div className="min-w-0">
-                    <p className="font-bold text-xs text-[#181818] truncate">{city.name}</p>
-                    <p className="text-[11px] text-[#6B655E] truncate">{city.country}</p>
+                    <p className="font-bold text-xs text-[#181818] dark:text-[#F5F3EF] truncate">{city.name}</p>
+                    <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] truncate">{city.country}</p>
                   </div>
                   <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] ${isSelected
+                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-[10px] ${
+                      isSelected
                         ? "bg-[#F4A62A] text-[#181818] font-bold"
-                        : "border border-[#DDD7CB] bg-white text-transparent"
-                      }`}
+                        : "border border-[#DDD7CB] dark:border-[#48443D] bg-white dark:bg-[#1C1B18] text-transparent"
+                    }`}
                   >
                     <Check className="w-3 h-3 stroke-[3]" />
                   </div>
@@ -279,7 +281,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
             })}
           </div>
 
-          <div className="pt-4 flex justify-between items-center border-t border-[#E7E2D8]">
+          <div className="pt-4 flex justify-between items-center border-t border-[#E7E2D8] dark:border-[#33302B]">
             <Button variant="ghost" onClick={() => setStep(1)}>
               Back
             </Button>

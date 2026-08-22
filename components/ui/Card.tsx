@@ -25,10 +25,10 @@ export function Card({
   return (
     <div
       className={cn(
-        "bg-white rounded-2xl",
-        bordered && "border border-[#E7E2D8]",
-        hover && "transition-all duration-300 hover:shadow-[0_8px_24px_-4px_rgba(24,24,24,0.07)] hover:border-[#D5CEBF] hover:-translate-y-0.5",
-        !hover && "shadow-[0_1px_3px_0_rgba(24,24,24,0.03),0_4px_12px_-2px_rgba(24,24,24,0.04)]",
+        "bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] rounded-2xl transition-colors",
+        bordered && "border border-[#E7E2D8] dark:border-[#33302B]",
+        hover && "transition-all duration-300 hover:shadow-[0_8px_24px_-4px_rgba(24,24,24,0.07)] dark:hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.5)] hover:border-[#D5CEBF] dark:hover:border-[#48443D] hover:-translate-y-0.5",
+        !hover && "shadow-[0_1px_3px_0_rgba(24,24,24,0.03),0_4px_12px_-2px_rgba(24,24,24,0.04)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.4)]",
         paddingStyles[padding],
         className
       )}

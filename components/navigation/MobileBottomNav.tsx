@@ -23,7 +23,7 @@ export function MobileBottomNav({ onOpenCreateTrip }: MobileBottomNavProps) {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E7E2D8] px-2 py-1.5 pb-safe">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-[#181715]/95 backdrop-blur-md border-t border-[#E7E2D8] dark:border-[#33302B] px-2 py-1.5 pb-safe">
       <div className="flex items-center justify-around relative">
         {/* Left 2 items */}
         {navItems.slice(0, 2).map((item) => {
@@ -35,7 +35,9 @@ export function MobileBottomNav({ onOpenCreateTrip }: MobileBottomNavProps) {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[11px] font-medium transition-colors",
-                isActive ? "text-[#B86E00] font-bold" : "text-[#6B655E] hover:text-[#181818]"
+                isActive
+                  ? "text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                  : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
               )}
             >
               <Icon className={cn("w-5 h-5 mb-0.5", isActive ? "stroke-[2.5]" : "stroke-[1.8]")} />
@@ -48,7 +50,7 @@ export function MobileBottomNav({ onOpenCreateTrip }: MobileBottomNavProps) {
         <button
           onClick={onOpenCreateTrip}
           aria-label="Plan New Trip"
-          className="w-12 h-12 -mt-5 rounded-full bg-[#F4A62A] text-[#181818] flex items-center justify-center shadow-lg border-2 border-white active:scale-95 transition-transform"
+          className="w-12 h-12 -mt-5 rounded-full bg-[#F4A62A] text-[#181818] flex items-center justify-center shadow-lg border-2 border-white dark:border-[#181715] active:scale-95 transition-transform"
         >
           <Plus className="w-6 h-6 stroke-[2.5]" />
         </button>
@@ -63,7 +65,9 @@ export function MobileBottomNav({ onOpenCreateTrip }: MobileBottomNavProps) {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center py-1 px-3 rounded-xl text-[11px] font-medium transition-colors",
-                isActive ? "text-[#B86E00] font-bold" : "text-[#6B655E] hover:text-[#181818]"
+                isActive
+                  ? "text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                  : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
               )}
             >
               <Icon className={cn("w-5 h-5 mb-0.5", isActive ? "stroke-[2.5]" : "stroke-[1.8]")} />

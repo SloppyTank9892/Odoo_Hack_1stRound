@@ -47,22 +47,22 @@ export function ActivityCard({ activity, onAddToTrip }: ActivityCardProps) {
         </div>
       </div>
 
-      <div className="p-4 bg-white flex-1 flex flex-col justify-between">
+      <div className="p-4 bg-white dark:bg-[#1C1B18] flex-1 flex flex-col justify-between transition-colors">
         <div>
-          <p className="text-xs text-[#6B655E] line-clamp-2 mb-3">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mb-3">
             {activity.description}
           </p>
 
-          <div className="flex items-center gap-2 text-[11px] text-[#6B655E] mb-3">
-            <Clock className="w-3.5 h-3.5 text-[#9E978E]" />
+          <div className="flex items-center gap-2 text-[11px] text-[#6B655E] dark:text-[#A8A196] mb-3">
+            <Clock className="w-3.5 h-3.5 text-[#9E978E] dark:text-[#7A746B]" />
             <span>{activity.durationMinutes} mins duration</span>
           </div>
         </div>
 
-        <div className="pt-3 border-t border-[#E7E2D8] flex items-center justify-between gap-2">
+        <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between gap-2">
           <div>
-            <span className="block text-[10px] text-[#9E978E]">Est. Cost</span>
-            <span className="text-xs font-bold text-[#181818]">
+            <span className="block text-[10px] text-[#9E978E] dark:text-[#7A746B]">Est. Cost</span>
+            <span className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF]">
               {activity.cost > 0 ? formatCurrency(activity.cost, currency) : "Free"}
             </span>
           </div>

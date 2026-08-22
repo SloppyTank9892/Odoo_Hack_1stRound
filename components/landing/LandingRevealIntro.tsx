@@ -13,6 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 interface LandingRevealIntroProps {
   onComplete?: () => void;
@@ -76,14 +77,6 @@ export function LandingRevealIntro({
   onReplay,
   onSkip,
 }: LandingRevealIntroProps) {
-  // Step tracker:
-  // 0: Initial Mount & Title reveal (0 - 400ms)
-  // 1: Delhi Node (400ms - 850ms)
-  // 2: Agra Node (850ms - 1300ms)
-  // 3: Jaipur Node (1300ms - 1750ms)
-  // 4: Udaipur Node (1750ms - 2200ms)
-  // 5: Completion & Sync confirmation (2200ms - 2600ms)
-  // 6: Curtain Lift (2600ms+)
   const [animStage, setAnimStage] = useState<number>(0);
   const [isCurtainLifted, setIsCurtainLifted] = useState<boolean>(isRevealed);
 
@@ -170,12 +163,6 @@ export function LandingRevealIntro({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  // Stroke Dash calculations for the 4 flight path segments (Total viewBox path ~ 760px)
-  // Stage 0: 0% path
-  // Stage 1: ~10% (Delhi anchor)
-  // Stage 2: ~38% (Agra reached)
-  // Stage 3: ~68% (Jaipur reached)
-  // Stage 4+: 100% (Udaipur reached)
   const getStrokeDashoffset = () => {
     const totalLength = 760;
     switch (animStage) {
@@ -203,10 +190,10 @@ export function LandingRevealIntro({
       {/* ========================================================================= */}
       <div
         className={cn(
-          "fixed inset-0 z-50 flex flex-col justify-between bg-[#F7F6F2] overflow-hidden select-none",
+          "fixed inset-0 z-50 flex flex-col justify-between bg-[#F7F6F2] dark:bg-[#121210] overflow-hidden select-none transition-colors",
           "transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           isCurtainLifted
-            ? "-translate-y-full pointer-events-none shadow-[0_24px_50px_rgba(24,24,24,0.15)]"
+            ? "-translate-y-full pointer-events-none shadow-[0_24px_50px_rgba(24,24,24,0.3)]"
             : "translate-y-0 pointer-events-auto"
         )}
         style={{ willChange: "transform" }}
@@ -214,7 +201,7 @@ export function LandingRevealIntro({
       >
         {/* Subtle Warm Journal Texture Overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-40"
+          className="absolute inset-0 pointer-events-none opacity-40 dark:opacity-20"
           style={{
             backgroundImage: `radial-gradient(#E7E2D8 1px, transparent 1px)`,
             backgroundSize: "28px 28px",
@@ -223,8 +210,8 @@ export function LandingRevealIntro({
 
         {/* Ambient Warm Explorer Glow Accents */}
         <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#F4A62A]/10 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-[#76546F]/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-[#F4A62A]/8 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-[#76546F]/15 dark:bg-[#9D7395]/15 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-[#F4A62A]/10 blur-3xl pointer-events-none" />
 
         {/* --- Top Navigation / Skip Bar --- */}
         <header className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 py-6 flex items-center justify-between">
@@ -235,27 +222,31 @@ export function LandingRevealIntro({
               animStage >= 1 ? "scale-95 opacity-90" : "scale-100 opacity-100"
             )}
           >
-            <div className="w-10 h-10 rounded-2xl bg-[#F4A62A] flex items-center justify-center text-[#181818] shadow-sm border border-[#FCD89C]">
+            <div className="w-10 h-10 rounded-2xl bg-[#F4A62A] flex items-center justify-center text-[#181818] shadow-sm border border-[#FCD89C] dark:border-[#5E431E]">
               <Globe2 className="w-6 h-6 stroke-[2.2]" />
             </div>
             <div>
-              <span className="font-bold text-base tracking-tight text-[#181818] leading-none block">
+              <span className="font-bold text-base tracking-tight text-[#181818] dark:text-[#F5F3EF] leading-none block">
                 GlobeTrotter
               </span>
-              <span className="text-[11px] font-medium text-[#76546F] tracking-wider uppercase block">
+              <span className="text-[11px] font-medium text-[#76546F] dark:text-[#B88BAF] tracking-wider uppercase block">
                 Warm Explorer
               </span>
             </div>
           </div>
 
-          {/* Quick Skip Control */}
-          <button
-            onClick={onSkip}
-            className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-xs font-semibold text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:border-[#D5CEBF] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer active:scale-95"
-          >
-            <span>Skip to Workspace</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#F4A62A] group-hover:translate-x-0.5 transition-transform" />
-          </button>
+          {/* Controls Right */}
+          <div className="flex items-center gap-2.5">
+            <ThemeToggle variant="icon" />
+
+            <button
+              onClick={onSkip}
+              className="group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-[#1E1E1E]/90 hover:bg-white dark:hover:bg-[#282622] text-xs font-semibold text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF] border border-[#E7E2D8] dark:border-[#33302B] hover:border-[#D5CEBF] dark:hover:border-[#48443D] shadow-2xs hover:shadow-xs transition-all duration-200 cursor-pointer active:scale-95"
+            >
+              <span>Skip to Workspace</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#F4A62A] group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
         </header>
 
         {/* --- Main Center Editorial Stage --- */}
@@ -263,7 +254,7 @@ export function LandingRevealIntro({
           {/* Tagline Badge */}
           <div
             className={cn(
-              "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FEF7EC] border border-[#FCD89C] text-xs font-semibold text-[#B86E00] mb-5 shadow-2xs transition-all duration-500",
+              "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FEF7EC] dark:bg-[#2B2113] border border-[#FCD89C] dark:border-[#5E431E] text-xs font-semibold text-[#B86E00] dark:text-[#F4A62A] mb-5 shadow-2xs transition-all duration-500",
               animStage >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             )}
           >
@@ -274,7 +265,7 @@ export function LandingRevealIntro({
           {/* Large Serif Headline */}
           <h1
             className={cn(
-              "text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-editorial text-[#181818] leading-[1.15] mb-3 max-w-3xl mx-auto transition-all duration-500",
+              "text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-editorial text-[#181818] dark:text-[#F5F3EF] leading-[1.15] mb-3 max-w-3xl mx-auto transition-all duration-500",
               animStage >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
             )}
           >
@@ -284,7 +275,7 @@ export function LandingRevealIntro({
           {/* Supporting Text */}
           <p
             className={cn(
-              "text-sm sm:text-base md:text-lg text-[#6B655E] font-medium max-w-xl mx-auto mb-8 sm:mb-12 transition-all duration-500 delay-75",
+              "text-sm sm:text-base md:text-lg text-[#6B655E] dark:text-[#A8A196] font-medium max-w-xl mx-auto mb-8 sm:mb-12 transition-all duration-500 delay-75",
               animStage >= 0 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
             )}
           >
@@ -292,21 +283,21 @@ export function LandingRevealIntro({
           </p>
 
           {/* --- FLIGHT PATH & DESTINATION NODES CONTAINER --- */}
-          <div className="w-full max-w-4xl bg-white/90 backdrop-blur-md rounded-3xl border border-[#E7E2D8] p-5 sm:p-8 shadow-[0_4px_24px_rgba(24,24,24,0.04)] relative">
+          <div className="w-full max-w-4xl bg-white/90 dark:bg-[#1C1B18]/95 backdrop-blur-md rounded-3xl border border-[#E7E2D8] dark:border-[#33302B] p-5 sm:p-8 shadow-[0_4px_24px_rgba(24,24,24,0.04)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] relative transition-colors">
             {/* Header Mini Label inside the Path Card */}
-            <div className="flex items-center justify-between border-b border-[#E7E2D8]/80 pb-3 mb-6 text-xs">
+            <div className="flex items-center justify-between border-b border-[#E7E2D8]/80 dark:border-[#33302B] pb-3 mb-6 text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#F4A62A] animate-pulse" />
-                <span className="font-bold text-[#181818] uppercase tracking-wider text-[11px]">
+                <span className="font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider text-[11px]">
                   Featured Itinerary Route · Rajasthan Circuit
                 </span>
               </div>
-              <div className="flex items-center gap-3 text-[11px] text-[#76546F] font-semibold">
+              <div className="flex items-center gap-3 text-[11px] text-[#76546F] dark:text-[#B88BAF] font-semibold">
                 <span className="inline-flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-[#9E978E]" /> 8 Days
+                  <Calendar className="w-3 h-3 text-[#9E978E] dark:text-[#7A746B]" /> 8 Days
                 </span>
                 <span className="inline-flex items-center gap-1">
-                  <Wallet className="w-3 h-3 text-[#9E978E]" /> ₹47,200 Est.
+                  <Wallet className="w-3 h-3 text-[#9E978E] dark:text-[#7A746B]" /> ₹47,200 Est.
                 </span>
               </div>
             </div>
@@ -336,7 +327,8 @@ export function LandingRevealIntro({
                 <path
                   d="M 96 88 C 180 32, 220 40, 304 51 C 388 62, 430 115, 512 108 C 594 101, 625 54, 704 64"
                   fill="none"
-                  stroke="#E7E2D8"
+                  stroke="currentColor"
+                  className="text-[#E7E2D8] dark:text-[#33302B]"
                   strokeWidth="2.5"
                   strokeDasharray="4 4"
                 />
@@ -381,15 +373,15 @@ export function LandingRevealIntro({
                         className={cn(
                           "w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all duration-400 border-2 shadow-xs",
                           isActive
-                            ? "bg-white border-[#F4A62A] scale-100"
-                            : "bg-[#FAF9F5] border-[#D5CEBF] scale-90 opacity-60"
+                            ? "bg-white dark:bg-[#1E1E1E] border-[#F4A62A] scale-100"
+                            : "bg-[#FAF9F5] dark:bg-[#201F1B] border-[#D5CEBF] dark:border-[#48443D] scale-90 opacity-60"
                         )}
                       >
                         {/* Inner Core */}
                         <div
                           className={cn(
                             "w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full transition-all duration-300",
-                            isActive ? "bg-[#F4A62A] shadow-xs" : "bg-[#D5CEBF]"
+                            isActive ? "bg-[#F4A62A] shadow-xs" : "bg-[#D5CEBF] dark:bg-[#48443D]"
                           )}
                         />
                       </div>
@@ -408,11 +400,11 @@ export function LandingRevealIntro({
                         <span className="text-[10px] font-bold text-[#F4A62A]">
                           {node.stopNumber}
                         </span>
-                        <span className="text-xs sm:text-sm font-bold text-[#181818] font-editorial">
+                        <span className="text-xs sm:text-sm font-bold text-[#181818] dark:text-[#F5F3EF] font-editorial">
                           {node.name}
                         </span>
                       </div>
-                      <span className="text-[10px] text-[#76546F] font-medium hidden sm:block">
+                      <span className="text-[10px] text-[#76546F] dark:text-[#B88BAF] font-medium hidden sm:block">
                         {node.subtitle}
                       </span>
                     </div>
@@ -422,7 +414,7 @@ export function LandingRevealIntro({
             </div>
 
             {/* Bottom Status / Completion Indicator */}
-            <div className="mt-4 pt-3 border-t border-[#E7E2D8] flex items-center justify-between text-xs text-[#6B655E]">
+            <div className="mt-4 pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between text-xs text-[#6B655E] dark:text-[#A8A196]">
               <div className="flex items-center gap-2">
                 <Compass
                   className={cn(
@@ -438,7 +430,7 @@ export function LandingRevealIntro({
               </div>
 
               {animStage >= 4 && (
-                <div className="flex items-center gap-1.5 text-[#1B8755] font-semibold animate-fade-in">
+                <div className="flex items-center gap-1.5 text-[#1B8755] dark:text-[#34D399] font-semibold">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Ready</span>
                 </div>
@@ -448,28 +440,28 @@ export function LandingRevealIntro({
         </main>
 
         {/* --- Footer Status / Hint --- */}
-        <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 py-5 flex items-center justify-between text-xs text-[#9E978E] border-t border-[#E7E2D8]/60">
+        <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 py-5 flex items-center justify-between text-xs text-[#9E978E] dark:text-[#7A746B] border-t border-[#E7E2D8]/60 dark:border-[#33302B]">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1B8755]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1B8755] dark:bg-[#34D399]" />
             <span>Interactive Travel Planning Workspace</span>
           </div>
           <div className="text-[11px] font-medium">
-            Press <kbd className="px-1.5 py-0.5 rounded bg-white border border-[#E7E2D8] text-[#181818] font-mono text-[10px]">Esc</kbd> or click anywhere to reveal
+            Press <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-[#1E1E1E] border border-[#E7E2D8] dark:border-[#33302B] text-[#181818] dark:text-[#F5F3EF] font-mono text-[10px]">Esc</kbd> or click anywhere to reveal
           </div>
         </footer>
       </div>
 
       {/* ========================================================================= */}
-      {/* 2. REPLAY INTRO FLOATING TRIGGER (Subtle, accessible once revealed) */}
+      {/* 2. REPLAY INTRO FLOATING TRIGGER (Accessible, positioned without collisions) */}
       {/* ========================================================================= */}
       {isCurtainLifted && (
         <button
           onClick={onReplay}
           title="Replay Flight Path Intro"
-          className="fixed bottom-20 md:bottom-6 right-6 z-40 flex items-center gap-2 bg-white hover:bg-[#FEF7EC] text-[#181818] border border-[#E7E2D8] hover:border-[#FCD89C] px-3.5 py-2 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 group active:scale-95 cursor-pointer text-xs font-semibold"
+          className="fixed bottom-20 md:bottom-6 left-6 md:left-72 z-30 flex items-center gap-2 bg-white/95 dark:bg-[#1E1E1E]/95 backdrop-blur-md hover:bg-[#FEF7EC] dark:hover:bg-[#2B2113] text-[#181818] dark:text-[#F5F3EF] border border-[#E7E2D8] dark:border-[#33302B] hover:border-[#FCD89C] dark:hover:border-[#5E431E] px-3.5 py-2 rounded-2xl shadow-md hover:shadow-lg transition-all duration-200 group active:scale-95 cursor-pointer text-xs font-semibold"
         >
           <RotateCcw className="w-3.5 h-3.5 text-[#F4A62A] group-hover:-rotate-90 transition-transform duration-300" />
-          <span className="text-[#6B655E] group-hover:text-[#181818]">Replay Intro</span>
+          <span className="text-[#6B655E] dark:text-[#A8A196] group-hover:text-[#181818] dark:group-hover:text-[#F5F3EF]">Replay Intro</span>
         </button>
       )}
     </>

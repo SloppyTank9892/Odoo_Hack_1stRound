@@ -79,7 +79,7 @@ export function CityCard({ city, onAddToTrip }: CityCardProps) {
         <motion.button
           onClick={handleBookmark}
           aria-label={isBookmarked ? "Remove bookmark" : "Save destination"}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-10"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors z-10 cursor-pointer"
           whileTap={{ scale: 0.85 }}
         >
           <AnimatePresence mode="wait">
@@ -116,15 +116,15 @@ export function CityCard({ city, onAddToTrip }: CityCardProps) {
       </div>
 
       {/* Details */}
-      <div className="p-4 bg-white flex-1 flex flex-col justify-between">
+      <div className="p-4 bg-white dark:bg-[#1C1B18] flex-1 flex flex-col justify-between transition-colors">
         <div>
-          <p className="text-xs text-[#6B655E] line-clamp-2 mb-3">{city.description}</p>
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mb-3">{city.description}</p>
 
           <div className="flex flex-wrap gap-1 mb-4">
             {city.tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[10px] bg-[#FAF9F5] text-[#6B655E] px-2 py-0.5 rounded-md border border-[#E7E2D8]"
+                className="text-[10px] bg-[#FAF9F5] dark:bg-[#24221E] text-[#6B655E] dark:text-[#A8A196] px-2 py-0.5 rounded-md border border-[#E7E2D8] dark:border-[#33302B]"
               >
                 {tag}
               </span>
@@ -133,10 +133,10 @@ export function CityCard({ city, onAddToTrip }: CityCardProps) {
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-[#E7E2D8] flex items-center justify-between gap-2">
+        <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between gap-2">
           <div>
-            <span className="block text-[10px] text-[#9E978E]">Avg Daily</span>
-            <span className="text-xs font-bold text-[#181818]">
+            <span className="block text-[10px] text-[#9E978E] dark:text-[#7A746B]">Avg Daily</span>
+            <span className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF]">
               {formatCurrency(city.avgDailyCost, currency)}
             </span>
           </div>
@@ -147,7 +147,7 @@ export function CityCard({ city, onAddToTrip }: CityCardProps) {
             onClick={() => onAddToTrip(city)}
             leftIcon={
               isAlreadyInActiveTrip ? (
-                <Check className="w-3.5 h-3.5 text-[#1B8755]" />
+                <Check className="w-3.5 h-3.5 text-[#1B8755] dark:text-[#34D399]" />
               ) : (
                 <Plus className="w-3.5 h-3.5" />
               )

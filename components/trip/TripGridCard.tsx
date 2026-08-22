@@ -5,20 +5,17 @@ import Link from "next/link";
 import { Trip } from "@/types/trip";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { formatCurrency, calculateTripTotalCost, calculateBudgetPercentage } from "@/lib/tripCalculations";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
 import {
   Calendar,
-  MapPin,
   Share2,
   Copy,
   Trash2,
   MoreVertical,
   ArrowRight,
-  Sparkles,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -93,7 +90,7 @@ export function TripGridCard({ trip }: TripGridCardProps) {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1.5 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-white transition-colors"
+            className="p-1.5 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-white transition-colors cursor-pointer"
           >
             <MoreVertical className="w-4 h-4" />
           </button>
@@ -101,27 +98,27 @@ export function TripGridCard({ trip }: TripGridCardProps) {
           {/* Context Menu Dropdown */}
           {showMenu && (
             <div
-              className="absolute right-0 top-8 w-44 bg-white rounded-xl shadow-xl border border-[#E7E2D8] py-1.5 z-30 animate-in fade-in zoom-in-95"
+              className="absolute right-0 top-8 w-44 bg-white dark:bg-[#1E1E1E] rounded-xl shadow-xl border border-[#E7E2D8] dark:border-[#33302B] py-1.5 z-30 animate-in fade-in zoom-in-95"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={handleDuplicate}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#181818] hover:bg-[#FAF9F5] flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#181818] dark:text-[#F5F3EF] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] flex items-center gap-2 cursor-pointer"
               >
-                <Copy className="w-3.5 h-3.5 text-[#76546F]" />
+                <Copy className="w-3.5 h-3.5 text-[#76546F] dark:text-[#B88BAF]" />
                 <span>Duplicate Trip</span>
               </button>
               <Link
                 href={`/share/${trip.id}`}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#181818] hover:bg-[#FAF9F5] flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#181818] dark:text-[#F5F3EF] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] flex items-center gap-2"
               >
-                <Share2 className="w-3.5 h-3.5 text-[#2B6CB0]" />
+                <Share2 className="w-3.5 h-3.5 text-[#2B6CB0] dark:text-[#60A5FA]" />
                 <span>{trip.isPublic ? "View Public Story" : "Preview Story (Private)"}</span>
               </Link>
-              <div className="my-1 border-t border-[#E7E2D8]" />
+              <div className="my-1 border-t border-[#E7E2D8] dark:border-[#33302B]" />
               <button
                 onClick={handleDelete}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#C84B31] hover:bg-[#FDF1EE] flex items-center gap-2"
+                className="w-full text-left px-3 py-2 text-xs font-semibold text-[#C84B31] dark:text-[#F87171] hover:bg-[#FDF1EE] dark:hover:bg-[#3A1713] flex items-center gap-2 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Delete Trip</span>
@@ -145,22 +142,22 @@ export function TripGridCard({ trip }: TripGridCardProps) {
       </div>
 
       {/* Body Information */}
-      <div className="p-4 sm:p-5 bg-white flex-1 flex flex-col justify-between">
+      <div className="p-4 sm:p-5 bg-white dark:bg-[#1C1B18] flex-1 flex flex-col justify-between transition-colors">
         <div>
           {/* Route Pills */}
           <div className="mb-4">
-            <span className="block text-[10px] font-bold text-[#9E978E] uppercase tracking-wider mb-1.5">
+            <span className="block text-[10px] font-bold text-[#9E978E] dark:text-[#7A746B] uppercase tracking-wider mb-1.5">
               Destinations & Stops
             </span>
             <div className="flex flex-wrap gap-1.5">
               {trip.stops.map((stop) => (
                 <span
                   key={stop.id}
-                  className="text-xs font-semibold bg-[#FAF9F5] text-[#181818] px-2.5 py-1 rounded-lg border border-[#E7E2D8] flex items-center gap-1"
+                  className="text-xs font-semibold bg-[#FAF9F5] dark:bg-[#24221E] text-[#181818] dark:text-[#F5F3EF] px-2.5 py-1 rounded-lg border border-[#E7E2D8] dark:border-[#33302B] flex items-center gap-1"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-[#F4A62A]" />
                   {stop.cityName}
-                  <span className="text-[10px] text-[#6B655E]">({stop.daysCount}d)</span>
+                  <span className="text-[10px] text-[#6B655E] dark:text-[#A8A196]">({stop.daysCount}d)</span>
                 </span>
               ))}
             </div>
@@ -169,10 +166,10 @@ export function TripGridCard({ trip }: TripGridCardProps) {
           {/* Budget Overview */}
           <div className="mb-3">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-[#6B655E]">Estimated Budget</span>
-              <span className="font-bold text-[#181818]">
+              <span className="text-[#6B655E] dark:text-[#A8A196]">Estimated Budget</span>
+              <span className="font-bold text-[#181818] dark:text-[#F5F3EF]">
                 {formatCurrency(totalCost, trip.budget.currency)}{" "}
-                <span className="text-[#9E978E] font-normal">
+                <span className="text-[#9E978E] dark:text-[#7A746B] font-normal">
                   / {formatCurrency(trip.budget.targetBudget, trip.budget.currency)}
                 </span>
               </span>
@@ -182,10 +179,10 @@ export function TripGridCard({ trip }: TripGridCardProps) {
         </div>
 
         {/* Card Footer Actions */}
-        <div className="pt-3 border-t border-[#E7E2D8] flex items-center justify-between gap-3">
+        <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between gap-3">
           <Link
             href={`/share/${trip.id}`}
-            className="text-xs font-semibold text-[#76546F] hover:text-[#181818] flex items-center gap-1"
+            className="text-xs font-semibold text-[#76546F] dark:text-[#B88BAF] hover:text-[#181818] dark:hover:text-[#F5F3EF] flex items-center gap-1"
           >
             <Share2 className="w-3.5 h-3.5" />
             <span>Share Story</span>
@@ -194,7 +191,7 @@ export function TripGridCard({ trip }: TripGridCardProps) {
           <Link
             href={`/trips/${trip.id}`}
             onClick={() => setActiveTripId(trip.id)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] hover:bg-[#F4A62A] text-white hover:text-[#181818] rounded-xl text-xs font-bold transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#181818] dark:bg-[#F4A62A] hover:bg-[#F4A62A] dark:hover:bg-[#E09115] text-white dark:text-[#181818] rounded-xl text-xs font-bold transition-colors"
           >
             <span>Open Workspace</span>
             <ArrowRight className="w-3.5 h-3.5" />

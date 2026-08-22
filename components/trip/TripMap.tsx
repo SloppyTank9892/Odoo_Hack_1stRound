@@ -17,7 +17,6 @@ export function TripMap({ trip }: TripMapProps) {
   const { currency } = useTrips();
   const [selectedStop, setSelectedStop] = useState<DestinationStop>(trip.stops[0] || null);
 
-  // Approximate relative SVG positioning for stops based on normalized coords
   const minLat = Math.min(...trip.stops.map((s) => s.lat));
   const maxLat = Math.max(...trip.stops.map((s) => s.lat));
   const minLng = Math.min(...trip.stops.map((s) => s.lng));
@@ -26,7 +25,6 @@ export function TripMap({ trip }: TripMapProps) {
   const latRange = Math.max(0.1, maxLat - minLat);
   const lngRange = Math.max(0.1, maxLng - minLng);
 
-  // Map to SVG coordinate space 800x450 with padding
   const getSvgCoords = (stop: DestinationStop) => {
     const x = 100 + ((stop.lng - minLng) / lngRange) * 600;
     const y = 380 - ((stop.lat - minLat) / latRange) * 300;
@@ -38,15 +36,15 @@ export function TripMap({ trip }: TripMapProps) {
   return (
     <div className="space-y-6">
       {/* Map Control & Route Overview Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#E7E2D8]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#1C1B18] p-4 sm:p-5 rounded-2xl border border-[#E7E2D8] dark:border-[#33302B] transition-colors">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Compass className="w-4 h-4 text-[#F4A62A]" />
-            <h3 className="text-base font-bold text-[#181818] font-editorial">
+            <h3 className="text-base font-bold text-[#181818] dark:text-[#F5F3EF] font-editorial">
               Geographic Route & Transit Coordinates
             </h3>
           </div>
-          <p className="text-xs text-[#6B655E]">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">
             {trip.stops.length} connected destinations across {trip.days.length} days of exploration
           </p>
         </div>
@@ -55,16 +53,16 @@ export function TripMap({ trip }: TripMapProps) {
           <Badge variant="amber" size="sm">
             {trip.stops.length - 1} Transit Legs
           </Badge>
-          <span className="text-xs text-[#76546F] font-bold">
+          <span className="text-xs text-[#76546F] dark:text-[#B88BAF] font-bold">
             Interactive Route Map
           </span>
         </div>
       </div>
 
       {/* SVG Canvas Map Visualizer */}
-      <Card className="p-0 overflow-hidden bg-[#FAF9F5] border-[#E7E2D8] relative">
+      <Card className="p-0 overflow-hidden bg-[#FAF9F5] dark:bg-[#181816] border-[#E7E2D8] dark:border-[#33302B] relative">
         {/* Subtle Map Grid Background */}
-        <div className="relative w-full h-[380px] sm:h-[480px] bg-[#FAF9F5] select-none">
+        <div className="relative w-full h-[380px] sm:h-[480px] bg-[#FAF9F5] dark:bg-[#181816] select-none transition-colors">
           <svg className="w-full h-full" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
             <defs>
               {/* Map Route Line Gradient */}
@@ -76,7 +74,7 @@ export function TripMap({ trip }: TripMapProps) {
 
               {/* Grid pattern */}
               <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#E7E2D8" strokeWidth="0.8" opacity="0.6" />
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" className="text-[#E7E2D8] dark:text-[#282622]" strokeWidth="0.8" opacity="0.6" />
               </pattern>
             </defs>
 
@@ -116,8 +114,7 @@ export function TripMap({ trip }: TripMapProps) {
                     cx={(p.x + nextP.x) / 2}
                     cy={(p.y + nextP.y) / 2}
                     r="9"
-                    fill="#FFFFFF"
-                    stroke="#E7E2D8"
+                    className="fill-white dark:fill-[#1C1B18] stroke-[#E7E2D8] dark:stroke-[#33302B]"
                     strokeWidth="2"
                   />
                   <text
@@ -126,7 +123,7 @@ export function TripMap({ trip }: TripMapProps) {
                     fontSize="9"
                     fontWeight="bold"
                     textAnchor="middle"
-                    fill="#76546F"
+                    className="fill-[#76546F] dark:fill-[#B88BAF]"
                   >
                     →
                   </text>
@@ -179,25 +176,25 @@ export function TripMap({ trip }: TripMapProps) {
                     {i + 1}
                   </text>
 
-                  {/* City Label Badge in SVG */}
-                  <g transform={`translate(${coords.x}, ${coords.y - 24})`}>
+                  {/* City Label Badge in SVG (Staggered above/below to prevent overlap) */}
+                  <g transform={`translate(${coords.x}, ${i % 2 === 0 ? coords.y - 26 : coords.y + 26})`}>
                     <rect
-                      x="-45"
-                      y="-12"
-                      width="90"
-                      height="20"
-                      rx="6"
-                      fill="#FFFFFF"
+                      x="-46"
+                      y="-11"
+                      width="92"
+                      height="22"
+                      rx="8"
+                      className="fill-white dark:fill-[#1C1B18] shadow-sm"
                       stroke={isSelected ? "#F4A62A" : "#E7E2D8"}
                       strokeWidth={isSelected ? "1.5" : "1"}
                     />
                     <text
                       x="0"
-                      y="1"
-                      fontSize="10"
+                      y="3"
+                      fontSize="9.5"
                       fontWeight="bold"
                       textAnchor="middle"
-                      fill="#181818"
+                      className="fill-[#181818] dark:fill-[#F5F3EF]"
                     >
                       {stop.cityName} ({stop.daysCount}d)
                     </text>
@@ -209,42 +206,42 @@ export function TripMap({ trip }: TripMapProps) {
 
           {/* Floating Selected Stop Inspector Card */}
           {selectedStop && (
-            <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-80 bg-white/95 backdrop-blur-md rounded-2xl p-4 border border-[#E7E2D8] shadow-lg animate-in slide-in-from-bottom-2 duration-200 z-10">
+            <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:w-80 bg-white/95 dark:bg-[#1C1B18]/95 backdrop-blur-md rounded-2xl p-4 border border-[#E7E2D8] dark:border-[#33302B] shadow-lg animate-in slide-in-from-bottom-2 duration-200 z-10">
               <div className="flex items-start gap-3 mb-2">
                 <img
                   src={selectedStop.image}
                   alt={selectedStop.cityName}
-                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8] shrink-0"
+                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B] shrink-0"
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h4 className="font-bold text-sm text-[#181818] truncate">
+                    <h4 className="font-bold text-sm text-[#181818] dark:text-[#F5F3EF] truncate">
                       {selectedStop.cityName}
                     </h4>
-                    <span className="text-[10px] bg-[#FEF7EC] text-[#B86E00] font-bold px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] font-bold px-1.5 py-0.5 rounded">
                       {selectedStop.daysCount} Days
                     </span>
                   </div>
-                  <p className="text-[11px] text-[#6B655E] truncate">
+                  <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] truncate">
                     {selectedStop.stateOrCountry}
                   </p>
-                  <p className="text-[10px] text-[#9E978E] mt-0.5">
+                  <p className="text-[10px] text-[#9E978E] dark:text-[#7A746B] mt-0.5">
                     Stay: {formatCurrency(selectedStop.accommodationPerNight, currency)}/night
                   </p>
                 </div>
               </div>
 
-              <p className="text-xs text-[#6B655E] line-clamp-2 mb-3">
+              <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mb-3">
                 {selectedStop.description}
               </p>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D8]">
-                <span className="text-[11px] text-[#76546F] font-bold">
+              <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D8] dark:border-[#33302B]">
+                <span className="text-[11px] text-[#76546F] dark:text-[#B88BAF] font-bold">
                   {selectedStop.highlights.slice(0, 2).join(", ")}
                 </span>
                 <a
                   href={`#day-1`}
-                  className="text-xs font-bold text-[#F4A62A] hover:underline flex items-center gap-1"
+                  className="text-xs font-bold text-[#F4A62A] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   View Days <ArrowRight className="w-3 h-3" />
                 </a>

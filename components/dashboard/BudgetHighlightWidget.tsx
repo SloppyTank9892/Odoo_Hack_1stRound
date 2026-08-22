@@ -18,53 +18,56 @@ export function BudgetHighlightWidget() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-      <Card className="bg-[#FEF7EC] border-[#FCD89C] p-5">
+      {/* 1. Total Managed Budget Card */}
+      <Card className="bg-[#FEF7EC] dark:bg-[#201A10] border-[#FCD89C] dark:border-[#4A3314] p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-[#B86E00] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#B86E00] dark:text-[#F4A62A] uppercase tracking-wider">
             Total Managed Budget
           </span>
-          <div className="w-8 h-8 rounded-full bg-[#F4A62A]/20 flex items-center justify-center text-[#B86E00]">
+          <div className="w-8 h-8 rounded-full bg-[#F4A62A]/20 dark:bg-[#F4A62A]/30 flex items-center justify-center text-[#B86E00] dark:text-[#F4A62A]">
             <Wallet className="w-4 h-4" />
           </div>
         </div>
-        <div className="text-2xl font-black text-[#181818]">
+        <div className="text-2xl font-black text-[#181818] dark:text-[#F5F3EF]">
           {formatCurrency(totalBudgetAcrossTrips, currency)}
         </div>
-        <p className="text-[11px] text-[#6B655E] mt-1">
+        <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
           Across {trips.length} active itineraries
         </p>
       </Card>
 
-      <Card className="bg-[#F6F0F5] border-[#DBCBD8] p-5">
+      {/* 2. Planned Travel Days Card */}
+      <Card className="bg-[#F6F0F5] dark:bg-[#221721] border-[#DBCBD8] dark:border-[#452D42] p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-[#76546F] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#76546F] dark:text-[#B88BAF] uppercase tracking-wider">
             Planned Travel Days
           </span>
-          <div className="w-8 h-8 rounded-full bg-[#76546F]/20 flex items-center justify-center text-[#76546F]">
+          <div className="w-8 h-8 rounded-full bg-[#76546F]/20 dark:bg-[#76546F]/30 flex items-center justify-center text-[#76546F] dark:text-[#B88BAF]">
             <CalendarDays className="w-4 h-4" />
           </div>
         </div>
-        <div className="text-2xl font-black text-[#181818]">
+        <div className="text-2xl font-black text-[#181818] dark:text-[#F5F3EF]">
           {totalDaysAcrossTrips} Days
         </div>
-        <p className="text-[11px] text-[#6B655E] mt-1">
+        <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
           {totalStops} unique cities & regions
         </p>
       </Card>
 
-      <Card className="bg-[#EDF7F2] border-[#BDE3CF] p-5">
+      {/* 3. Dynamic Sync Engine Card */}
+      <Card className="bg-[#EDF7F2] dark:bg-[#102318] border-[#BDE3CF] dark:border-[#1E4B33] p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-[#1B8755] uppercase tracking-wider">
+          <span className="text-xs font-bold text-[#1B8755] dark:text-[#34D399] uppercase tracking-wider">
             Dynamic Sync Engine
           </span>
-          <div className="w-8 h-8 rounded-full bg-[#1B8755]/20 flex items-center justify-center text-[#1B8755]">
+          <div className="w-8 h-8 rounded-full bg-[#1B8755]/20 dark:bg-[#1B8755]/30 flex items-center justify-center text-[#1B8755] dark:text-[#34D399]">
             <CheckCircle2 className="w-4 h-4" />
           </div>
         </div>
-        <div className="text-2xl font-black text-[#1B8755]">
+        <div className="text-2xl font-black text-[#1B8755] dark:text-[#34D399]">
           100% Live
         </div>
-        <p className="text-[11px] text-[#6B655E] mt-1">
+        <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
           Timeline, budget & calendar connected
         </p>
       </Card>

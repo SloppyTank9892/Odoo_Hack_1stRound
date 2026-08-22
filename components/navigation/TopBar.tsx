@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Globe2, Plus, ChevronDown, LogOut, User } from "lucide-react";
+import { Search, Globe2, Plus, ChevronDown, LogOut } from "lucide-react";
 import { useTrips } from "@/context/TripContext";
 import { Button } from "@/components/ui/Button";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { getAuthUser, signOut } from "@/app/actions/auth";
 import { useToast } from "@/components/ui/Toast";
 
@@ -50,31 +51,31 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-[#F7F6F2]/90 backdrop-blur-md border-b border-[#E7E2D8] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-20 bg-[#F7F6F2]/90 dark:bg-[#121210]/90 backdrop-blur-md border-b border-[#E7E2D8] dark:border-[#33302B] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
       {/* Mobile Brand / Desktop Title Area */}
       <div className="flex items-center gap-3 md:hidden">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl bg-[#F4A62A] flex items-center justify-center text-[#181818]">
             <Globe2 className="w-5 h-5 stroke-[2.2]" />
           </div>
-          <span className="font-bold text-sm tracking-tight text-[#181818]">GlobeTrotter</span>
+          <span className="font-bold text-sm tracking-tight text-[#181818] dark:text-[#F5F3EF]">GlobeTrotter</span>
         </Link>
       </div>
 
       {/* Search Input */}
       <div className="flex-1 max-w-md relative">
-        <Search className="w-4 h-4 text-[#9E978E] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search destinations, stops, activities..."
-          className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white border border-[#E7E2D8] rounded-xl text-[#181818] placeholder-[#9E978E] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] focus:border-transparent transition-all shadow-2xs"
+          className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white dark:bg-[#1E1E1E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] focus:border-transparent transition-all shadow-2xs"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9E978E] hover:text-[#181818] cursor-pointer"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#9E978E] hover:text-[#181818] dark:hover:text-[#F5F3EF] cursor-pointer"
           >
             Clear
           </button>
@@ -89,10 +90,10 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
             <select
               value={activeTrip.id}
               onChange={(e) => setActiveTripId(e.target.value)}
-              className="appearance-none bg-white border border-[#E7E2D8] text-xs font-semibold text-[#181818] py-2 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F4A62A] shadow-2xs cursor-pointer"
+              className="appearance-none bg-white dark:bg-[#1E1E1E] border border-[#E7E2D8] dark:border-[#33302B] text-xs font-semibold text-[#181818] dark:text-[#F5F3EF] py-2 pl-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F4A62A] shadow-2xs cursor-pointer"
             >
               {trips.map((t) => (
-                <option key={t.id} value={t.id}>
+                <option key={t.id} value={t.id} className="dark:bg-[#1E1E1E]">
                   📍 {t.name}
                 </option>
               ))}
@@ -102,22 +103,31 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         )}
 
         {/* Currency Switcher */}
-        <div className="flex bg-white rounded-xl border border-[#E7E2D8] p-0.5 text-xs font-bold shadow-2xs">
+        <div className="flex bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#E7E2D8] dark:border-[#33302B] p-0.5 text-xs font-bold shadow-2xs">
           <button
             onClick={() => setCurrency("₹")}
-            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-              }`}
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
+              currency === "₹"
+                ? "bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                : "text-[#9E978E] dark:text-[#7A746B] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+            }`}
           >
             ₹ INR
           </button>
           <button
             onClick={() => setCurrency("$")}
-            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-              }`}
+            className={`px-2 py-1 rounded-lg transition-colors cursor-pointer ${
+              currency === "$"
+                ? "bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                : "text-[#9E978E] dark:text-[#7A746B] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+            }`}
           >
             $ USD
           </button>
         </div>
+
+        {/* Theme Switcher Toggle */}
+        <ThemeToggle variant="icon" />
 
         {/* Plan Trip Button */}
         {onOpenCreateTrip && (
@@ -137,7 +147,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
           <div className="flex items-center gap-2">
             <Link
               href="/settings"
-              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white border border-[#E7E2D8] text-xs font-bold text-[#181818] hover:bg-[#FAF9F5] transition-colors shadow-2xs"
+              className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-white dark:bg-[#1E1E1E] border border-[#E7E2D8] dark:border-[#33302B] text-xs font-bold text-[#181818] dark:text-[#F5F3EF] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] transition-colors shadow-2xs"
             >
               {currentUser.avatarUrl ? (
                 <img
@@ -155,7 +165,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
             <button
               onClick={handleSignOut}
               title="Sign Out"
-              className="p-2 text-[#9E978E] hover:text-[#C84B31] hover:bg-white rounded-xl border border-transparent hover:border-[#E7E2D8] transition-colors cursor-pointer"
+              className="p-2 text-[#9E978E] hover:text-[#C84B31] hover:bg-white dark:hover:bg-[#1E1E1E] rounded-xl border border-transparent hover:border-[#E7E2D8] dark:hover:border-[#33302B] transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -163,7 +173,7 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         ) : (
           <Link
             href="/auth"
-            className="text-xs font-bold text-[#76546F] hover:text-[#181818] px-3 py-1.5 rounded-xl bg-white border border-[#E7E2D8] hover:bg-[#FAF9F5] transition-colors shadow-2xs"
+            className="text-xs font-bold text-[#76546F] dark:text-[#B88BAF] hover:text-[#181818] dark:hover:text-[#F5F3EF] px-3 py-1.5 rounded-xl bg-white dark:bg-[#1E1E1E] border border-[#E7E2D8] dark:border-[#33302B] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] transition-colors shadow-2xs"
           >
             Sign In
           </Link>

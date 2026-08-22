@@ -49,26 +49,26 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             className={cn(
-              "pointer-events-auto p-4 rounded-2xl border shadow-lg flex items-start gap-3 bg-white animate-in slide-in-from-bottom-5 duration-200",
-              t.variant === "success" && "border-[#BDE3CF] bg-[#FAFDFB]",
-              t.variant === "error" && "border-[#F8CEC4] bg-[#FDFAF9]",
-              t.variant === "info" && "border-[#BDD8F2] bg-[#FAFCFE]"
+              "pointer-events-auto p-4 rounded-2xl border shadow-lg flex items-start gap-3 bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] animate-in slide-in-from-bottom-5 duration-200 transition-colors",
+              t.variant === "success" && "border-[#BDE3CF] dark:border-[#1E4B33] bg-[#FAFDFB] dark:bg-[#12241A]",
+              t.variant === "error" && "border-[#F8CEC4] dark:border-[#4B1E1A] bg-[#FDFAF9] dark:bg-[#251211]",
+              t.variant === "info" && "border-[#BDD8F2] dark:border-[#1E3B5C] bg-[#FAFCFE] dark:bg-[#0E2038]"
             )}
           >
-            {t.variant === "success" && <CheckCircle2 className="w-5 h-5 text-[#1B8755] shrink-0 mt-0.5" />}
-            {t.variant === "error" && <AlertCircle className="w-5 h-5 text-[#C84B31] shrink-0 mt-0.5" />}
-            {t.variant === "info" && <Info className="w-5 h-5 text-[#2B6CB0] shrink-0 mt-0.5" />}
+            {t.variant === "success" && <CheckCircle2 className="w-5 h-5 text-[#1B8755] dark:text-[#34D399] shrink-0 mt-0.5" />}
+            {t.variant === "error" && <AlertCircle className="w-5 h-5 text-[#C84B31] dark:text-[#F87171] shrink-0 mt-0.5" />}
+            {t.variant === "info" && <Info className="w-5 h-5 text-[#2B6CB0] dark:text-[#60A5FA] shrink-0 mt-0.5" />}
 
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-[#181818]">{t.title}</h4>
-              {t.description && <p className="text-xs text-[#6B655E] mt-0.5">{t.description}</p>}
+              <h4 className="text-sm font-semibold text-[#181818] dark:text-[#F5F3EF]">{t.title}</h4>
+              {t.description && <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mt-0.5">{t.description}</p>}
               {t.actionLabel && t.onAction && (
                 <button
                   onClick={() => {
                     t.onAction?.();
                     removeToast(t.id);
                   }}
-                  className="mt-2 text-xs font-semibold text-[#F4A62A] hover:underline"
+                  className="mt-2 text-xs font-semibold text-[#F4A62A] hover:underline cursor-pointer"
                 >
                   {t.actionLabel} →
                 </button>
@@ -77,7 +77,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
             <button
               onClick={() => removeToast(t.id)}
-              className="text-[#9E978E] hover:text-[#181818] p-1 -mr-1 -mt-1 rounded-md"
+              aria-label="Close notification"
+              className="text-[#9E978E] hover:text-[#181818] dark:hover:text-[#F5F3EF] p-1 -mr-1 -mt-1 rounded-md cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>

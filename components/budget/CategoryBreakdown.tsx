@@ -23,8 +23,8 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
       key: "accommodation" as const,
       amount: cats.accommodation,
       icon: Hotel,
-      color: "bg-[#76546F]",
-      textColor: "text-[#76546F]",
+      color: "bg-[#76546F] dark:bg-[#B88BAF]",
+      textColor: "text-[#76546F] dark:text-[#B88BAF]",
       description: "Hotels, heritage havelis & boutique stays",
     },
     {
@@ -33,7 +33,7 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
       amount: cats.meals,
       icon: Utensils,
       color: "bg-[#F4A62A]",
-      textColor: "text-[#B86E00]",
+      textColor: "text-[#B86E00] dark:text-[#F4A62A]",
       description: "Breakfasts, street food walks & fine dining",
     },
     {
@@ -41,8 +41,8 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
       key: "activities" as const,
       amount: cats.activities,
       icon: Compass,
-      color: "bg-[#1B8755]",
-      textColor: "text-[#1B8755]",
+      color: "bg-[#1B8755] dark:bg-[#34D399]",
+      textColor: "text-[#1B8755] dark:text-[#34D399]",
       description: "Monuments, guided palace tours & experiences",
     },
     {
@@ -50,8 +50,8 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
       key: "transport" as const,
       amount: cats.transport,
       icon: Plane,
-      color: "bg-[#2B6CB0]",
-      textColor: "text-[#2B6CB0]",
+      color: "bg-[#2B6CB0] dark:bg-[#60A5FA]",
+      textColor: "text-[#2B6CB0] dark:text-[#60A5FA]",
       description: "Trains, scenic private drives & intra-city cabs",
     },
     {
@@ -59,24 +59,24 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
       key: "misc" as const,
       amount: cats.misc,
       icon: Sparkles,
-      color: "bg-[#6B655E]",
-      textColor: "text-[#6B655E]",
+      color: "bg-[#6B655E] dark:bg-[#A8A196]",
+      textColor: "text-[#6B655E] dark:text-[#A8A196]",
       description: "Bazaar shopping, tips & emergency buffer",
     },
   ];
 
   return (
-    <Card className="p-6 bg-white border-[#E7E2D8]">
+    <Card className="p-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-base sm:text-lg font-bold font-editorial text-[#181818]">
+          <h3 className="text-base sm:text-lg font-bold font-editorial text-[#181818] dark:text-[#F5F3EF]">
             Expense Allocation by Category
           </h3>
-          <p className="text-xs text-[#6B655E]">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">
             Dynamic breakdown automatically recalculated based on scheduled itinerary items
           </p>
         </div>
-        <span className="text-xs font-bold text-[#76546F] bg-[#F6F0F5] px-2.5 py-1 rounded-lg border border-[#DBCBD8]">
+        <span className="text-xs font-bold text-[#76546F] dark:text-[#B88BAF] bg-[#F6F0F5] dark:bg-[#2A1D28] px-2.5 py-1 rounded-lg border border-[#DBCBD8] dark:border-[#4D3349]">
           5 Categories
         </span>
       </div>
@@ -96,23 +96,23 @@ export function CategoryBreakdown({ trip }: CategoryBreakdownProps) {
                     <Icon className="w-3.5 h-3.5" />
                   </div>
                   <div>
-                    <span className="font-bold text-[#181818]">{cat.name}</span>
-                    <span className="text-[10px] text-[#9E978E] ml-2 hidden sm:inline">
+                    <span className="font-bold text-[#181818] dark:text-[#F5F3EF]">{cat.name}</span>
+                    <span className="text-[10px] text-[#9E978E] dark:text-[#7A746B] ml-2 hidden sm:inline">
                       {cat.description}
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="font-bold text-[#181818]">
+                  <span className="font-bold text-[#181818] dark:text-[#F5F3EF]">
                     {formatCurrency(cat.amount, currency)}
                   </span>
-                  <span className="text-[11px] text-[#9E978E] ml-2">({percentage}%)</span>
+                  <span className="text-[11px] text-[#9E978E] dark:text-[#7A746B] ml-2">({percentage}%)</span>
                 </div>
               </div>
 
               {/* Individual Category Bar */}
-              <div className="w-full bg-[#EFECE6] h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-[#EFECE6] dark:bg-[#2E2C29] h-2 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${cat.color}`}
                   style={{ width: `${percentage}%` }}

@@ -102,14 +102,15 @@ export function AddActivityDrawer({
     );
 
     toast({
-      title: "Custom Activity Added!",
-      description: `"${name}" placed in Day ${dayNumber} timeline.`,
+      title: "Custom Activity Created!",
+      description: `"${name}" added to Day ${dayNumber}.`,
       variant: "success",
     });
 
-    // Reset & close
+    // Reset Form
     setName("");
     setDescription("");
+    setLocation("");
     onClose();
   };
 
@@ -120,112 +121,112 @@ export function AddActivityDrawer({
       title={
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-          <span>Add Activity · Day {dayNumber}</span>
+          <span>Add Activity to Day {dayNumber}</span>
         </div>
       }
-      subtitle={`Explore top-rated spots or create a custom plan for ${cityName}`}
-      width="lg"
+      subtitle={`Curating experiences in ${cityName}`}
+      width="md"
     >
-      {/* Mode Tabs */}
-      <div className="flex bg-[#FAF9F5] p-1 rounded-xl border border-[#E7E2D8] mb-4">
+      {/* Mode Switcher Tabs */}
+      <div className="flex bg-[#FAF9F5] dark:bg-[#24221E] p-1 rounded-xl border border-[#E7E2D8] dark:border-[#33302B] mb-5">
         <button
           onClick={() => setMode("browse")}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-            mode === "browse" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E] hover:text-[#181818]"
+          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            mode === "browse"
+              ? "bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] shadow-2xs"
+              : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
           }`}
         >
-          Suggested for {cityName}
+          Curated Experiences
         </button>
         <button
           onClick={() => setMode("custom")}
-          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-colors ${
-            mode === "custom" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E] hover:text-[#181818]"
+          className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            mode === "custom"
+              ? "bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] shadow-2xs"
+              : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
           }`}
         >
-          + Custom Activity
+          Custom Activity
         </button>
       </div>
 
       {mode === "browse" ? (
         <div className="space-y-4">
-          {/* Search Box */}
+          {/* Search bar */}
           <div className="relative">
-            <Search className="w-4 h-4 text-[#9E978E] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Search ${cityName} experiences, dining, forts...`}
-              className="w-full pl-9 pr-4 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              placeholder={`Search ${cityName} experiences...`}
+              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           {/* Activity Cards List */}
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-1">
             {availableActivities.length > 0 ? (
               availableActivities.map((act) => (
                 <div
                   key={act.id}
-                  className="p-3.5 rounded-xl border border-[#E7E2D8] hover:border-[#D5CEBF] bg-white transition-all hover:shadow-2xs flex items-start justify-between gap-3"
+                  className="p-3.5 bg-white dark:bg-[#201F1B] rounded-xl border border-[#E7E2D8] dark:border-[#33302B] hover:border-[#D5CEBF] dark:hover:border-[#48443D] transition-all hover:shadow-2xs flex flex-col justify-between gap-3 group"
                 >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-bold text-[#76546F] capitalize">
-                        {act.category}
-                      </span>
-                      <span className="text-[10px] text-[#9E978E]">·</span>
-                      <span className="text-[11px] text-[#6B655E] flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-[#9E978E]" />
-                        {act.durationMinutes}m ({act.bestTimeOfDay})
-                      </span>
-                    </div>
-
-                    <h5 className="font-bold text-xs sm:text-sm text-[#181818] leading-tight">
-                      {act.name}
-                    </h5>
-
-                    <p className="text-[11px] text-[#6B655E] mt-1 line-clamp-2">
-                      {act.description}
-                    </p>
-
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-xs font-bold text-[#181818]">
-                        {formatCurrency(act.cost, currency)}
-                      </span>
-                      <span className="text-[10px] text-[#1B8755] bg-[#EDF7F2] px-1.5 py-0.5 rounded font-medium">
-                        ★ {act.rating} ({act.reviewCount})
-                      </span>
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={act.image}
+                      alt={act.name}
+                      className="w-16 h-16 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B] shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Badge variant="amber" size="sm">
+                          {act.category}
+                        </Badge>
+                        <span className="text-[10px] text-[#6B655E] dark:text-[#A8A196] flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {act.durationMinutes}m
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] leading-tight group-hover:text-[#F4A62A] transition-colors">
+                        {act.name}
+                      </h4>
+                      <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] line-clamp-2 mt-0.5">
+                        {act.description}
+                      </p>
                     </div>
                   </div>
 
-                  <Button
-                    size="sm"
-                    onClick={() => handleAddFromCatalog(act)}
-                    leftIcon={<Plus className="w-3.5 h-3.5" />}
-                    className="shrink-0 mt-1"
-                  >
-                    Add
-                  </Button>
+                  <div className="flex items-center justify-between pt-2 border-t border-[#E7E2D8] dark:border-[#33302B]">
+                    <div>
+                      <span className="text-[10px] text-[#9E978E] dark:text-[#7A746B] block">Price</span>
+                      <span className="font-bold text-xs text-[#181818] dark:text-[#F5F3EF]">
+                        {act.cost === 0 ? "Free" : formatCurrency(act.cost, currency)}
+                      </span>
+                    </div>
+
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddFromCatalog(act)}
+                      leftIcon={<Plus className="w-3.5 h-3.5" />}
+                    >
+                      Add to Day {dayNumber}
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-[#9E978E] text-xs">
-                <p>No catalog activities matching your search.</p>
-                <button
-                  onClick={() => setMode("custom")}
-                  className="mt-2 text-[#F4A62A] font-bold underline"
-                >
-                  Create a custom one instead
-                </button>
+              <div className="text-center py-8 text-[#9E978E] dark:text-[#7A746B] text-xs">
+                No matching curated experiences found. Try creating a custom one!
               </div>
             )}
           </div>
         </div>
       ) : (
-        /* Custom Activity Form */
-        <form onSubmit={handleCreateCustom} className="space-y-4">
+        /* Custom Activity Creation Form */
+        <form onSubmit={handleCreateCustom} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
               Activity Name *
             </label>
             <input
@@ -234,46 +235,46 @@ export function AddActivityDrawer({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Royal Thali Tasting at Heritage Haveli"
-              className="w-full px-3.5 py-2 text-xs sm:text-sm bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ActivityCategory)}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               >
-                <option value="culture">Culture / Heritage</option>
-                <option value="food">Food & Dining</option>
-                <option value="sightseeing">Sightseeing</option>
-                <option value="adventure">Adventure</option>
-                <option value="nature">Nature / Outdoors</option>
-                <option value="shopping">Shopping</option>
-                <option value="transport">Transport</option>
+                <option value="culture" className="dark:bg-[#1C1B18]">Culture / Heritage</option>
+                <option value="food" className="dark:bg-[#1C1B18]">Food & Dining</option>
+                <option value="sightseeing" className="dark:bg-[#1C1B18]">Sightseeing</option>
+                <option value="adventure" className="dark:bg-[#1C1B18]">Adventure</option>
+                <option value="nature" className="dark:bg-[#1C1B18]">Nature / Outdoors</option>
+                <option value="shopping" className="dark:bg-[#1C1B18]">Shopping</option>
+                <option value="transport" className="dark:bg-[#1C1B18]">Transport</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                 Time Slot
               </label>
               <input
                 type="time"
                 value={timeSlot}
                 onChange={(e) => setTimeSlot(e.target.value)}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                 Estimated Cost ({currency})
               </label>
               <input
@@ -282,12 +283,12 @@ export function AddActivityDrawer({
                 step="50"
                 value={cost}
                 onChange={(e) => setCost(Number(e.target.value))}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                 Duration (Minutes)
               </label>
               <input
@@ -296,13 +297,13 @@ export function AddActivityDrawer({
                 step="15"
                 value={durationMinutes}
                 onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
               Location / Area (Optional)
             </label>
             <input
@@ -310,29 +311,29 @@ export function AddActivityDrawer({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Old City Courtyard"
-              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
               Notes or Description
             </label>
             <textarea
-              rows={2}
+              rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add key reservation details, dress code, or tips..."
-              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-3.5 py-2 text-xs bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             />
           </div>
 
-          <div className="pt-3 border-t border-[#E7E2D8] flex justify-end gap-2">
+          <div className="pt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex justify-end gap-2">
             <Button variant="ghost" size="sm" onClick={onClose}>
               Cancel
             </Button>
-            <Button size="sm" type="submit" leftIcon={<Sparkles className="w-3.5 h-3.5" />}>
-              Save to Day {dayNumber}
+            <Button type="submit" size="sm" leftIcon={<Sparkles className="w-3.5 h-3.5" />}>
+              Add Activity
             </Button>
           </div>
         </form>

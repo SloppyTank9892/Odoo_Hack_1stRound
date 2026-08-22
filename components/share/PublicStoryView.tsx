@@ -7,6 +7,7 @@ import { Trip } from "@/types/trip";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { SocialShareModal } from "@/components/share/SocialShareModal";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { formatCurrency, calculateTripTotalCost } from "@/lib/tripCalculations";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
@@ -97,11 +98,11 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
     "https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80";
 
   return (
-    <div className="min-h-screen bg-[#F7F6F2] text-[#181818]">
+    <div className="min-h-screen bg-[#F7F6F2] dark:bg-[#121210] text-[#181818] dark:text-[#F5F3EF] transition-colors">
       {/* Private Owner Preview Banner */}
       {!trip.isPublic && isOwner && (
-        <div className="bg-[#FEF7EC] border-b border-[#FCD89C] px-4 sm:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 text-[#8F5500]">
+        <div className="bg-[#FEF7EC] dark:bg-[#2B2113] border-b border-[#FCD89C] dark:border-[#5E431E] px-4 sm:px-8 py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2 text-[#8F5500] dark:text-[#F4A62A]">
             <span className="p-1 rounded-md bg-[#F4A62A]/20">🔒</span>
             <span>
               <strong>Private Journey Preview:</strong> Only you can view this page. Click <strong>Publish Story</strong> to make it visible in the Community Gallery so other travelers can discover and copy it.
@@ -109,7 +110,7 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
           </div>
           <button
             onClick={handleToggle}
-            className="px-4 py-1.5 rounded-xl bg-[#F4A62A] hover:bg-[#E09115] text-[#181818] font-bold shadow-xs whitespace-nowrap transition-colors"
+            className="px-4 py-1.5 rounded-xl bg-[#F4A62A] hover:bg-[#E09115] text-[#181818] font-bold shadow-xs whitespace-nowrap transition-colors cursor-pointer"
           >
             Publish Story Now
           </button>
@@ -117,7 +118,7 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
       )}
 
       {/* Top Editorial Navbar */}
-      <nav className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E7E2D8] px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
+      <nav className="sticky top-0 z-30 bg-white/95 dark:bg-[#181715]/95 backdrop-blur-md border-b border-[#E7E2D8] dark:border-[#33302B] px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
         {/* Brand & Explorer Links */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-2.5 group">
@@ -125,26 +126,26 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
               <Globe2 className="w-5 h-5 stroke-[2.2]" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-tight text-[#181818]">
+              <span className="font-bold text-sm tracking-tight text-[#181818] dark:text-[#F5F3EF]">
                 GlobeTrotter
               </span>
-              <span className="hidden sm:inline-block text-[10px] uppercase font-bold bg-[#FEF7EC] text-[#B86E00] px-2 py-0.5 rounded-full border border-[#FCD89C]">
+              <span className="hidden sm:inline-block text-[10px] uppercase font-bold bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] px-2 py-0.5 rounded-full border border-[#FCD89C] dark:border-[#5E431E]">
                 {isOwner ? (trip.isPublic ? "Your Public Story" : "Your Private Preview") : "Public Story"}
               </span>
             </div>
           </Link>
 
           {/* Quick Navigation Links */}
-          <div className="hidden md:flex items-center gap-1 pl-3 border-l border-[#E7E2D8] text-xs font-semibold text-[#6B655E]">
+          <div className="hidden md:flex items-center gap-1 pl-3 border-l border-[#E7E2D8] dark:border-[#33302B] text-xs font-semibold text-[#6B655E] dark:text-[#A8A196]">
             <Link
               href="/share"
-              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] hover:bg-[#FAF9F5] transition-colors"
+              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] dark:hover:text-[#F5F3EF] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] transition-colors"
             >
               All Public Stories
             </Link>
             <Link
               href="/trips"
-              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] hover:bg-[#FAF9F5] transition-colors"
+              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] dark:hover:text-[#F5F3EF] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E] transition-colors"
             >
               My Workspace
             </Link>
@@ -154,22 +155,30 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
         {/* Right Controls & Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Currency Toggle */}
-          <div className="hidden sm:flex bg-[#FAF9F5] rounded-xl border border-[#E7E2D8] p-0.5 text-xs font-bold shadow-2xs">
+          <div className="hidden sm:flex bg-[#FAF9F5] dark:bg-[#24221E] rounded-xl border border-[#E7E2D8] dark:border-[#33302B] p-0.5 text-xs font-bold shadow-2xs">
             <button
               onClick={() => setCurrency("₹")}
-              className={`px-2 py-1 rounded-lg transition-colors ${currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-                }`}
+              className={`px-2 py-1 rounded-lg transition-colors ${
+                currency === "₹"
+                  ? "bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                  : "text-[#9E978E] dark:text-[#7A746B] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+              }`}
             >
               ₹ INR
             </button>
             <button
               onClick={() => setCurrency("$")}
-              className={`px-2 py-1 rounded-lg transition-colors ${currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
-                }`}
+              className={`px-2 py-1 rounded-lg transition-colors ${
+                currency === "$"
+                  ? "bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] font-bold"
+                  : "text-[#9E978E] dark:text-[#7A746B] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+              }`}
             >
               $ USD
             </button>
           </div>
+
+          <ThemeToggle variant="icon" />
 
           <Button
             variant="outline"
@@ -187,7 +196,7 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
                 size="sm"
                 variant="outline"
                 leftIcon={<Edit3 className="w-3.5 h-3.5" />}
-                className="font-bold border-[#E7E2D8]"
+                className="font-bold border-[#E7E2D8] dark:border-[#33302B]"
               >
                 Edit in Workspace
               </Button>
@@ -215,9 +224,9 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
           {/* User Sign In / Profile Link */}
           <Link
             href="/auth"
-            className="text-xs font-bold text-[#181818] bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] px-3 py-1.5 rounded-xl transition-colors shrink-0 shadow-2xs"
+            className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF] bg-[#FAF9F5] dark:bg-[#24221E] hover:bg-[#EFECE6] dark:hover:bg-[#2E2C29] border border-[#E7E2D8] dark:border-[#33302B] px-3 py-1.5 rounded-xl transition-colors shrink-0 shadow-2xs"
           >
-            Sign In / Login
+            Sign In
           </Link>
         </div>
       </nav>
@@ -280,12 +289,12 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
       {/* Main Editorial Story Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
         {/* Sticky Action Banner */}
-        <div className="p-5 bg-white rounded-2xl border border-[#E7E2D8] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
+        <div className="p-5 bg-white dark:bg-[#1C1B18] rounded-2xl border border-[#E7E2D8] dark:border-[#33302B] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
           <div>
-            <h3 className="font-bold text-base text-[#181818]">
+            <h3 className="font-bold text-base text-[#181818] dark:text-[#F5F3EF]">
               {isOwner ? "Manage Your Itinerary" : "Inspired by this itinerary?"}
             </h3>
-            <p className="text-xs text-[#6B655E]">
+            <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">
               {isOwner
                 ? "This trip is in your personal collection. Open the workspace to edit stops, adjust days, or log expenses."
                 : "Copy this exact trip into your workspace to customize dates, modify stops, and track budgets."}
@@ -312,10 +321,10 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
 
         {/* Route Highlights Section */}
         <div className="mb-14">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#B86E00] block mb-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#B86E00] dark:text-[#F4A62A] block mb-2">
             The Journey Map
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold font-editorial text-[#181818] mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold font-editorial text-[#181818] dark:text-[#F5F3EF] mb-6">
             Destinations &amp; Heritage Citadels
           </h2>
 
@@ -323,27 +332,27 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
             {trip.stops.map((stop, idx) => (
               <div
                 key={stop.id}
-                className="p-5 rounded-2xl bg-white border border-[#E7E2D8] shadow-2xs flex items-start gap-4"
+                className="p-5 rounded-2xl bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] shadow-2xs flex items-start gap-4"
               >
                 <img
                   src={stop.image || defaultImg}
                   alt={stop.cityName}
-                  className="w-16 h-16 rounded-xl object-cover border border-[#E7E2D8] shrink-0"
+                  className="w-16 h-16 rounded-xl object-cover border border-[#E7E2D8] dark:border-[#33302B] shrink-0"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = defaultImg;
                   }}
                 />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-[#181818] text-white text-[10px] font-bold flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-[#181818] dark:bg-[#F4A62A] text-white dark:text-[#181818] text-[10px] font-bold flex items-center justify-center">
                       {idx + 1}
                     </span>
-                    <h4 className="font-bold text-base text-[#181818]">{stop.cityName}</h4>
-                    <span className="text-xs font-semibold text-[#76546F]">
+                    <h4 className="font-bold text-base text-[#181818] dark:text-[#F5F3EF]">{stop.cityName}</h4>
+                    <span className="text-xs font-semibold text-[#76546F] dark:text-[#B88BAF]">
                       ({stop.daysCount} Days)
                     </span>
                   </div>
-                  <p className="text-xs text-[#6B655E] mt-1 line-clamp-2">
+                  <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mt-1 line-clamp-2">
                     {stop.description}
                   </p>
                 </div>
@@ -354,10 +363,10 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
 
         {/* Day-by-Day Editorial Chapter Flow */}
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#B86E00] block mb-2">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#B86E00] dark:text-[#F4A62A] block mb-2">
             Chronological Itinerary
           </span>
-          <h2 className="text-2xl sm:text-3xl font-bold font-editorial text-[#181818] mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold font-editorial text-[#181818] dark:text-[#F5F3EF] mb-8">
             Day-by-Day Travel Story
           </h2>
 
@@ -365,21 +374,21 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
             {trip.days.map((day) => (
               <div
                 key={day.dayNumber}
-                className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E7E2D8] shadow-xs"
+                className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] shadow-xs"
               >
                 {/* Chapter Title */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E7E2D8] mb-6 gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E7E2D8] dark:border-[#33302B] mb-6 gap-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-black uppercase text-[#B86E00] bg-[#FEF7EC] px-3 py-1 rounded-xl border border-[#FCD89C]">
+                    <span className="text-xs font-black uppercase text-[#B86E00] dark:text-[#F4A62A] bg-[#FEF7EC] dark:bg-[#2B2113] px-3 py-1 rounded-xl border border-[#FCD89C] dark:border-[#5E431E]">
                       Day {day.dayNumber}
                     </span>
-                    <h3 className="text-xl font-bold font-editorial text-[#181818]">
+                    <h3 className="text-xl font-bold font-editorial text-[#181818] dark:text-[#F5F3EF]">
                       {day.cityName} · Chapter {day.cityDayNumber}
                     </h3>
                   </div>
 
-                  <span className="text-xs font-semibold text-[#6B655E] flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5 text-[#9E978E]" />
+                  <span className="text-xs font-semibold text-[#6B655E] dark:text-[#A8A196] flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-[#9E978E] dark:text-[#7A746B]" />
                     {new Date(day.date).toLocaleDateString("en-US", {
                       weekday: "short",
                       month: "short",
@@ -390,7 +399,7 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
 
                 {/* Day Notes */}
                 {day.notes && (
-                  <p className="text-xs sm:text-sm text-[#76546F] italic mb-6">
+                  <p className="text-xs sm:text-sm text-[#76546F] dark:text-[#B88BAF] italic mb-6">
                     {day.notes}
                   </p>
                 )}
@@ -400,27 +409,27 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
                   {day.activities.map((act) => (
                     <div
                       key={act.id}
-                      className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#E7E2D8] flex flex-col justify-between"
+                      className="p-4 rounded-2xl bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] flex flex-col justify-between"
                     >
                       <div>
-                        <div className="flex items-center justify-between text-[11px] font-bold text-[#76546F] mb-1">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-[#76546F] dark:text-[#B88BAF] mb-1">
                           <span className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {act.timeSlot}
                           </span>
                           <span className="capitalize">{act.category}</span>
                         </div>
-                        <h5 className="font-bold text-sm text-[#181818] mb-1">
+                        <h5 className="font-bold text-sm text-[#181818] dark:text-[#F5F3EF] mb-1">
                           {act.name}
                         </h5>
-                        <p className="text-xs text-[#6B655E] line-clamp-2">
+                        <p className="text-xs text-[#6B655E] dark:text-[#A8A196] line-clamp-2">
                           {act.description}
                         </p>
                       </div>
 
-                      <div className="pt-3 mt-3 border-t border-[#E7E2D8] flex items-center justify-between text-xs">
-                        <span className="text-[11px] text-[#9E978E]">{act.durationMinutes} mins</span>
-                        <span className="font-bold text-[#181818]">
+                      <div className="pt-3 mt-3 border-t border-[#E7E2D8] dark:border-[#33302B] flex items-center justify-between text-xs">
+                        <span className="text-[11px] text-[#9E978E] dark:text-[#7A746B]">{act.durationMinutes} mins</span>
+                        <span className="font-bold text-[#181818] dark:text-[#F5F3EF]">
                           {act.cost > 0 ? formatCurrency(act.cost, currency) : "Free"}
                         </span>
                       </div>
@@ -433,7 +442,7 @@ export function PublicStoryView({ trip, isOwner = false, onTogglePublic }: Publi
         </div>
 
         {/* Bottom Call to Action */}
-        <div className="mt-16 text-center py-12 px-6 rounded-3xl bg-[#181818] text-white">
+        <div className="mt-16 text-center py-12 px-6 rounded-3xl bg-[#181818] dark:bg-[#1C1B18] border border-[#33302B] text-white">
           <h3 className="text-2xl font-bold font-editorial mb-2">
             {isOwner ? "Ready to customize your journey?" : `Ready to plan your version of ${trip.name}?`}
           </h3>

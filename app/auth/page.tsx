@@ -125,7 +125,7 @@ function AuthFormContent() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F7F6F2]">
+    <div className="min-h-screen flex bg-[#F7F6F2] dark:bg-[#121210] transition-colors">
       {/* Left Visual Editorial Column */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#181818] p-12 flex-col justify-between text-white">
         <img
@@ -159,7 +159,7 @@ function AuthFormContent() {
                 EV
               </div>
               <div>
-                <p className="text-xs font-bold text-white">Elena & Marcus Vance</p>
+                <p className="text-xs font-bold text-white">Elena &amp; Marcus Vance</p>
                 <p className="text-[11px] text-[#D5CEBF]">Explorer Members · 8 Trips Planned</p>
               </div>
             </div>
@@ -169,20 +169,20 @@ function AuthFormContent() {
 
       {/* Right Auth Form Column */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-[#E7E2D8] shadow-md">
+        <div className="w-full max-w-md bg-white dark:bg-[#1C1B18] p-8 sm:p-10 rounded-3xl border border-[#E7E2D8] dark:border-[#33302B] shadow-md transition-colors">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2 lg:hidden">
               <div className="w-8 h-8 rounded-xl bg-[#F4A62A] flex items-center justify-center text-[#181818]">
                 <Globe2 className="w-5 h-5 stroke-[2.2]" />
               </div>
-              <span className="font-bold text-sm text-[#181818]">GlobeTrotter</span>
+              <span className="font-bold text-sm text-[#181818] dark:text-[#F5F3EF]">GlobeTrotter</span>
             </div>
 
-            <h2 className="text-2xl font-bold font-editorial text-[#181818]">
+            <h2 className="text-2xl font-bold font-editorial text-[#181818] dark:text-[#F5F3EF]">
               {mode === "login" ? "Welcome Back, Explorer" : "Join GlobeTrotter"}
             </h2>
-            <p className="text-xs text-[#6B655E] mt-1">
+            <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mt-1">
               {mode === "login"
                 ? "Enter your credentials to access your travel workspace."
                 : "Create an account to build, organize, and share custom journeys."}
@@ -190,15 +190,18 @@ function AuthFormContent() {
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="flex bg-[#FAF9F5] p-1 rounded-xl border border-[#E7E2D8] mb-6">
+          <div className="flex bg-[#FAF9F5] dark:bg-[#24221E] p-1 rounded-xl border border-[#E7E2D8] dark:border-[#33302B] mb-6">
             <button
               type="button"
               onClick={() => {
                 setMode("login");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${mode === "login" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
-                }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                mode === "login"
+                  ? "bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] shadow-2xs"
+                  : "text-[#6B655E] dark:text-[#A8A196]"
+              }`}
             >
               Sign In
             </button>
@@ -208,8 +211,11 @@ function AuthFormContent() {
                 setMode("signup");
                 setErrorMessage(null);
               }}
-              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${mode === "signup" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
-                }`}
+              className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                mode === "signup"
+                  ? "bg-white dark:bg-[#1C1B18] text-[#181818] dark:text-[#F5F3EF] shadow-2xs"
+                  : "text-[#6B655E] dark:text-[#A8A196]"
+              }`}
             >
               Create Account
             </button>
@@ -217,7 +223,7 @@ function AuthFormContent() {
 
           {/* Inline Error Message */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-xl bg-[#FFF5F5] border border-[#FED7D7] flex items-start gap-2.5 text-xs text-[#C53030]">
+            <div className="mb-5 p-3.5 rounded-xl bg-[#FFF5F5] dark:bg-[#3A1713] border border-[#FED7D7] dark:border-[#5C231B] flex items-start gap-2.5 text-xs text-[#C53030] dark:text-[#F87171]">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <div className="flex-1 font-medium">{errorMessage}</div>
             </div>
@@ -228,7 +234,7 @@ function AuthFormContent() {
             {mode === "signup" && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                     First Name
                   </label>
                   <input
@@ -237,11 +243,11 @@ function AuthFormContent() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="e.g. Alex"
-                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                     Last Name
                   </label>
                   <input
@@ -250,14 +256,14 @@ function AuthFormContent() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="e.g. Morgan"
-                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1">
                 Email Address
               </label>
               <input
@@ -266,19 +272,19 @@ function AuthFormContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider">
+                <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider">
                   Password
                 </label>
                 {mode === "login" && (
                   <Link
                     href="/auth/reset"
-                    className="text-[10px] font-bold text-[#76546F] hover:text-[#F4A62A] transition-colors"
+                    className="text-[10px] font-bold text-[#76546F] dark:text-[#B88BAF] hover:text-[#F4A62A] transition-colors"
                   >
                     Forgot password?
                   </Link>
@@ -291,9 +297,9 @@ function AuthFormContent() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
-              <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-[#9E978E]">
+              <div className="flex items-center gap-1.5 mt-1.5 text-[11px] text-[#9E978E] dark:text-[#7A746B]">
                 <Info className="w-3.5 h-3.5 shrink-0" />
                 <span>Minimum 6 characters required.</span>
               </div>
@@ -317,23 +323,23 @@ function AuthFormContent() {
           </form>
 
           {/* 1-Click Guest Bypass */}
-          <div className="pt-6 mt-6 border-t border-[#E7E2D8] text-center">
+          <div className="pt-6 mt-6 border-t border-[#E7E2D8] dark:border-[#33302B] text-center">
             <button
               type="button"
               onClick={handleGuestDemo}
               disabled={isLoading || isGuestLoading}
-              className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+              className="w-full py-2.5 px-4 bg-[#FEF7EC] dark:bg-[#2B2113] hover:bg-[#FCD89C]/50 dark:hover:bg-[#3D2C17] text-[#B86E00] dark:text-[#F4A62A] border border-[#FCD89C] dark:border-[#5E431E] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
               {isGuestLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-[#B86E00]" />
+                <Loader2 className="w-4 h-4 animate-spin text-[#B86E00] dark:text-[#F4A62A]" />
               ) : (
                 <Sparkles className="w-4 h-4" />
               )}
               <span>{isGuestLoading ? "Entering as Demo Guest..." : "Continue as Demo Guest Explorer"}</span>
             </button>
 
-            <p className="text-[11px] text-[#9E978E] mt-3">
-              Full workspace access with live dynamic calculations & Supabase sync.
+            <p className="text-[11px] text-[#9E978E] dark:text-[#7A746B] mt-3">
+              Full workspace access with live dynamic calculations &amp; Supabase sync.
             </p>
           </div>
         </div>
@@ -346,7 +352,7 @@ export default function AuthPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#F7F6F2] flex items-center justify-center">
+        <div className="min-h-screen bg-[#F7F6F2] dark:bg-[#121210] flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-[#F4A62A] animate-spin" />
         </div>
       }

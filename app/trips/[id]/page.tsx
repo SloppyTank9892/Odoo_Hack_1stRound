@@ -58,7 +58,7 @@ export default function TripWorkspacePage() {
       <AppShell>
         <div className="flex flex-col items-center justify-center py-24">
           <Loader2 className="w-8 h-8 text-[#F4A62A] animate-spin mb-3" />
-          <p className="text-xs font-bold uppercase tracking-wider text-[#6B655E]">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#6B655E] dark:text-[#A8A196]">
             Loading Trip Workspace...
           </p>
         </div>
@@ -69,12 +69,12 @@ export default function TripWorkspacePage() {
   if (!trip) {
     return (
       <AppShell>
-        <Card className="text-center py-16 px-6 max-w-md mx-auto my-12 bg-white">
+        <Card className="text-center py-16 px-6 max-w-md mx-auto my-12 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
           <Compass className="w-12 h-12 text-[#F4A62A] mx-auto mb-3" />
-          <h2 className="text-xl font-bold font-editorial text-[#181818] mb-2">
+          <h2 className="text-xl font-bold font-editorial text-[#181818] dark:text-[#F5F3EF] mb-2">
             Trip Workspace Not Found
           </h2>
-          <p className="text-xs text-[#6B655E] mb-6">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mb-6">
             The requested travel itinerary does not exist or has been removed.
           </p>
           <Button onClick={() => router.push("/trips")} leftIcon={<ArrowLeft className="w-4 h-4" />}>
@@ -95,7 +95,7 @@ export default function TripWorkspacePage() {
           onTabChange={setActiveTab}
         />
 
-        {/* Tab Views Container - Clean single-scrollbar workspace scrolling */}
+        {/* Tab Views Container */}
         <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-8 py-6 max-w-7xl w-full mx-auto pb-24 md:pb-12 animate-in fade-in duration-200">
           {activeTab === "itinerary" && <TimelineView trip={trip} />}
           {activeTab === "map" && <TripMap trip={trip} />}

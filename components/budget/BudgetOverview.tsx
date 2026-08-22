@@ -39,27 +39,27 @@ export function BudgetOverview({ trip }: BudgetOverviewProps) {
       {/* Top Stat Highlights */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Estimated Cost */}
-        <Card className="p-5 bg-white border-[#E7E2D8]">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E] block mb-1">
+        <Card className="p-5 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E] dark:text-[#7A746B] block mb-1">
             Total Estimated Cost
           </span>
-          <div className="text-2xl font-black text-[#181818]">
+          <div className="text-2xl font-black text-[#181818] dark:text-[#F5F3EF]">
             {formatCurrency(totalCost, currency)}
           </div>
-          <p className="text-[11px] text-[#6B655E] mt-1">
+          <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
             {budgetPercentage}% of target budget
           </p>
         </Card>
 
         {/* Target Budget Cap with quick edit */}
-        <Card className="p-5 bg-white border-[#E7E2D8]">
+        <Card className="p-5 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E]">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E] dark:text-[#7A746B]">
               Target Spending Cap
             </span>
             <button
               onClick={() => setIsEditingTarget(!isEditingTarget)}
-              className="text-[#76546F] hover:text-[#181818] text-xs font-semibold"
+              className="text-[#76546F] dark:text-[#B88BAF] hover:text-[#181818] dark:hover:text-[#F5F3EF] text-xs font-semibold cursor-pointer"
             >
               {isEditingTarget ? "Cancel" : <Edit3 className="w-3.5 h-3.5" />}
             </button>
@@ -71,62 +71,64 @@ export function BudgetOverview({ trip }: BudgetOverviewProps) {
                 type="number"
                 value={customTarget}
                 onChange={(e) => setCustomTarget(Number(e.target.value))}
-                className="w-full px-2 py-1 text-sm border rounded-lg"
+                className="w-full px-2 py-1 text-sm border border-[#E7E2D8] dark:border-[#33302B] rounded-lg bg-white dark:bg-[#24221E] text-[#181818] dark:text-[#F5F3EF]"
               />
               <button
                 onClick={handleSaveTarget}
-                className="p-1.5 rounded-lg bg-[#F4A62A] text-[#181818]"
+                className="p-1.5 rounded-lg bg-[#F4A62A] text-[#181818] cursor-pointer"
               >
                 <Check className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            <div className="text-2xl font-black text-[#76546F]">
+            <div className="text-2xl font-black text-[#76546F] dark:text-[#B88BAF]">
               {formatCurrency(trip.budget.targetBudget, currency)}
             </div>
           )}
-          <p className="text-[11px] text-[#6B655E] mt-1">User planned limit</p>
+          <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">User planned limit</p>
         </Card>
 
         {/* Remaining Budget / Overrun */}
         <Card
           className={`p-5 border ${
-            remaining >= 0 ? "bg-[#EDF7F2] border-[#BDE3CF]" : "bg-[#FDF1EE] border-[#F8CEC4]"
+            remaining >= 0
+              ? "bg-[#EDF7F2] dark:bg-[#102318] border-[#BDE3CF] dark:border-[#1E4B33]"
+              : "bg-[#FDF1EE] dark:bg-[#2B1412] border-[#F8CEC4] dark:border-[#52221D]"
           }`}
         >
-          <span className="text-[11px] font-bold uppercase tracking-wider block mb-1 text-[#6B655E]">
+          <span className="text-[11px] font-bold uppercase tracking-wider block mb-1 text-[#6B655E] dark:text-[#A8A196]">
             {remaining >= 0 ? "Remaining Runway" : "Budget Overrun"}
           </span>
           <div
             className={`text-2xl font-black ${
-              remaining >= 0 ? "text-[#1B8755]" : "text-[#C84B31]"
+              remaining >= 0 ? "text-[#1B8755] dark:text-[#34D399]" : "text-[#C84B31] dark:text-[#F87171]"
             }`}
           >
             {formatCurrency(Math.abs(remaining), currency)}
           </div>
-          <p className="text-[11px] text-[#6B655E] mt-1">
+          <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
             {remaining >= 0 ? "Available for discretionary spend" : "Exceeds desired threshold"}
           </p>
         </Card>
 
         {/* Average Daily Spend */}
-        <Card className="p-5 bg-white border-[#E7E2D8]">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E] block mb-1">
+        <Card className="p-5 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#9E978E] dark:text-[#7A746B] block mb-1">
             Average Daily Cost
           </span>
-          <div className="text-2xl font-black text-[#181818]">
+          <div className="text-2xl font-black text-[#181818] dark:text-[#F5F3EF]">
             {formatCurrency(avgDaily, currency)}
-            <span className="text-xs font-normal text-[#9E978E]">/day</span>
+            <span className="text-xs font-normal text-[#9E978E] dark:text-[#7A746B]">/day</span>
           </div>
-          <p className="text-[11px] text-[#6B655E] mt-1">
+          <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] mt-1">
             Calculated across {trip.days.length} total days
           </p>
         </Card>
       </div>
 
       {/* Progress Bar */}
-      <Card className="p-5 bg-white border-[#E7E2D8]">
-        <div className="flex items-center justify-between text-xs font-bold text-[#181818] mb-2">
+      <Card className="p-5 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B]">
+        <div className="flex items-center justify-between text-xs font-bold text-[#181818] dark:text-[#F5F3EF] mb-2">
           <span>Overall Budget Utilization</span>
           <span>{budgetPercentage}%</span>
         </div>

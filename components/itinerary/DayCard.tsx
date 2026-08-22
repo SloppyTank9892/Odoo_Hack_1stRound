@@ -36,32 +36,32 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
       <div className="timeline-connector group-last/day:hidden" />
 
       {/* Timeline Day Pin */}
-      <div className="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-[#181818] border-2 border-white text-white flex items-center justify-center text-[10px] font-bold shadow-xs z-10">
+      <div className="absolute left-0 top-1.5 w-6 h-6 rounded-full bg-[#181818] dark:bg-[#F4A62A] border-2 border-white dark:border-[#1C1B18] text-white dark:text-[#181818] flex items-center justify-center text-[10px] font-bold shadow-xs z-10">
         {day.dayNumber}
       </div>
 
-      <Card className="bg-white border-[#E7E2D8] p-4 sm:p-6 shadow-xs">
+      <Card className="bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B] p-4 sm:p-6 shadow-xs transition-colors">
         {/* Day Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E7E2D8]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E7E2D8] dark:border-[#33302B]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xs font-black uppercase tracking-wider text-[#B86E00] bg-[#FEF7EC] px-2.5 py-1 rounded-lg border border-[#FCD89C]">
+            <span className="text-xs font-black uppercase tracking-wider text-[#B86E00] dark:text-[#F4A62A] bg-[#FEF7EC] dark:bg-[#2B2113] px-2.5 py-1 rounded-lg border border-[#FCD89C] dark:border-[#5E431E]">
               Day {day.dayNumber}
             </span>
-            <h4 className="text-base sm:text-lg font-bold font-editorial text-[#181818]">
+            <h4 className="text-base sm:text-lg font-bold font-editorial text-[#181818] dark:text-[#F5F3EF]">
               {day.cityName}{" "}
-              <span className="text-xs font-normal text-[#6B655E]">
+              <span className="text-xs font-normal text-[#6B655E] dark:text-[#A8A196]">
                 (Day {day.cityDayNumber})
               </span>
             </h4>
           </div>
 
           <div className="flex items-center gap-3 text-xs">
-            <span className="text-[#6B655E] flex items-center gap-1 font-medium">
-              <Calendar className="w-3.5 h-3.5 text-[#9E978E]" />
+            <span className="text-[#6B655E] dark:text-[#A8A196] flex items-center gap-1 font-medium">
+              <Calendar className="w-3.5 h-3.5 text-[#9E978E] dark:text-[#7A746B]" />
               {formattedDate}
             </span>
 
-            <span className="font-bold text-[#181818] bg-[#FAF9F5] px-2.5 py-1 rounded-lg border border-[#E7E2D8]">
+            <span className="font-bold text-[#181818] dark:text-[#F5F3EF] bg-[#FAF9F5] dark:bg-[#24221E] px-2.5 py-1 rounded-lg border border-[#E7E2D8] dark:border-[#33302B]">
               Est. Daily: {formatCurrency(day.estimatedDailyBudget, currency)}
             </span>
           </div>
@@ -69,7 +69,7 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
 
         {/* Notes or Guidance */}
         {day.notes && (
-          <p className="text-xs text-[#76546F] italic bg-[#F6F0F5]/60 px-3 py-1.5 rounded-lg border border-[#DBCBD8]/40 my-3">
+          <p className="text-xs text-[#76546F] dark:text-[#B88BAF] italic bg-[#F6F0F5]/60 dark:bg-[#2A1D28]/60 px-3 py-1.5 rounded-lg border border-[#DBCBD8]/40 dark:border-[#4D3349]/40 my-3">
             📍 {day.notes}
           </p>
         )}
@@ -87,8 +87,8 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
               />
             ))
           ) : (
-            <div className="text-center py-6 px-4 border border-dashed border-[#E7E2D8] rounded-xl bg-[#FAF9F5]/70">
-              <p className="text-xs text-[#9E978E] mb-2 font-medium">
+            <div className="text-center py-6 px-4 border border-dashed border-[#E7E2D8] dark:border-[#33302B] rounded-xl bg-[#FAF9F5]/70 dark:bg-[#201F1B]/70">
+              <p className="text-xs text-[#9E978E] dark:text-[#7A746B] mb-2 font-medium">
                 No activities scheduled for Day {day.dayNumber} yet.
               </p>
               <Button
@@ -105,7 +105,7 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
 
         {/* Day Footer Action */}
         <div className="pt-2 flex items-center justify-between">
-          <span className="text-[11px] text-[#9E978E]">
+          <span className="text-[11px] text-[#9E978E] dark:text-[#7A746B]">
             {day.activities.length} planned · {formatCurrency(dailyActivitiesCost, currency)} activities spend
           </span>
 
@@ -114,7 +114,7 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
             variant="ghost"
             onClick={() => setIsAddDrawerOpen(true)}
             leftIcon={<Plus className="w-3.5 h-3.5 text-[#F4A62A]" />}
-            className="text-xs font-bold text-[#181818] hover:text-[#F4A62A]"
+            className="text-xs font-bold text-[#181818] dark:text-[#F5F3EF] hover:text-[#F4A62A] dark:hover:text-[#F4A62A]"
           >
             + Add Activity
           </Button>

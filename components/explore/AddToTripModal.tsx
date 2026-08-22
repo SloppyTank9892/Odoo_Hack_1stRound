@@ -114,15 +114,15 @@ export function AddToTripModal({
     >
       <div className="space-y-4">
         {/* Selected Item Preview */}
-        <div className="p-3 bg-[#FAF9F5] rounded-xl border border-[#E7E2D8] flex items-center gap-3">
+        <div className="p-3 bg-[#FAF9F5] dark:bg-[#24221E] rounded-xl border border-[#E7E2D8] dark:border-[#33302B] flex items-center gap-3">
           <img
             src={item.image}
             alt={item.name}
-            className="w-12 h-12 rounded-lg object-cover border border-[#E7E2D8] shrink-0"
+            className="w-12 h-12 rounded-lg object-cover border border-[#E7E2D8] dark:border-[#33302B] shrink-0"
           />
           <div className="min-w-0">
-            <h4 className="font-bold text-xs sm:text-sm text-[#181818] truncate">{item.name}</h4>
-            <p className="text-[11px] text-[#6B655E] truncate">
+            <h4 className="font-bold text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] truncate">{item.name}</h4>
+            <p className="text-[11px] text-[#6B655E] dark:text-[#A8A196] truncate">
               {"country" in item ? `${item.region}, ${item.country}` : `${item.cityName} · ${item.category}`}
             </p>
           </div>
@@ -130,29 +130,29 @@ export function AddToTripModal({
 
         {/* Target Trip Selection */}
         {isInsideTripWorkspace && targetTrip ? (
-          /* Contextual Trip Badge (When already inside a workspace, skip dropdown entirely) */
-          <div className="p-3 bg-[#FEF7EC] rounded-xl border border-[#FCD89C] flex items-center justify-between">
+          /* Contextual Trip Badge */
+          <div className="p-3 bg-[#FEF7EC] dark:bg-[#2B2113] rounded-xl border border-[#FCD89C] dark:border-[#5E431E] flex items-center justify-between">
             <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#B86E00] block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#B86E00] dark:text-[#F4A62A] block">
                 Destination Trip (Current Workspace)
               </span>
-              <h5 className="font-bold text-xs sm:text-sm text-[#181818] truncate">
+              <h5 className="font-bold text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] truncate">
                 📍 {targetTrip.name}
               </h5>
             </div>
-            <span className="text-[11px] font-semibold text-[#76546F] shrink-0">
+            <span className="text-[11px] font-semibold text-[#76546F] dark:text-[#B88BAF] shrink-0">
               {targetTrip.days.length} Days · {targetTrip.stops.length} Cities
             </span>
           </div>
         ) : (
-          /* Trip Selector: Defaulted to Active Trip */
+          /* Trip Selector */
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider">
+              <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider">
                 Select Destination Trip
               </label>
               {activeTrip && selectedTripId === activeTrip.id && (
-                <span className="text-[10px] font-bold text-[#B86E00] bg-[#FEF7EC] px-1.5 py-0.5 rounded border border-[#FCD89C]">
+                <span className="text-[10px] font-bold text-[#B86E00] dark:text-[#F4A62A] bg-[#FEF7EC] dark:bg-[#2B2113] px-1.5 py-0.5 rounded border border-[#FCD89C] dark:border-[#5E431E]">
                   Default: Active Trip
                 </span>
               )}
@@ -160,10 +160,10 @@ export function AddToTripModal({
             <select
               value={selectedTripId}
               onChange={(e) => setSelectedTripId(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm font-semibold text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm font-semibold text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             >
               {trips.map((t) => (
-                <option key={t.id} value={t.id}>
+                <option key={t.id} value={t.id} className="dark:bg-[#1E1E1E]">
                   📍 {t.name} ({t.days.length} Days · {t.stops.length} Cities){t.id === activeTrip?.id ? " — (Active)" : ""}
                 </option>
               ))}
@@ -174,16 +174,16 @@ export function AddToTripModal({
         {/* If activity: Day Selection */}
         {type === "activity" && targetTrip && (
           <div>
-            <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-[#181818] dark:text-[#F5F3EF] uppercase tracking-wider mb-1.5">
               Assign to Day
             </label>
             <select
               value={selectedDayNumber}
               onChange={(e) => setSelectedDayNumber(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              className="w-full px-3.5 py-2.5 bg-[#FAF9F5] dark:bg-[#24221E] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
             >
               {targetTrip.days.map((d) => (
-                <option key={d.dayNumber} value={d.dayNumber}>
+                <option key={d.dayNumber} value={d.dayNumber} className="dark:bg-[#1E1E1E]">
                   Day {d.dayNumber} — {d.cityName} ({d.date})
                 </option>
               ))}
@@ -192,7 +192,7 @@ export function AddToTripModal({
         )}
 
         {/* Footer */}
-        <div className="pt-4 border-t border-[#E7E2D8] flex justify-end gap-2">
+        <div className="pt-4 border-t border-[#E7E2D8] dark:border-[#33302B] flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>
             Cancel
           </Button>

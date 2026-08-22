@@ -1,17 +1,24 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  /* Warm Modern Explorer Design System Tokens */
+  /* Typography Tokens */
+  --font-editorial: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-playfair: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+
+  /* Warm Modern Explorer (Light Mode) Design System Tokens */
   --bg-ivory: #F7F6F2;
   --bg-surface: #FFFFFF;
   --bg-surface-subtle: #FAF9F5;
   --border-warm: #E7E2D8;
   --border-warm-strong: #D5CEBF;
-
+  
   --text-primary: #181818;
   --text-secondary: #6B655E;
   --text-muted: #9E978E;
-
+  
   --amber-primary: #F4A62A;
   --amber-hover: #E09115;
   --amber-tint: #FEF7EC;
@@ -34,15 +41,55 @@
   --radius-xl: 24px;
 }
 
+/* Warm Midnight Explorer (Dark Mode) Design System Tokens */
+.dark, :root.dark {
+  --bg-ivory: #121210;
+  --bg-surface: #1C1B18;
+  --bg-surface-subtle: #24221E;
+  --border-warm: #33302B;
+  --border-warm-strong: #48443D;
+  
+  --text-primary: #F5F3EF;
+  --text-secondary: #A8A196;
+  --text-muted: #7A746B;
+  
+  --amber-primary: #F4A62A;
+  --amber-hover: #F7B74A;
+  --amber-tint: #2B2113;
+  --amber-border: #5E431E;
+
+  --purple-muted: #B88BAF;
+  --purple-tint: #2A1D28;
+  --purple-border: #4D3349;
+
+  --emerald-success: #34D399;
+  --emerald-tint: #132D20;
+  --terracotta-danger: #F87171;
+  --terracotta-tint: #3A1713;
+  --cobalt-info: #60A5FA;
+  --cobalt-tint: #142847;
+}
+
 @layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     border-color: var(--border-warm);
   }
-
+  
   body {
     background-color: var(--bg-ivory);
     color: var(--text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Automatically apply Cormorant Garamond to headings everywhere */
+  h1, h2, h3, h4 {
+    font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+    letter-spacing: -0.01em;
   }
 }
 
@@ -51,25 +98,34 @@
   width: 6px;
   height: 6px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: #DDD7CB;
   border-radius: 9999px;
 }
-
+.dark ::-webkit-scrollbar-thumb {
+  background: #3A3731;
+}
 ::-webkit-scrollbar-thumb:hover {
   background: #C4BDAF;
 }
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #504C44;
+}
 
-/* Subtle glassmorphism and card elevation */
+/* Subtle card elevation */
 .card-warm {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-warm);
   box-shadow: 0 1px 3px 0 rgba(24, 24, 24, 0.03), 0 4px 12px -2px rgba(24, 24, 24, 0.04);
+}
+
+.dark .card-warm {
+  background-color: var(--bg-surface);
+  border-color: var(--border-warm);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
 }
 
 .card-warm-hover {
@@ -81,15 +137,23 @@
   box-shadow: 0 4px 6px -1px rgba(24, 24, 24, 0.05), 0 12px 24px -4px rgba(24, 24, 24, 0.08);
 }
 
+.dark .card-warm-hover:hover {
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.6);
+}
+
 .font-editorial {
-  font-family: var(--font-playfair), Georgia, serif;
+  font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, serif !important;
+}
+
+.font-serif {
+  font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, serif !important;
 }
 
 .timeline-connector {
   position: absolute;
   top: 24px;
-  bottom: -24px;
-  left: 19px;
+  bottom: -8px;
+  left: 11px;
   width: 2px;
   background-color: var(--border-warm);
 }

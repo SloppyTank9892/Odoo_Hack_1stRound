@@ -60,11 +60,11 @@ export default function ExplorePage() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-          <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818]">
+          <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818] dark:text-[#F5F3EF]">
             Global Discovery Hub
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-[#6B655E]">
+        <p className="text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196]">
           Explore iconic destinations, curated cultural tours, and local gastronomic adventures
         </p>
       </div>
@@ -72,16 +72,17 @@ export default function ExplorePage() {
       {/* Search & Main Tab Switcher */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-6">
         {/* Main Tab Pill */}
-        <div className="flex bg-white p-1 rounded-2xl border border-[#E7E2D8] shadow-2xs">
+        <div className="flex bg-white dark:bg-[#1C1B18] p-1 rounded-2xl border border-[#E7E2D8] dark:border-[#33302B] shadow-2xs">
           <button
             onClick={() => {
               setActiveTab("cities");
               setSelectedTag("all");
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === "cities"
-                ? "bg-[#181818] text-white shadow-xs"
-                : "text-[#6B655E] hover:text-[#181818]"
-              }`}
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "cities"
+                ? "bg-[#181818] dark:bg-[#F4A62A] text-white dark:text-[#181818] shadow-xs"
+                : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+            }`}
           >
             <Compass className="w-4 h-4" />
             <span>Destinations ({curatedDestinations.length})</span>
@@ -91,19 +92,20 @@ export default function ExplorePage() {
               setActiveTab("activities");
               setSelectedTag("all");
             }}
-            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === "activities"
-                ? "bg-[#181818] text-white shadow-xs"
-                : "text-[#6B655E] hover:text-[#181818]"
-              }`}
+            className={`flex items-center gap-2 px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === "activities"
+                ? "bg-[#181818] dark:bg-[#F4A62A] text-white dark:text-[#181818] shadow-xs"
+                : "text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF]"
+            }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Activities & Tours ({curatedActivities.length})</span>
+            <span>Activities &amp; Tours ({curatedActivities.length})</span>
           </button>
         </div>
 
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-[#9E978E] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#9E978E] dark:text-[#7A746B] absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
@@ -113,7 +115,7 @@ export default function ExplorePage() {
                 ? "Search by city name, country, or vibe..."
                 : "Search by activity, fortress, food tour..."
             }
-            className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] shadow-2xs"
+            className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1C1B18] border border-[#E7E2D8] dark:border-[#33302B] rounded-xl text-xs sm:text-sm text-[#181818] dark:text-[#F5F3EF] placeholder-[#9E978E] dark:placeholder-[#7A746B] focus:outline-none focus:ring-2 focus:ring-[#F4A62A] shadow-2xs"
           />
         </div>
       </div>
@@ -124,10 +126,11 @@ export default function ExplorePage() {
           <button
             key={tag}
             onClick={() => setSelectedTag(tag)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all shrink-0 ${selectedTag === tag
-                ? "bg-[#FEF7EC] text-[#B86E00] border border-[#FCD89C] shadow-2xs"
-                : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:bg-[#FAF9F5]"
-              }`}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all shrink-0 cursor-pointer ${
+              selectedTag === tag
+                ? "bg-[#FEF7EC] dark:bg-[#2B2113] text-[#B86E00] dark:text-[#F4A62A] border border-[#FCD89C] dark:border-[#5E431E] shadow-2xs"
+                : "bg-white dark:bg-[#1C1B18] text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF] border border-[#E7E2D8] dark:border-[#33302B] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E]"
+            }`}
           >
             {tag === "all" ? "All Categories" : tag}
           </button>
@@ -152,16 +155,16 @@ export default function ExplorePage() {
       {/* Empty State */}
       {((activeTab === "cities" && filteredCities.length === 0) ||
         (activeTab === "activities" && filteredActivities.length === 0)) && (
-          <Card className="text-center py-16 px-6 bg-white max-w-md mx-auto my-8">
-            <Compass className="w-12 h-12 text-[#9E978E] mx-auto mb-3" />
-            <h3 className="text-base font-bold text-[#181818] mb-1 font-editorial">
-              No matches found
-            </h3>
-            <p className="text-xs text-[#6B655E]">
-              Try searching for a different keyword or resetting your category filter.
-            </p>
-          </Card>
-        )}
+        <Card className="text-center py-16 px-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B] max-w-md mx-auto my-8">
+          <Compass className="w-12 h-12 text-[#9E978E] dark:text-[#7A746B] mx-auto mb-3" />
+          <h3 className="text-base font-bold text-[#181818] dark:text-[#F5F3EF] mb-1 font-editorial">
+            No matches found
+          </h3>
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196]">
+            Try searching for a different keyword or resetting your category filter.
+          </p>
+        </Card>
+      )}
 
       {/* Add To Trip Modal */}
       <AddToTripModal

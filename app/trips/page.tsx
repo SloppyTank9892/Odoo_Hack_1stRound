@@ -29,11 +29,11 @@ export default function MyTripsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="w-2.5 h-2.5 rounded-full bg-[#F4A62A]" />
-            <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold font-editorial text-[#181818] dark:text-[#F5F3EF]">
               My Trip Collection
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-[#6B655E]">
+          <p className="text-xs sm:text-sm text-[#6B655E] dark:text-[#A8A196]">
             {trips.length} active and planned journeys synchronized with your workspace
           </p>
         </div>
@@ -59,10 +59,11 @@ export default function MyTripsPage() {
           <button
             key={tab.id}
             onClick={() => setFilterStatus(tab.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 ${filterStatus === tab.id
-                ? "bg-[#181818] text-white shadow-xs"
-                : "bg-white text-[#6B655E] hover:text-[#181818] border border-[#E7E2D8] hover:bg-[#FAF9F5]"
-              }`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+              filterStatus === tab.id
+                ? "bg-[#181818] dark:bg-[#F4A62A] text-white dark:text-[#181818] shadow-xs"
+                : "bg-white dark:bg-[#1C1B18] text-[#6B655E] dark:text-[#A8A196] hover:text-[#181818] dark:hover:text-[#F5F3EF] border border-[#E7E2D8] dark:border-[#33302B] hover:bg-[#FAF9F5] dark:hover:bg-[#24221E]"
+            }`}
           >
             {tab.label}
           </button>
@@ -77,14 +78,14 @@ export default function MyTripsPage() {
           ))}
         </div>
       ) : (
-        <Card className="text-center py-16 px-6 bg-white max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-full bg-[#FEF7EC] text-[#F4A62A] flex items-center justify-center mx-auto mb-4 border border-[#FCD89C]">
+        <Card className="text-center py-16 px-6 bg-white dark:bg-[#1C1B18] border-[#E7E2D8] dark:border-[#33302B] max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-full bg-[#FEF7EC] dark:bg-[#2B2113] text-[#F4A62A] flex items-center justify-center mx-auto mb-4 border border-[#FCD89C] dark:border-[#5E431E]">
             <Compass className="w-8 h-8 stroke-[2]" />
           </div>
-          <h3 className="text-lg font-bold text-[#181818] mb-1 font-editorial">
+          <h3 className="text-lg font-bold text-[#181818] dark:text-[#F5F3EF] mb-1 font-editorial">
             No journeys found
           </h3>
-          <p className="text-xs text-[#6B655E] mb-6 max-w-xs mx-auto">
+          <p className="text-xs text-[#6B655E] dark:text-[#A8A196] mb-6 max-w-xs mx-auto">
             {searchQuery
               ? `No itineraries matching "${searchQuery}". Try a different city.`
               : "Your next grand adventure starts here. Plan a multi-city route in seconds."}
