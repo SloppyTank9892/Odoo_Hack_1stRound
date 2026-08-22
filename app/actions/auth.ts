@@ -46,7 +46,6 @@ export async function getAuthUser(): Promise<
 
     const cookieStore = await cookies()
     const isGuestCookie = cookieStore.get('gt_guest_mode')?.value === 'true'
-    const localSessionRaw = cookieStore.get('gt_user_session')?.value
 
     if (user) {
       const { data: profile } = await supabase
@@ -63,34 +62,6 @@ export async function getAuthUser(): Promise<
           profile: profile || null,
           isGuest: isGuestCookie || user.email === 'guest.explorer@globetrotter.travel',
         },
-      }
-    }
-
-    if (localSessionRaw) {
-      try {
-        const parsed: LocalSessionUser = JSON.parse(localSessionRaw)
-        return {
-          success: true,
-          data: {
-            id: parsed.id || 'user-local',
-            email: parsed.email,
-            profile: {
-              id: parsed.id || 'user-local',
-              first_name: parsed.first_name || parsed.email?.split('@')[0] || 'Traveler',
-              last_name: parsed.last_name || '',
-              phone_number: parsed.phone_number || null,
-              city: parsed.city || 'Global',
-              country: parsed.country || 'Earth',
-              bio: parsed.bio || 'Passionate traveler exploring the world.',
-              avatar_url: parsed.avatar_url || null,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-            isGuest: false,
-          },
-        }
-      } catch {
-        // Continue to guest check
       }
     }
 
@@ -154,15 +125,13 @@ export async function getProfile(
 // ---------------------------------------------------------------------------
 
 /**
- * Creates a new user account with resilient Supabase auth and automatic rate-limit bypass.
+ * Creates a new user account with Supabase auth.
+ * Returns an explicit error if Supabase fails or if email verification is required.
  */
 export async function signUp(
   formData: FormData
 ): Promise<ActionResult<{ userId: string }>> {
   try {
-    const cookieStore = await cookies()
-    cookieStore.delete('gt_guest_mode')
-
     const rawEmail = String(formData.get('email') ?? '').trim()
     const email = rawEmail.toLowerCase()
     const password = String(formData.get('password') ?? '')
@@ -182,6 +151,13 @@ export async function signUp(
       return { success: false, error: 'Password must be at least 6 characters long.' }
     }
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return {
+        success: false,
+        error: 'Supabase is not configured. Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY in environment variables.',
+      }
+    }
+
     const supabase = await createClient()
 
     // 1. Attempt Supabase Auth Sign Up
@@ -196,105 +172,72 @@ export async function signUp(
       },
     })
 
-    // If Supabase encounters an error (rate limit, mailer refusal, existing user, etc.)
     if (error) {
-      const lowerErr = error.message.toLowerCase()
-
-      // If user was already created, try immediate sign in
-      const { data: signInData } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInData?.user) {
-        cookieStore.set(
-          'gt_user_session',
-          JSON.stringify({
-            id: signInData.user.id,
-            email,
-            first_name,
-            last_name,
-          }),
-          { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', httpOnly: true }
-        )
-        revalidatePath('/', 'layout')
-        return { success: true, data: { userId: signInData.user.id } }
-      }
-
-      // If Supabase rate limit was hit, seamlessly grant a verified local user session
-      // so the user can test and use the application without mailer limits
-      if (
-        lowerErr.includes('rate limit') ||
-        lowerErr.includes('over_email_send_rate_limit') ||
-        lowerErr.includes('email address is invalid')
-      ) {
-        const localUserId = `user-${Date.now()}`
-        cookieStore.set(
-          'gt_user_session',
-          JSON.stringify({
-            id: localUserId,
-            email,
-            first_name: first_name || email.split('@')[0],
-            last_name,
-          }),
-          { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', httpOnly: true }
-        )
-        revalidatePath('/', 'layout')
-        return { success: true, data: { userId: localUserId } }
-      }
-
       return { success: false, error: error.message }
     }
 
-    // If Supabase returns empty identities (user already registered in DB)
+    // Check if user already exists (Supabase returns empty identities for duplicate signups)
     if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-      const { data: signInData } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInData?.user) {
-        cookieStore.set(
-          'gt_user_session',
-          JSON.stringify({
-            id: signInData.user.id,
-            email,
-            first_name,
-            last_name,
-          }),
-          { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', httpOnly: true }
-        )
-        revalidatePath('/', 'layout')
-        return { success: true, data: { userId: signInData.user.id } }
-      }
-
       return {
         success: false,
         error: 'An account with this email already exists. Please switch to the Sign In tab.',
       }
     }
 
-    const userId = data.user?.id || `user-${Date.now()}`
-
-    // Auto-login to obtain session
-    if (!data.session) {
-      await supabase.auth.signInWithPassword({ email, password })
+    if (!data.user) {
+      return { success: false, error: 'Failed to create user account in Supabase.' }
     }
 
-    // Always establish user session cookie
-    cookieStore.set(
-      'gt_user_session',
-      JSON.stringify({
-        id: userId,
+    // 2. If session wasn't automatically returned (e.g. Email confirmation required in Supabase)
+    if (!data.session) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
-        first_name: first_name || email.split('@')[0],
-        last_name,
-      }),
-      { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', httpOnly: true }
-    )
+        password,
+      })
+
+      if (signInError) {
+        const lowerErr = signInError.message.toLowerCase()
+        if (lowerErr.includes('email not confirmed') || lowerErr.includes('not confirmed')) {
+          return {
+            success: false,
+            error: 'Account created on Supabase! However, "Confirm email" is enabled in your Supabase project. To continue, verify your email or disable "Confirm email" in Supabase Dashboard > Authentication > Providers > Email.',
+          }
+        }
+        return {
+          success: false,
+          error: `Account created in Supabase, but could not establish active session: ${signInError.message}`,
+        }
+      }
+
+      if (!signInData?.session) {
+        return {
+          success: false,
+          error: 'Account created, but email confirmation is pending on Supabase. Please confirm your email in Supabase.',
+        }
+      }
+    }
+
+    // Ensure a profile row exists in public.profiles table
+    try {
+      await supabase.from('profiles').upsert(
+        {
+          id: data.user.id,
+          first_name: first_name || email.split('@')[0],
+          last_name: last_name || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      )
+    } catch {
+      // Non-blocking if table or trigger already handled it
+    }
+
+    const cookieStore = await cookies()
+    cookieStore.delete('gt_guest_mode')
+    cookieStore.delete('gt_user_session')
 
     revalidatePath('/', 'layout')
-    return { success: true, data: { userId } }
+    return { success: true, data: { userId: data.user.id } }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An unexpected error occurred during sign up.'
     return { success: false, error: message }
@@ -306,15 +249,12 @@ export async function signUp(
 // ---------------------------------------------------------------------------
 
 /**
- * Signs in an existing user with email + password.
+ * Signs in an existing user with email + password using Supabase Auth.
  */
 export async function signIn(
   formData: FormData
 ): Promise<ActionResult<{ userId: string }>> {
   try {
-    const cookieStore = await cookies()
-    cookieStore.delete('gt_guest_mode')
-
     const rawEmail = String(formData.get('email') ?? '').trim()
     const email = rawEmail.toLowerCase()
     const password = String(formData.get('password') ?? '')
@@ -328,6 +268,13 @@ export async function signIn(
       return { success: false, error: 'Please enter a valid email address.' }
     }
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return {
+        success: false,
+        error: 'Supabase is not configured. Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY in environment variables.',
+      }
+    }
+
     const supabase = await createClient()
 
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -337,41 +284,28 @@ export async function signIn(
 
     if (error) {
       const lowerErr = error.message.toLowerCase()
-
-      // If email was unconfirmed or rate limited but user entered password
-      const localSessionRaw = cookieStore.get('gt_user_session')?.value
-      if (localSessionRaw) {
-        try {
-          const parsed: LocalSessionUser = JSON.parse(localSessionRaw)
-          if (parsed.email === email) {
-            revalidatePath('/', 'layout')
-            return { success: true, data: { userId: parsed.id } }
-          }
-        } catch {
-          // ignore
-        }
-      }
-
       if (lowerErr.includes('invalid login credentials') || lowerErr.includes('invalid_grant')) {
         return { success: false, error: 'Invalid email or password. Please check your credentials.' }
       }
-
+      if (lowerErr.includes('email not confirmed') || lowerErr.includes('not confirmed')) {
+        return {
+          success: false,
+          error: 'Your email has not been confirmed yet in Supabase. Please verify your email or disable "Confirm email" in Supabase Dashboard > Authentication > Providers > Email.',
+        }
+      }
       return { success: false, error: error.message }
     }
 
-    const userId = data.user?.id || `user-${Date.now()}`
+    if (!data.user || !data.session) {
+      return { success: false, error: 'Failed to establish Supabase authentication session.' }
+    }
 
-    cookieStore.set(
-      'gt_user_session',
-      JSON.stringify({
-        id: userId,
-        email,
-      }),
-      { path: '/', maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', httpOnly: true }
-    )
+    const cookieStore = await cookies()
+    cookieStore.delete('gt_guest_mode')
+    cookieStore.delete('gt_user_session')
 
     revalidatePath('/', 'layout')
-    return { success: true, data: { userId } }
+    return { success: true, data: { userId: data.user.id } }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'An unexpected error occurred during sign in.'
     return { success: false, error: message }

@@ -631,9 +631,14 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
         );
         setActiveTripId(dbTripId);
         return dbTripId;
+      } else if (!serverRes.success) {
+        // Rollback optimistic state
+        setTrips((prev) => prev.filter((t) => t.id !== newId));
+        throw new Error(serverRes.error || "Failed to save trip to Supabase database.");
       }
-    } catch (err) {
-      console.warn("Async server createTrip notice:", err);
+    } catch (err: unknown) {
+      setTrips((prev) => prev.filter((t) => t.id !== newId));
+      throw err;
     }
 
     return newId;

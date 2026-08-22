@@ -92,10 +92,11 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
       setStep(1);
 
       router.push(`/trips/${newId}`);
-    } catch {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Could not create trip in Supabase database. Please try again.";
       toast({
         title: "Creation Error",
-        description: "Could not create trip. Please try again.",
+        description: errorMsg,
         variant: "error",
       });
     } finally {

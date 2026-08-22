@@ -57,7 +57,25 @@ export async function createTrip(
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return { success: false, error: 'You must be logged in to create a trip.' }
+      return {
+        success: false,
+        error: 'You must be signed in with a valid Supabase account to save a trip. Please log in.',
+      }
+    }
+
+    // Ensure profile exists in public.profiles to satisfy foreign key constraint
+    try {
+      await supabase.from('profiles').upsert(
+        {
+          id: user.id,
+          first_name: user.user_metadata?.first_name || user.email?.split('@')[0] || 'Traveler',
+          last_name: user.user_metadata?.last_name || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' }
+      )
+    } catch (profileErr) {
+      console.warn('Profile sync notice:', profileErr)
     }
 
     const title = String(formData.get('title') ?? '').trim()
@@ -106,7 +124,10 @@ export async function createTrip(
       .single()
 
     if (tripError || !trip) {
-      return { success: false, error: tripError?.message || 'Failed to create trip.' }
+      return {
+        success: false,
+        error: `Supabase database error: ${tripError?.message || 'Failed to save trip. Ensure SQL migrations have been executed in Supabase.'}`,
+      }
     }
 
     // Handle optional initial stops
