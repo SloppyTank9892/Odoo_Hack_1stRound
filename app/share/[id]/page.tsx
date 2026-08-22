@@ -1,21 +1,65 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PublicStoryView } from "@/components/share/PublicStoryView";
 import { useTrips } from "@/context/TripContext";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
-import { Compass, ArrowLeft, Globe2 } from "lucide-react";
+import { Compass, ArrowLeft, Globe2, Loader2 } from "lucide-react";
+import { Trip } from "@/types/trip";
 
 export default function SharedTripPage() {
   const params = useParams();
   const router = useRouter();
-  const { getTripById, trips } = useTrips();
+  const { getTripById, refreshTrip, trips } = useTrips();
 
   const tripId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
-  const trip = getTripById(tripId) || trips[0];
+  const [liveTrip, setLiveTrip] = useState<Trip | undefined>(() => getTripById(tripId));
+  const [isFetching, setIsFetching] = useState<boolean>(!liveTrip);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadPublicTrip() {
+      const existing = getTripById(tripId);
+      if (existing) {
+        if (mounted) {
+          setLiveTrip(existing);
+          setIsFetching(false);
+        }
+        return;
+      }
+
+      if (tripId) {
+        setIsFetching(true);
+        const fetched = await refreshTrip(tripId);
+        if (mounted) {
+          setLiveTrip(fetched);
+          setIsFetching(false);
+        }
+      }
+    }
+    loadPublicTrip();
+    return () => {
+      mounted = false;
+    };
+  }, [tripId, getTripById, refreshTrip]);
+
+  const trip = liveTrip || getTripById(tripId) || (tripId === "rajasthan-explorer" ? trips[0] : undefined);
+
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-[#F7F6F2] flex flex-col items-center justify-center text-[#181818]">
+        <div className="p-8 rounded-3xl bg-white border border-[#E7E2D8] shadow-sm flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-[#F4A62A] animate-spin" />
+          <p className="text-xs font-bold uppercase tracking-wider text-[#6B655E]">
+            Loading Public Story...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!trip) {
     return (

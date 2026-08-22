@@ -31,7 +31,7 @@ export function TripWorkspaceHeader({
   activeTab,
   onTabChange,
 }: TripWorkspaceHeaderProps) {
-  const { currency, lastRecalculatedField } = useTrips();
+  const { currency, lastRecalculatedField, toggleTripPublic } = useTrips();
   const totalCost = calculateTripTotalCost(trip);
   const budgetPercentage = calculateBudgetPercentage(trip);
   const totalDays = trip.days.length;
@@ -56,6 +56,18 @@ export function TripWorkspaceHeader({
         </Link>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggleTripPublic(trip.id)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors ${
+              trip.isPublic
+                ? "bg-[#EDF7F2] text-[#1B8755] border-[#B7E4C7] hover:bg-[#D8F3DC]"
+                : "bg-[#FAF9F5] text-[#6B655E] border-[#E7E2D8] hover:bg-[#EFECE6]"
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{trip.isPublic ? "Public (Live)" : "Make Public"}</span>
+          </button>
+
           <Link
             href={`/share/${trip.id}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FEF7EC] text-[#B86E00] hover:bg-[#FCD89C]/50 rounded-xl text-xs font-bold border border-[#FCD89C] transition-colors"

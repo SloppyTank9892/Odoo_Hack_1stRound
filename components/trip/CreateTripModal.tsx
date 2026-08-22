@@ -8,7 +8,7 @@ import { mockDestinations } from "@/data/mockDestinations";
 import { CityDiscovery } from "@/types/trip";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
-import { Sparkles, Calendar, MapPin, Check } from "lucide-react";
+import { Sparkles, Calendar, MapPin, Check, Image as ImageIcon, Loader2, IndianRupee } from "lucide-react";
 
 interface CreateTripModalProps {
   isOpen: boolean;
@@ -17,13 +17,17 @@ interface CreateTripModalProps {
 
 export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
   const router = useRouter();
-  const { createNewTrip } = useTrips();
+  const { createNewTrip, currency } = useTrips();
   const { toast } = useToast();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [tripName, setTripName] = useState("");
   const [tagline, setTagline] = useState("");
   const [startDate, setStartDate] = useState("2026-10-15");
+  const [targetBudget, setTargetBudget] = useState(60000);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedCities, setSelectedCities] = useState<CityDiscovery[]>([
     mockDestinations[0], // Jaipur
     mockDestinations[1], // Udaipur
@@ -39,29 +43,52 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
     }
   };
 
-  const handleCreate = () => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCreate = async () => {
     if (!tripName.trim()) return;
 
-    const newId = createNewTrip(
-      tripName.trim(),
-      tagline.trim() || `Exploring ${selectedCities.map((c) => c.name).join(", ")}`,
-      startDate,
-      selectedCities
-    );
+    setIsSubmitting(true);
+    try {
+      const newId = await createNewTrip({
+        name: tripName.trim(),
+        tagline: tagline.trim() || `Exploring ${selectedCities.map((c) => c.name).join(", ")}`,
+        startDate,
+        initialCities: selectedCities,
+        coverFile,
+        targetBudget,
+      });
 
-    toast({
-      title: "Trip Created!",
-      description: `${tripName} is ready in your Trip Workspace.`,
-      variant: "success",
-    });
+      toast({
+        title: "Trip Created!",
+        description: `${tripName} is ready in your Trip Workspace.`,
+        variant: "success",
+      });
 
-    onClose();
-    // Reset state
-    setTripName("");
-    setTagline("");
-    setStep(1);
+      onClose();
+      // Reset state
+      setTripName("");
+      setTagline("");
+      setCoverFile(null);
+      setCoverPreview(null);
+      setStep(1);
 
-    router.push(`/trips/${newId}`);
+      router.push(`/trips/${newId}`);
+    } catch (err) {
+      toast({
+        title: "Creation Error",
+        description: "Could not create trip. Please try again.",
+        variant: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -81,7 +108,7 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-              Trip Title
+              Trip Title *
             </label>
             <input
               type="text"
@@ -106,18 +133,62 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
             />
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Departure Start Date
+              </label>
+              <div className="relative">
+                <Calendar className="w-4 h-4 text-[#9E978E] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Target Budget ({currency})
+              </label>
+              <input
+                type="number"
+                min="5000"
+                step="5000"
+                value={targetBudget}
+                onChange={(e) => setTargetBudget(Number(e.target.value))}
+                className="w-full px-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-              Departure Start Date
+              Custom Cover Photo (Optional)
             </label>
-            <div className="relative">
-              <Calendar className="w-4 h-4 text-[#9E978E] absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
-              />
+            <div className="flex items-center gap-3">
+              {coverPreview ? (
+                <img
+                  src={coverPreview}
+                  alt="Cover preview"
+                  className="w-14 h-14 rounded-xl object-cover border border-[#E7E2D8]"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-xl bg-[#FAF9F5] border border-dashed border-[#DDD7CB] flex items-center justify-center text-[#9E978E]">
+                  <ImageIcon className="w-6 h-6" />
+                </div>
+              )}
+              <label className="cursor-pointer px-3.5 py-2 rounded-xl bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] text-xs font-bold text-[#181818] transition-colors shadow-2xs">
+                <span>{coverFile ? "Change Image" : "Upload Cover Image"}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
 
@@ -184,8 +255,12 @@ export function CreateTripModal({ isOpen, onClose }: CreateTripModalProps) {
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button onClick={handleCreate} rightIcon={<MapPin className="w-4 h-4" />}>
-                Launch Workspace
+              <Button
+                onClick={handleCreate}
+                disabled={isSubmitting}
+                rightIcon={isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
+              >
+                {isSubmitting ? "Creating..." : "Launch Workspace"}
               </Button>
             </div>
           </div>

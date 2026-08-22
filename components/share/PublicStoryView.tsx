@@ -38,14 +38,14 @@ export function PublicStoryView({ trip }: PublicStoryViewProps) {
   const totalCost = calculateTripTotalCost(trip);
   const totalDays = trip.days.length;
 
-  const handleCopyTrip = () => {
+  const handleCopyTrip = async () => {
     confetti({
       particleCount: 75,
       spread: 70,
       origin: { y: 0.6 },
     });
 
-    const newTrip = copyTrip(trip.id);
+    const newTrip = await copyTrip(trip.id);
     setIsCopied(true);
 
     toast({

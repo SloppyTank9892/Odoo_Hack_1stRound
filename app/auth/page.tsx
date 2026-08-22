@@ -1,27 +1,91 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Globe2, Sparkles, ArrowRight, ShieldCheck, Check } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Globe2, Sparkles, ArrowRight, ShieldCheck, Check, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
+import { signIn, signUp } from "@/app/actions/auth";
 
-export default function AuthPage() {
+function AuthFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const { toast } = useToast();
-  const [mode, setMode] = useState<"login" | "signup">("login");
-  const [email, setEmail] = useState("aarav.roy@globetrotter.travel");
-  const [password, setPassword] = useState("••••••••••••");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("aarav.roy@globetrotter.travel");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: mode === "login" ? "Welcome back, Aarav!" : "Account Created!",
-      description: "Entering your personalized travel workspace...",
-      variant: "success",
-    });
-    router.push("/");
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", password);
+    if (mode === "signup") {
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+    }
+
+    try {
+      if (mode === "login") {
+        const result = await signIn(formData);
+        if (!result.success) {
+          setErrorMessage(result.error || "Authentication failed.");
+          toast({
+            title: "Sign In Failed",
+            description: result.error || "Please check your credentials and try again.",
+            variant: "error",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        toast({
+          title: "Welcome Back!",
+          description: "Entering your personalized travel workspace...",
+          variant: "success",
+        });
+      } else {
+        const result = await signUp(formData);
+        if (!result.success) {
+          setErrorMessage(result.error || "Sign-up failed.");
+          toast({
+            title: "Account Creation Failed",
+            description: result.error || "Could not complete account setup.",
+            variant: "error",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        toast({
+          title: "Account Created!",
+          description: "Welcome to GlobeTrotter! Launching your workspace...",
+          variant: "success",
+        });
+      }
+
+      router.push(redirectTo);
+      router.refresh();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
+      setErrorMessage(msg);
+      toast({
+        title: "Authentication Error",
+        description: msg,
+        variant: "error",
+      });
+      setIsLoading(false);
+    }
   };
 
   const handleGuestDemo = () => {
@@ -30,7 +94,7 @@ export default function AuthPage() {
       description: "Full access granted to all GlobeTrotter workspaces.",
       variant: "info",
     });
-    router.push("/");
+    router.push(redirectTo);
   };
 
   return (
@@ -101,7 +165,11 @@ export default function AuthPage() {
           {/* Mode Switcher Tabs */}
           <div className="flex bg-[#FAF9F5] p-1 rounded-xl border border-[#E7E2D8] mb-6">
             <button
-              onClick={() => setMode("login")}
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setErrorMessage(null);
+              }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
                 mode === "login" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
               }`}
@@ -109,7 +177,11 @@ export default function AuthPage() {
               Sign In
             </button>
             <button
-              onClick={() => setMode("signup")}
+              type="button"
+              onClick={() => {
+                setMode("signup");
+                setErrorMessage(null);
+              }}
               className={`flex-1 py-2 text-xs font-bold rounded-lg transition-colors ${
                 mode === "signup" ? "bg-white text-[#181818] shadow-2xs" : "text-[#6B655E]"
               }`}
@@ -118,8 +190,47 @@ export default function AuthPage() {
             </button>
           </div>
 
+          {/* Inline Error Message if any */}
+          {errorMessage && (
+            <div className="mb-4 p-3 rounded-xl bg-[#FFF5F5] border border-[#FED7D7] flex items-center gap-2 text-xs text-[#C53030]">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === "signup" && (
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="e.g. Aarav"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="e.g. Roy"
+                    className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1">
                 Email Address
@@ -129,6 +240,7 @@ export default function AuthPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -140,20 +252,35 @@ export default function AuthPage() {
               <input
                 type="password"
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
-            <Button size="lg" type="submit" className="w-full font-bold shadow-sm mt-2">
-              {mode === "login" ? "Sign In to Workspace" : "Get Started Free"}
+            <Button
+              size="lg"
+              type="submit"
+              disabled={isLoading}
+              className="w-full font-bold shadow-sm mt-2"
+              leftIcon={isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+            >
+              {isLoading
+                ? mode === "login"
+                  ? "Signing in..."
+                  : "Creating account..."
+                : mode === "login"
+                ? "Sign In to Workspace"
+                : "Get Started Free"}
             </Button>
           </form>
 
           {/* 1-Click Guest Bypass */}
           <div className="pt-6 mt-6 border-t border-[#E7E2D8] text-center">
             <button
+              type="button"
               onClick={handleGuestDemo}
               className="w-full py-2.5 px-4 bg-[#FEF7EC] hover:bg-[#FCD89C]/50 text-[#B86E00] border border-[#FCD89C] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2"
             >
@@ -162,11 +289,25 @@ export default function AuthPage() {
             </button>
 
             <p className="text-[11px] text-[#9E978E] mt-3">
-              Frontend prototype with live local state & mock datasets.
+              Full workspace access with live dynamic calculations & Supabase sync.
             </p>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F7F6F2] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-[#F4A62A] animate-spin" />
+        </div>
+      }
+    >
+      <AuthFormContent />
+    </Suspense>
   );
 }

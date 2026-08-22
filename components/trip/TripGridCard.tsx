@@ -35,11 +35,11 @@ export function TripGridCard({ trip }: TripGridCardProps) {
   const budgetPercentage = calculateBudgetPercentage(trip);
   const totalDays = trip.days.length;
 
-  const handleDuplicate = (e: React.MouseEvent) => {
+  const handleDuplicate = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowMenu(false);
-    const newTrip = copyTrip(trip.id);
+    const newTrip = await copyTrip(trip.id);
     confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
     toast({
       title: "Trip Duplicated!",

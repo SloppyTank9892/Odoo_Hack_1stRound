@@ -68,17 +68,23 @@ export function AddToTripModal({
       });
     } else {
       const act = item as ActivityDiscovery;
-      addActivityToDay(targetTrip.id, selectedDayNumber, {
-        name: act.name,
-        description: act.description,
-        category: act.category,
-        cost: act.cost,
-        durationMinutes: act.durationMinutes,
-        timeSlot: act.bestTimeOfDay === "Morning" ? "09:30" : act.bestTimeOfDay === "Afternoon" ? "14:00" : "18:30",
-        location: `${act.cityName}, Exploration Zone`,
-        image: act.image,
-        completed: false,
-      });
+      const targetDay = targetTrip.days.find((d) => d.dayNumber === selectedDayNumber);
+      addActivityToDay(
+        targetTrip.id,
+        selectedDayNumber,
+        {
+          name: act.name,
+          description: act.description,
+          category: act.category,
+          cost: act.cost,
+          durationMinutes: act.durationMinutes,
+          timeSlot: act.bestTimeOfDay === "Morning" ? "09:30" : act.bestTimeOfDay === "Afternoon" ? "14:00" : "18:30",
+          location: `${act.cityName}, Exploration Zone`,
+          image: act.image,
+          completed: false,
+        },
+        targetDay?.cityId
+      );
       toast({
         title: "Activity Scheduled!",
         description: `${act.name} was added to Day ${selectedDayNumber} of ${targetTrip.name}.`,

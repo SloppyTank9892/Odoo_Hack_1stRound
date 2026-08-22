@@ -221,3 +221,11 @@ export type UpdateStopInput = Database['public']['Tables']['trip_stops']['Update
 
 /** Payload for adding an activity to a stop */
 export type AddActivityInput = Database['public']['Tables']['activities']['Insert']
+
+// =============================================================================
+// Standard Action Response Envelope
+// =============================================================================
+
+export type ActionResponse<T = undefined> =
+  | { success: true; data: T; error?: never }
+  | { success: false; error: string; data?: never }

@@ -19,7 +19,7 @@ export function MobileBottomNav({ onOpenCreateTrip }: MobileBottomNavProps) {
     { name: "Home", href: "/", icon: Compass },
     { name: "Trips", href: "/trips", icon: MapPinned },
     { name: "Explore", href: "/explore", icon: Sparkles },
-    { name: "Story", href: `/share/${activeTrip.id}`, icon: BookOpen },
+    { name: "Story", href: `/share/${activeTrip?.id || "rajasthan-explorer"}`, icon: BookOpen },
   ];
 
   return (

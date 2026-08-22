@@ -25,6 +25,25 @@ interface DesktopSidebarProps {
 export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
   const pathname = usePathname();
   const { trips, activeTrip } = useTrips();
+  const [currentUser, setCurrentUser] = React.useState<{ name: string; avatarUrl?: string; initials: string } | null>(null);
+
+  React.useEffect(() => {
+    async function loadUser() {
+      const { getAuthUser } = await import("@/app/actions/auth");
+      const res = await getAuthUser();
+      if (res.success && res.data) {
+        const p = res.data.profile;
+        const name = p?.first_name ? `${p.first_name} ${p.last_name || ""}`.trim() : res.data.email?.split("@")[0] || "Explorer";
+        const initials = p?.first_name ? `${p.first_name.charAt(0)}${p.last_name?.charAt(0) || ""}`.toUpperCase() : "EX";
+        setCurrentUser({
+          name,
+          avatarUrl: p?.avatar_url || undefined,
+          initials,
+        });
+      }
+    }
+    loadUser();
+  }, []);
 
   const navItems = [
     { name: "Dashboard", href: "/", icon: Compass },
@@ -145,15 +164,23 @@ export function DesktopSidebar({ onOpenCreateTrip }: DesktopSidebarProps) {
 
       {/* User Profile Mini Footer - Permanently Anchored to Bottom */}
       <div className="mt-auto flex-shrink-0 p-4 border-t border-[#E7E2D8]/80 bg-white flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-full bg-[#76546F] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
-            AR
-          </div>
+        <Link href="/settings" className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity">
+          {currentUser?.avatarUrl ? (
+            <img
+              src={currentUser.avatarUrl}
+              alt={currentUser.name}
+              className="w-9 h-9 rounded-full object-cover border border-[#E7E2D8] shadow-2xs shrink-0"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-[#76546F] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+              {currentUser?.initials || "AR"}
+            </div>
+          )}
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#181818] truncate">Aarav Roy</p>
+            <p className="text-xs font-bold text-[#181818] truncate">{currentUser?.name || "Aarav Roy"}</p>
             <p className="text-[11px] text-[#9E978E] truncate">Pro Explorer</p>
           </div>
-        </div>
+        </Link>
       </div>
     </aside>
   );

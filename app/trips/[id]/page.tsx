@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, use } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { TripWorkspaceHeader } from "@/components/trip/TripWorkspaceHeader";
@@ -11,16 +11,60 @@ import { BudgetOverview } from "@/components/budget/BudgetOverview";
 import { useTrips } from "@/context/TripContext";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Compass, ArrowLeft } from "lucide-react";
+import { Compass, ArrowLeft, Loader2 } from "lucide-react";
+import { Trip } from "@/types/trip";
 
 export default function TripWorkspacePage() {
   const params = useParams();
   const router = useRouter();
-  const { getTripById, trips } = useTrips();
+  const { getTripById, refreshTrip, trips } = useTrips();
   const [activeTab, setActiveTab] = useState<"itinerary" | "calendar" | "budget" | "map">("itinerary");
 
   const tripId = typeof params?.id === "string" ? params.id : Array.isArray(params?.id) ? params.id[0] : "";
-  const trip = getTripById(tripId) || trips[0];
+  const [liveTrip, setLiveTrip] = useState<Trip | undefined>(() => getTripById(tripId));
+  const [isFetching, setIsFetching] = useState<boolean>(!liveTrip && Boolean(tripId));
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadTrip() {
+      const existing = getTripById(tripId);
+      if (existing) {
+        if (mounted) {
+          setLiveTrip(existing);
+          setIsFetching(false);
+        }
+        return;
+      }
+
+      if (tripId) {
+        setIsFetching(true);
+        const fetched = await refreshTrip(tripId);
+        if (mounted) {
+          setLiveTrip(fetched);
+          setIsFetching(false);
+        }
+      }
+    }
+    loadTrip();
+    return () => {
+      mounted = false;
+    };
+  }, [tripId, getTripById, refreshTrip]);
+
+  const trip = liveTrip || getTripById(tripId) || (tripId === "rajasthan-explorer" ? trips[0] : undefined);
+
+  if (isFetching) {
+    return (
+      <AppShell>
+        <div className="flex flex-col items-center justify-center py-24">
+          <Loader2 className="w-8 h-8 text-[#F4A62A] animate-spin mb-3" />
+          <p className="text-xs font-bold uppercase tracking-wider text-[#6B655E]">
+            Loading Trip Workspace...
+          </p>
+        </div>
+      </AppShell>
+    );
+  }
 
   if (!trip) {
     return (

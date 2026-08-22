@@ -128,6 +128,7 @@ export function DayCard({ trip, day, totalDays }: DayCardProps) {
         tripId={trip.id}
         dayNumber={day.dayNumber}
         cityName={day.cityName}
+        stopId={day.cityId}
       />
     </div>
   );

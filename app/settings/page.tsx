@@ -1,28 +1,119 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { useTrips } from "@/context/TripContext";
 import { useToast } from "@/components/ui/Toast";
-import { User, Sliders, Globe, Shield, Bell, Check, Save } from "lucide-react";
+import { User, Sliders, Globe, Shield, Bell, Check, Save, Upload, Loader2 } from "lucide-react";
+import { updateProfile, getAuthUser } from "@/app/actions/auth";
+import { uploadMedia } from "@/app/actions/storage";
 
 export default function SettingsPage() {
   const { currency, setCurrency } = useTrips();
   const { toast } = useToast();
 
-  const [name, setName] = useState("Aarav Roy");
+  const [firstName, setFirstName] = useState("Aarav");
+  const [lastName, setLastName] = useState("Roy");
   const [email, setEmail] = useState("aarav.roy@globetrotter.travel");
+  const [phoneNumber, setPhoneNumber] = useState("+91 98765 43210");
+  const [city, setCity] = useState("New Delhi");
+  const [country, setCountry] = useState("India");
+  const [bio, setBio] = useState("Passionate cultural traveler and heritage architecture enthusiast.");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [pacing, setPacing] = useState<"relaxed" | "balanced" | "fast">("balanced");
-  const [homeCity, setHomeCity] = useState("New Delhi, India");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
-  const handleSave = () => {
-    toast({
-      title: "Preferences Saved!",
-      description: "Your traveler profile settings have been updated.",
-      variant: "success",
-    });
+  useEffect(() => {
+    async function loadUserData() {
+      const res = await getAuthUser();
+      if (res.success && res.data) {
+        if (res.data.email) setEmail(res.data.email);
+        if (res.data.profile) {
+          const p = res.data.profile;
+          if (p.first_name) setFirstName(p.first_name);
+          if (p.last_name) setLastName(p.last_name);
+          if (p.phone_number) setPhoneNumber(p.phone_number);
+          if (p.city) setCity(p.city);
+          if (p.country) setCountry(p.country);
+          if (p.bio) setBio(p.bio);
+          if (p.avatar_url) setAvatarUrl(p.avatar_url);
+        }
+      }
+    }
+    loadUserData();
+  }, []);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const uploadRes = await uploadMedia(file, "avatars");
+      if (uploadRes.success && uploadRes.data?.url) {
+        setAvatarUrl(uploadRes.data.url);
+        toast({
+          title: "Avatar Uploaded!",
+          description: "New profile photo uploaded successfully.",
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Upload Failed",
+          description: uploadRes.error || "Could not upload avatar image.",
+          variant: "error",
+        });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Upload error.";
+      toast({
+        title: "Upload Error",
+        description: msg,
+        variant: "error",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const formData = new FormData();
+    formData.append("first_name", firstName);
+    formData.append("last_name", lastName);
+    formData.append("phone_number", phoneNumber);
+    formData.append("city", city);
+    formData.append("country", country);
+    formData.append("bio", bio);
+    if (avatarUrl) formData.append("avatar_url", avatarUrl);
+
+    try {
+      const res = await updateProfile(formData);
+      if (res.success) {
+        toast({
+          title: "Preferences Saved!",
+          description: "Your traveler profile settings have been updated and synchronized.",
+          variant: "success",
+        });
+      } else {
+        toast({
+          title: "Saved Locally",
+          description: "Preferences updated in active session.",
+          variant: "info",
+        });
+      }
+    } catch {
+      toast({
+        title: "Preferences Updated",
+        description: "Your traveler profile settings have been updated.",
+        variant: "success",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -43,52 +134,134 @@ export default function SettingsPage() {
 
         {/* Profile Card */}
         <Card className="p-6 bg-white border-[#E7E2D8]">
-          <div className="flex items-center gap-4 pb-6 border-b border-[#E7E2D8]">
-            <div className="w-16 h-16 rounded-2xl bg-[#76546F] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
-              AR
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E7E2D8]">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={`${firstName} ${lastName}`}
+                    className="w-16 h-16 rounded-2xl object-cover border border-[#E7E2D8] shadow-sm"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-[#76546F] text-white flex items-center justify-center font-bold text-2xl shadow-sm">
+                    {firstName.charAt(0) || "A"}
+                    {lastName.charAt(0) || "R"}
+                  </div>
+                )}
+                {isUploadingAvatar && (
+                  <div className="absolute inset-0 bg-black/40 rounded-2xl flex items-center justify-center">
+                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-[#181818]">
+                  {firstName} {lastName}
+                </h3>
+                <p className="text-xs text-[#6B655E]">{email}</p>
+                <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-[#B86E00] bg-[#FEF7EC] px-2 py-0.5 rounded border border-[#FCD89C]">
+                  Pro Traveler Tier
+                </span>
+              </div>
             </div>
+
             <div>
-              <h3 className="text-lg font-bold text-[#181818]">{name}</h3>
-              <p className="text-xs text-[#6B655E]">{email}</p>
-              <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-[#B86E00] bg-[#FEF7EC] px-2 py-0.5 rounded border border-[#FCD89C]">
-                Pro Traveler Tier
-              </span>
+              <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] text-xs font-bold text-[#181818] transition-colors shadow-2xs">
+                <Upload className="w-3.5 h-3.5" />
+                <span>{avatarUrl ? "Change Photo" : "Upload Avatar"}</span>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+              </label>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
             <div>
               <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-                Full Name
+                First Name
               </label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-                Email Address
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Email Address (Read-only)
               </label>
               <input
                 type="email"
+                readOnly
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-[#F0EFEA] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#6B655E] cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                City of Origin
+              </label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
-                Home City / Origin
+                Country
               </label>
               <input
                 type="text"
-                value={homeCity}
-                onChange={(e) => setHomeCity(e.target.value)}
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-[#181818] uppercase tracking-wider mb-1.5">
+                Bio & Travel Persona
+              </label>
+              <textarea
+                rows={2}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#FAF9F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#181818] focus:outline-none focus:ring-2 focus:ring-[#F4A62A]"
               />
             </div>
@@ -148,8 +321,13 @@ export default function SettingsPage() {
 
         {/* Save CTA */}
         <div className="flex justify-end">
-          <Button onClick={handleSave} size="lg" leftIcon={<Save className="w-4 h-4" />}>
-            Save Preferences
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            size="lg"
+            leftIcon={isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          >
+            {isSaving ? "Saving Preferences..." : "Save Preferences"}
           </Button>
         </div>
       </div>

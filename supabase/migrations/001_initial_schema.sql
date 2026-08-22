@@ -204,13 +204,14 @@ CREATE POLICY "Users can delete their own trips"
   USING (auth.uid() = user_id);
 
 -- ---- trip_stops ----
+DROP POLICY IF EXISTS "Public trip stops are viewable by all" ON public.trip_stops;
 DROP POLICY IF EXISTS "Users can view stops for their trips" ON public.trip_stops;
-CREATE POLICY "Users can view stops for their trips"
+CREATE POLICY "Stops are viewable if trip is public or user owns trip"
   ON public.trip_stops FOR SELECT
-  TO authenticated
+  TO anon, authenticated
   USING (
     trip_id IN (
-      SELECT id FROM public.trips WHERE user_id = auth.uid()
+      SELECT id FROM public.trips WHERE is_public = true OR user_id = auth.uid()
     )
   );
 
@@ -235,7 +236,7 @@ CREATE POLICY "Users can update stops for their trips"
   );
 
 DROP POLICY IF EXISTS "Users can delete stops for their trips" ON public.trip_stops;
-CREATE POLICY "Users can delete stops for their trips"
+CREATE POLICY "Users can delete their own stops"
   ON public.trip_stops FOR DELETE
   TO authenticated
   USING (
@@ -245,15 +246,16 @@ CREATE POLICY "Users can delete stops for their trips"
   );
 
 -- ---- activities ----
+DROP POLICY IF EXISTS "Public activities are viewable by all" ON public.activities;
 DROP POLICY IF EXISTS "Users can view activities for their trips" ON public.activities;
-CREATE POLICY "Users can view activities for their trips"
+CREATE POLICY "Activities are viewable if trip is public or user owns trip"
   ON public.activities FOR SELECT
-  TO authenticated
+  TO anon, authenticated
   USING (
     stop_id IN (
       SELECT ts.id FROM public.trip_stops ts
       JOIN public.trips t ON t.id = ts.trip_id
-      WHERE t.user_id = auth.uid()
+      WHERE t.is_public = true OR t.user_id = auth.uid()
     )
   );
 

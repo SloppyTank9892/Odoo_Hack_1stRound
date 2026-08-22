@@ -17,6 +17,7 @@ interface AddActivityDrawerProps {
   tripId: string;
   dayNumber: number;
   cityName: string;
+  stopId?: string;
 }
 
 export function AddActivityDrawer({
@@ -25,6 +26,7 @@ export function AddActivityDrawer({
   tripId,
   dayNumber,
   cityName,
+  stopId,
 }: AddActivityDrawerProps) {
   const { addActivityToDay, currency } = useTrips();
   const { toast } = useToast();
@@ -52,17 +54,22 @@ export function AddActivityDrawer({
   });
 
   const handleAddFromCatalog = (act: (typeof mockActivities)[0]) => {
-    addActivityToDay(tripId, dayNumber, {
-      name: act.name,
-      description: act.description,
-      category: act.category,
-      cost: act.cost,
-      durationMinutes: act.durationMinutes,
-      timeSlot: act.bestTimeOfDay === "Morning" ? "09:30" : act.bestTimeOfDay === "Afternoon" ? "14:00" : "18:30",
-      location: `${act.cityName}, Heritage Zone`,
-      image: act.image,
-      completed: false,
-    });
+    addActivityToDay(
+      tripId,
+      dayNumber,
+      {
+        name: act.name,
+        description: act.description,
+        category: act.category,
+        cost: act.cost,
+        durationMinutes: act.durationMinutes,
+        timeSlot: act.bestTimeOfDay === "Morning" ? "09:30" : act.bestTimeOfDay === "Afternoon" ? "14:00" : "18:30",
+        location: `${act.cityName}, Heritage Zone`,
+        image: act.image,
+        completed: false,
+      },
+      stopId
+    );
 
     toast({
       title: "Activity Added!",
@@ -77,17 +84,22 @@ export function AddActivityDrawer({
     e.preventDefault();
     if (!name.trim()) return;
 
-    addActivityToDay(tripId, dayNumber, {
-      name: name.trim(),
-      description: description.trim() || `Custom activity in ${cityName}`,
-      category,
-      cost: Number(cost) || 0,
-      durationMinutes: Number(durationMinutes) || 60,
-      timeSlot: timeSlot || "12:00",
-      location: location.trim() || cityName,
-      completed: false,
-      isCustom: true,
-    });
+    addActivityToDay(
+      tripId,
+      dayNumber,
+      {
+        name: name.trim(),
+        description: description.trim() || `Custom activity in ${cityName}`,
+        category,
+        cost: Number(cost) || 0,
+        durationMinutes: Number(durationMinutes) || 60,
+        timeSlot: timeSlot || "12:00",
+        location: location.trim() || cityName,
+        completed: false,
+        isCustom: true,
+      },
+      stopId
+    );
 
     toast({
       title: "Custom Activity Added!",
