@@ -29,7 +29,7 @@ interface PublicStoryViewProps {
 
 export function PublicStoryView({ trip }: PublicStoryViewProps) {
   const router = useRouter();
-  const { copyTrip, currency } = useTrips();
+  const { copyTrip, currency, setCurrency } = useTrips();
   const { toast } = useToast();
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -64,22 +64,68 @@ export function PublicStoryView({ trip }: PublicStoryViewProps) {
   return (
     <div className="min-h-screen bg-[#F7F6F2] text-[#181818]">
       {/* Top Editorial Navbar */}
-      <nav className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-[#E7E2D8] px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-[#F4A62A] flex items-center justify-center text-[#181818] shadow-xs">
-            <Globe2 className="w-5 h-5 stroke-[2.2]" />
-          </div>
-          <span className="font-bold text-sm tracking-tight text-[#181818]">
-            GlobeTrotter Story
-          </span>
-        </Link>
+      <nav className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-[#E7E2D8] px-4 sm:px-8 py-3 flex items-center justify-between gap-4">
+        {/* Brand & Explorer Links */}
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-xl bg-[#F4A62A] flex items-center justify-center text-[#181818] shadow-xs group-hover:scale-105 transition-transform duration-200">
+              <Globe2 className="w-5 h-5 stroke-[2.2]" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm tracking-tight text-[#181818]">
+                GlobeTrotter
+              </span>
+              <span className="hidden sm:inline-block text-[10px] uppercase font-bold bg-[#FEF7EC] text-[#B86E00] px-2 py-0.5 rounded-full border border-[#FCD89C]">
+                Public Story
+              </span>
+            </div>
+          </Link>
 
-        <div className="flex items-center gap-3">
+          {/* Quick Navigation Links */}
+          <div className="hidden md:flex items-center gap-1 pl-3 border-l border-[#E7E2D8] text-xs font-semibold text-[#6B655E]">
+            <Link
+              href="/explore"
+              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] hover:bg-[#FAF9F5] transition-colors"
+            >
+              Explore Hub
+            </Link>
+            <Link
+              href="/trips"
+              className="px-2.5 py-1.5 rounded-lg hover:text-[#181818] hover:bg-[#FAF9F5] transition-colors"
+            >
+              My Workspace
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Controls & Auth */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Currency Toggle */}
+          <div className="hidden sm:flex bg-[#FAF9F5] rounded-xl border border-[#E7E2D8] p-0.5 text-xs font-bold shadow-2xs">
+            <button
+              onClick={() => setCurrency("₹")}
+              className={`px-2 py-1 rounded-lg transition-colors ${
+                currency === "₹" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
+              }`}
+            >
+              ₹ INR
+            </button>
+            <button
+              onClick={() => setCurrency("$")}
+              className={`px-2 py-1 rounded-lg transition-colors ${
+                currency === "$" ? "bg-[#FEF7EC] text-[#B86E00] font-bold" : "text-[#9E978E] hover:text-[#181818]"
+              }`}
+            >
+              $ USD
+            </button>
+          </div>
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsShareModalOpen(true)}
             leftIcon={<Share2 className="w-3.5 h-3.5" />}
+            className="hidden xs:inline-flex"
           >
             Share
           </Button>
@@ -88,10 +134,18 @@ export function PublicStoryView({ trip }: PublicStoryViewProps) {
             size="sm"
             onClick={handleCopyTrip}
             leftIcon={isCopied ? <Check className="w-3.5 h-3.5 text-[#181818]" /> : <Copy className="w-3.5 h-3.5" />}
-            className="shadow-sm"
+            className="shadow-sm font-bold"
           >
-            {isCopied ? "Added to My Trips!" : "Copy This Trip"}
+            {isCopied ? "Added to My Trips!" : "Copy Trip"}
           </Button>
+
+          {/* Sign Up / Login Link */}
+          <Link
+            href="/auth"
+            className="text-xs font-bold text-[#181818] bg-[#FAF9F5] hover:bg-[#EFECE6] border border-[#E7E2D8] px-3 py-1.5 rounded-xl transition-colors shrink-0 shadow-2xs"
+          >
+            Sign In / Login
+          </Link>
         </div>
       </nav>
 

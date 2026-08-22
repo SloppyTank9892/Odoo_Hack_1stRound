@@ -7,7 +7,7 @@ import { useTrips } from "@/context/TripContext";
 import { Button } from "@/components/ui/Button";
 
 interface TopBarProps {
-  onOpenCreateTrip: () => void;
+  onOpenCreateTrip?: () => void;
 }
 
 export function TopBar({ onOpenCreateTrip }: TopBarProps) {
@@ -84,15 +84,17 @@ export function TopBar({ onOpenCreateTrip }: TopBarProps) {
         </div>
 
         {/* Plan Trip Button */}
-        <div className="hidden sm:block">
-          <Button
-            size="sm"
-            onClick={onOpenCreateTrip}
-            leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
-          >
-            Plan Trip
-          </Button>
-        </div>
+        {onOpenCreateTrip && (
+          <div className="hidden sm:block">
+            <Button
+              size="sm"
+              onClick={onOpenCreateTrip}
+              leftIcon={<Plus className="w-4 h-4 stroke-[2.5]" />}
+            >
+              Plan Trip
+            </Button>
+          </div>
+        )}
 
         {/* Auth / Guest Link */}
         <Link

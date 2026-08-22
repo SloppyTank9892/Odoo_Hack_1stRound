@@ -44,7 +44,7 @@ export function TripWorkspaceHeader({
   ];
 
   return (
-    <div className="bg-white border-b border-[#E7E2D8] -mx-4 sm:-mx-8 -mt-6 sm:-mt-8 px-4 sm:px-8 pt-6 pb-0 mb-8 sticky top-[57px] z-10 backdrop-blur-md bg-white/95">
+    <div className="bg-white border-b border-[#E7E2D8] px-4 sm:px-8 pt-4 sm:pt-5 pb-0 flex-shrink-0 z-10 shadow-2xs">
       {/* Back breadcrumb */}
       <div className="flex items-center justify-between gap-4 mb-3">
         <Link

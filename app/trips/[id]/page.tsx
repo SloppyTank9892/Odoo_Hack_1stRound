@@ -42,20 +42,22 @@ export default function TripWorkspacePage() {
   }
 
   return (
-    <AppShell>
-      {/* Contextual Trip Header & Tab Navigation */}
-      <TripWorkspaceHeader
-        trip={trip}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-      />
+    <AppShell noScroll fullWidth>
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        {/* Contextual Trip Header & Tab Navigation */}
+        <TripWorkspaceHeader
+          trip={trip}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
-      {/* Tab Views */}
-      <div className="animate-in fade-in duration-200">
-        {activeTab === "itinerary" && <TimelineView trip={trip} />}
-        {activeTab === "map" && <TripMap trip={trip} />}
-        {activeTab === "calendar" && <TripCalendar trip={trip} />}
-        {activeTab === "budget" && <BudgetOverview trip={trip} />}
+        {/* Tab Views Container - Clean single-scrollbar workspace scrolling */}
+        <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-8 py-6 max-w-7xl w-full mx-auto pb-24 md:pb-12 animate-in fade-in duration-200">
+          {activeTab === "itinerary" && <TimelineView trip={trip} />}
+          {activeTab === "map" && <TripMap trip={trip} />}
+          {activeTab === "calendar" && <TripCalendar trip={trip} />}
+          {activeTab === "budget" && <BudgetOverview trip={trip} />}
+        </div>
       </div>
     </AppShell>
   );
